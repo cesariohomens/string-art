@@ -4,7 +4,7 @@ A single-file, zero-build web app that does three things:
 
 1. **String art generator** — turns a photo into the sequence of pins the thread has to pass through, using a greedy chord-selection algorithm. This is the view the page opens on.
 2. **Template PDF** — draws the drilling/nailing template from just two numbers, the **number of points** and the **circle radius in cm**. The output is a print-at-100% PDF with a black circle, red points and a red number next to every point.
-3. **Nail ring STL** — models a printable ring carrying one nail per point, from those same two numbers, cuts it into arcs that clip together if it is bigger than the print bed, and exports it as an STL or a ZIP of STLs.
+3. **Template STL** — models a printable ring carrying one nail per point, from those same two numbers, cuts it into arcs that clip together if it is bigger than the print bed, and exports it as an STL or a ZIP of STLs.
 
 Everything runs in the browser. Nothing is uploaded anywhere.
 
@@ -91,7 +91,7 @@ The layout is defined in *design units* where the circle radius is exactly 90 u,
 
 The numbers are set in Times and rotated to read radially outwards, matching the original template this project was modelled on. Because jsPDF misplaces text when `align`/`baseline` are combined with `angle`, the baseline origin is computed by hand from the text advance width and the Times x-height.
 
-## Nail ring STL
+## Template STL
 
 Instead of drilling a board you can print the circle. This tab builds a flat band with one cylindrical nail standing on every point and exports it as a **binary STL in millimetres**, which any slicer opens at the right size.
 
