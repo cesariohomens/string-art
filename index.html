@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <title>String Art Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Google Fonts - Exo Thin -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo:wght@100;300;600&display=swap" rel="stylesheet">
+
+  <!-- React 18 -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <!-- jsPDF -->
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <!-- three.js: last release with a plain global build, so no bundler is needed -->
+  <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+
+  <style>
+    :root { --bg:#f6f7f9; --ink:#111; --muted:#666; --card:#fff; --border:#a1a4aa; --accent:#e11d1d; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.45 'Exo', system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial; font-weight:300; }
+    header { padding:16px 20px; background:#111; color:#fff; position:relative; display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    .header-content { flex:1; display:flex; flex-direction:column; gap:4px; min-width:260px; }
+    header h1 { margin:0; font-size:20px; font-weight:600; letter-spacing:.5px; }
+    header .hint { color:#c9ccd1; font-size:12px; }
+    #language-selector { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    #language-selector > div > span { font-size:12px; color:#fff; }
+
+    /* Customized dropdown */
+    .custom-select-wrapper { position:relative; width:160px; }
+    .custom-select-button {
+      width:100%; border:1px solid #d9dde3; border-radius:10px; padding:8px 12px;
+      background:#fff; color:#111 !important; display:flex; align-items:center;
+      justify-content:space-between; gap:8px; cursor:pointer; transition:background .15s;
+      font-family:'Exo', system-ui; font-weight:300; font-size:12px;
+    }
+    .custom-select-button:hover { background:#f6f7f9; }
+    .custom-select-label { display:flex; align-items:center; gap:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#111 !important; }
+    .custom-select-arrow { width:16px; height:16px; opacity:.7; flex-shrink:0; }
+    .custom-select-menu {
+      position:absolute; z-index:2000; margin-top:4px; width:100%; max-height:260px; overflow:auto;
+      border-radius:10px; border:1px solid #d9dde3; background:#fff; box-shadow:0 6px 18px rgba(0,0,0,.1); display:none;
+    }
+    .custom-select-menu.open { display:block; }
+    .custom-select-option {
+      width:100%; text-align:left; padding:8px 12px; cursor:pointer; transition:background .15s;
+      display:flex; align-items:center; gap:8px; font-size:12px; color:#111 !important;
+      border:none; background:none; font-family:inherit;
+    }
+    .custom-select-option:hover { background:#f6f7f9; }
+    .custom-select-option.selected { background:#e9ecef; }
+    .flag-icon { width:24px; height:18px; object-fit:contain; display:inline-block; }
+
+    main { padding:16px 20px 32px; max-width:1400px; margin:0 auto; }
+    .card { background:var(--card); border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:16px; margin-bottom:16px; border:1px solid var(--border); }
+    .card h2 { margin:0 0 12px; font-size:15px; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+    .row { display:flex; gap:16px; flex-wrap:wrap; }
+    .col { flex:1 1 320px; min-width:0; }
+    .col-narrow { flex:1 1 180px; min-width:0; }
+    label { display:block; font-size:13px; margin-bottom:6px; color:#000; font-weight:600; }
+    input[type="text"], input[type="number"], select, textarea {
+      width:100%; padding:10px 12px; border:1px solid #d9dde3; border-radius:10px;
+      font-family:inherit; font-size:14px; background:#fff; color:#111;
+    }
+    .dropzone {
+      width:100%; border:2px dashed #c7ccd3; border-radius:12px; background:#fbfcfd;
+      padding:22px 16px; cursor:pointer; font-family:inherit; color:inherit;
+      display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center;
+      transition:border-color .15s, background .15s, color .15s;
+    }
+    .dropzone:hover, .dropzone:focus-visible { border-color:#111; background:#f2f4f7; outline:none; }
+    .dropzone.over { border-color:var(--accent); background:#fdf1f1; }
+    .dropzone svg { width:42px; height:42px; color:#8b9099; transition:color .15s; }
+    .dropzone:hover svg { color:#111; }
+    .dropzone.over svg { color:var(--accent); }
+    .dz-title { font-size:14px; font-weight:600; }
+    .dz-sub { font-size:12px; color:#666; }
+    .dz-file { font-size:12px; font-weight:600; color:#111; word-break:break-all; }
+    textarea { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; resize:vertical; }
+    .field { margin-bottom:14px; }
+    .checkline { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13px; font-weight:600; }
+    .checkline input { width:16px; height:16px; }
+    .checkline label { margin:0; }
+    .controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .btn { padding:10px 16px; border:1px solid #111; border-radius:10px; background:#111; color:#fff; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; }
+    .btn:hover:not(:disabled) { background:#333; }
+    .btn.secondary { background:#fff; color:#111; }
+    .btn.secondary:hover:not(:disabled) { background:#f0f0f0; }
+    .btn.danger { background:var(--accent); border-color:var(--accent); }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+    .hint { font-size:12px; color:#555; font-weight:300; }
+    .tabs { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+    .tab { padding:10px 18px; border:1px solid var(--border); border-radius:999px; background:#fff; color:#111; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; }
+    .tab.active { background:#111; color:#fff; border-color:#111; }
+    .previewWrap { border:1px solid var(--border); border-radius:12px; background:#fff; padding:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .previewWrap svg { width:100%; height:auto; display:block; max-height:70vh; }
+    .stat { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px dashed #e3e5e8; font-size:13px; }
+    .stat:last-child { border-bottom:none; }
+    .stat b { font-weight:600; }
+    .alert { padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:12px; border:1px solid; font-weight:600; }
+    .alert.warn { background:#fff8e6; border-color:#e6c14d; color:#7a5a00; }
+    .alert.err { background:#fdecec; border-color:#e79a9a; color:#8d1c1c; }
+    .alert.ok { background:#eaf7ee; border-color:#8fcf9f; color:#1d6b32; }
+    .canvasWrap { position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff; aspect-ratio:1; }
+    .canvasWrap canvas { width:100%; height:100%; display:block; }
+    .canvasWrap.framing canvas { cursor:grab; touch-action:none; }
+    .canvasWrap.framing canvas:active { cursor:grabbing; }
+    .caption { font-size:12px; font-weight:600; margin-bottom:6px; }
+    .zoombar { display:flex; align-items:center; gap:8px; margin:8px 0 6px; flex-wrap:wrap; }
+    .zoombtn {
+      width:30px; height:30px; flex-shrink:0; padding:0; display:flex; align-items:center; justify-content:center;
+      border:1px solid var(--border); border-radius:8px; background:#fff; color:#111;
+      cursor:pointer; font-family:inherit; font-size:17px; font-weight:600; line-height:1;
+    }
+    .zoombtn:hover:not(:disabled) { background:#f0f0f0; }
+    .zoombtn:disabled { opacity:.45; cursor:not-allowed; }
+    .zoomval { font-size:12px; font-weight:600; min-width:46px; text-align:center; }
+    .btn.small { padding:6px 12px; font-size:12px; border-radius:8px; }
+    /* The box keeps the layout steady while the stage itself pops out of the
+       flow to cover the window. */
+    .stageBox { position:relative; aspect-ratio:16/10; }
+    .stage3d {
+      position:absolute; inset:0; border:1px solid var(--border); border-radius:12px; overflow:hidden;
+      background:#eef0f3; touch-action:none; cursor:grab;
+    }
+    .stage3d.max { position:fixed; inset:12px; z-index:3000; box-shadow:0 24px 60px rgba(0,0,0,.28); }
+    .stage3d:active { cursor:grabbing; }
+    .stage3d canvas { width:100%; height:100%; display:block; }
+    .stageBackdrop { position:fixed; inset:0; background:rgba(17,17,17,.55); z-index:2900; }
+    .expand {
+      position:absolute; top:10px; right:10px; width:34px; height:34px; padding:0; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; cursor:pointer;
+      border:1px solid rgba(0,0,0,.18); background:rgba(255,255,255,.92); color:#111;
+      box-shadow:0 2px 6px rgba(0,0,0,.14); transition:background .15s;
+    }
+    .expand:hover { background:#fff; }
+    .expand svg { width:18px; height:18px; }
+    .swatch { display:flex; align-items:center; gap:10px; }
+    .swatch input[type="color"] {
+      width:44px; height:34px; padding:2px; border:1px solid #d9dde3; border-radius:8px;
+      background:#fff; cursor:pointer; flex-shrink:0;
+    }
+    .swatch code { font-size:12px; font-weight:600; text-transform:uppercase; }
+    .segmented { display:flex; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .segmented button {
+      flex:1; padding:9px 10px; border:none; background:#fff; color:#111; cursor:pointer;
+      font-family:inherit; font-size:13px; font-weight:600;
+    }
+    .segmented button + button { border-left:1px solid var(--border); }
+    .segmented button.on { background:#111; color:#fff; }
+    .progress { height:22px; background:#e9ecef; border-radius:999px; overflow:hidden; border:1px solid var(--border); }
+    .progress > div { height:100%; background:#111; color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; transition:width .1s linear; }
+    footer { padding:12px 20px 24px; text-align:center; color:#444; font-size:12px; }
+    footer a { color:#111; }
+    .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0 16px; }
+  </style>
+
+  <script>
+    // ---------------------------------------------------------------
+    // Internationalization system (i18n)
+    // ---------------------------------------------------------------
+    window.I18N = {};
+
+    window.I18N.en = {
+      title: "String Art Studio",
+      headerHint: "Generate the drilling template PDF (points + radius) and turn any photo into a string art thread sequence.",
+      language: "Language",
+
+      tabTemplate: "Template PDF",
+      tabGenerator: "String Art Generator",
+
+      paramsTitle: "Parameters",
+      points: "Number of points",
+      pointsHint: "Nails/pins evenly spaced around the circle.",
+      radiusCm: "Circle radius (cm)",
+      radiusHint: "Radius of the circle where the points are placed.",
+      layoutTitle: "Page & layout",
+      pageSize: "Page size",
+      pageAuto: "Auto (smallest that fits)",
+      pageCustom: "Custom",
+      orientation: "Orientation",
+      portrait: "Portrait",
+      landscape: "Landscape",
+      customWidth: "Width (mm)",
+      customHeight: "Height (mm)",
+      optionsTitle: "Options",
+      showFrame: "Square frame around drawing",
+      showPageBorder: "Page border",
+      showCenter: "Centre cross-hair",
+      labelEvery: "Number every N points",
+      labelEveryHint: "Use 2 or 5 when points overlap.",
+      startAt: "Point 0 position",
+      startTop: "Top (12 o'clock)",
+      startRight: "Right (3 o'clock)",
+      startBottom: "Bottom (6 o'clock)",
+      startLeft: "Left (9 o'clock)",
+      direction: "Numbering direction",
+      clockwise: "Clockwise",
+      counterClockwise: "Counter-clockwise",
+
+      previewTitle: "Preview",
+      summaryTitle: "Summary",
+      sDiameter: "Diameter",
+      sDrawing: "Drawing size",
+      sPage: "Page",
+      sSpacing: "Spacing between points",
+      sCircumference: "Circumference",
+
+      downloadPdf: "Download PDF",
+      downloadSvg: "Download SVG",
+      fitToPage: "Fit to page",
+      warnNoFit: "The drawing ({0} mm) does not fit the selected page ({1} mm). Increase the page size or reduce the radius.",
+      warnDense: "With {0} points the spacing is only {1} mm. The numbers may overlap — consider raising \"Number every N points\".",
+
+      genTitle: "Source image",
+      selectImage: "Select an image",
+      imageHint: "Best results with high-contrast close-up portraits. The image is cropped to a square and masked to a circle.",
+      dropTitle: "Drag an image here",
+      dropHint: "or click to choose a file",
+      genParams: "Generation parameters",
+      pins: "Number of pins",
+      linesN: "Number of lines",
+      lineWeight: "Line weight",
+      lineWeightHint: "How much darkness each thread removes (higher = fewer overlapping threads).",
+      minDistance: "Minimum pin distance",
+      minDistanceHint: "Avoids very short threads between neighbouring pins.",
+      resolution: "Working resolution (px)",
+      syncPins: "Use the same number of points as the template",
+      generate: "Generate",
+      stop: "Stop",
+      linesDrawn: "{0} lines drawn — {1}%",
+      preparing: "Preparing…",
+      precalc: "Pre-calculating lines… {0}%",
+      done: "Done",
+      originalLabel: "Cropped & grayscale",
+      framingLabel: "Framing — stays in colour until you generate",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      zoomFit: "Fit",
+      zoomHint: "Scroll or use the buttons to zoom, and drag the image to reframe it. It turns greyscale when you generate.",
+      resultLabel: "String art result",
+      preview3dTitle: "3D preview",
+      preview3dHint: "Drag to turn the piece and scroll to get closer. The nails are always black.",
+      maximize: "Maximise the 3D view",
+      minimize: "Minimise the 3D view",
+      threadColor: "Thread colour",
+      boardShape: "Support",
+      boardRect: "Rectangular board",
+      boardRound: "Round board",
+      boardColor: "Wood colour",
+      error3D: "The 3D preview needs WebGL, which is not available in this browser.",
+      sequenceTitle: "Thread sequence",
+      sequenceHint: "The order in which to pass the thread around the pins.",
+      copySeq: "Copy",
+      copied: "Copied!",
+      downloadSeq: "Download .txt",
+      downloadSteps: "Instructions PDF",
+      downloadPng: "Download PNG",
+      sThread: "Estimated thread length",
+      sLines: "Lines",
+      noImageYet: "Load an image to start.",
+      errorJsPDF: "Error: jsPDF is not loaded.",
+      errorNoImage: "Please select an image first.",
+      errorNotImage: "That file is not an image.",
+      errorTooBig: "That combination needs too much memory. Lower the working resolution or the number of pins.",
+
+      pdfStepsTitle: "String art — thread sequence",
+      pdfStepsSubtitle: "{0} pins · {1} lines · radius {2} cm",
+      pdfPage: "Page",
+      pdfOf: "of",
+
+      footerText: "Points and numbers in red, circle and frame in black — ready to print at 100% scale."
+    };
+
+    window.I18N.pt = {
+      title: "String Art Studio",
+      headerHint: "Gera o PDF do molde de furação (pontos + raio) e transforma qualquer fotografia numa sequência de fios.",
+      language: "Idioma",
+
+      tabTemplate: "PDF do molde",
+      tabGenerator: "Gerador de String Art",
+
+      paramsTitle: "Parâmetros",
+      points: "Número de pontos",
+      pointsHint: "Pregos/pinos igualmente espaçados na circunferência.",
+      radiusCm: "Raio da circunferência (cm)",
+      radiusHint: "Raio da circunferência onde ficam os pontos.",
+      layoutTitle: "Página e disposição",
+      pageSize: "Tamanho da página",
+      pageAuto: "Automático (o menor que serve)",
+      pageCustom: "Personalizado",
+      orientation: "Orientação",
+      portrait: "Retrato",
+      landscape: "Paisagem",
+      customWidth: "Largura (mm)",
+      customHeight: "Altura (mm)",
+      optionsTitle: "Opções",
+      showFrame: "Moldura quadrada à volta do desenho",
+      showPageBorder: "Contorno da página",
+      showCenter: "Cruz no centro",
+      labelEvery: "Numerar a cada N pontos",
+      labelEveryHint: "Usa 2 ou 5 quando os pontos ficam sobrepostos.",
+      startAt: "Posição do ponto 0",
+      startTop: "Topo (12 horas)",
+      startRight: "Direita (3 horas)",
+      startBottom: "Baixo (6 horas)",
+      startLeft: "Esquerda (9 horas)",
+      direction: "Sentido da numeração",
+      clockwise: "Horário",
+      counterClockwise: "Anti-horário",
+
+      previewTitle: "Pré-visualização",
+      summaryTitle: "Resumo",
+      sDiameter: "Diâmetro",
+      sDrawing: "Tamanho do desenho",
+      sPage: "Página",
+      sSpacing: "Espaçamento entre pontos",
+      sCircumference: "Perímetro",
+
+      downloadPdf: "Descarregar PDF",
+      downloadSvg: "Descarregar SVG",
+      fitToPage: "Ajustar à página",
+      warnNoFit: "O desenho ({0} mm) não cabe na página escolhida ({1} mm). Aumenta a página ou reduz o raio.",
+      warnDense: "Com {0} pontos o espaçamento é de apenas {1} mm. Os números podem sobrepor-se — considera aumentar \"Numerar a cada N pontos\".",
+
+      genTitle: "Imagem de origem",
+      selectImage: "Escolher imagem",
+      imageHint: "Melhores resultados com retratos de grande plano e muito contraste. A imagem é cortada em quadrado e recortada em círculo.",
+      dropTitle: "Arrasta uma imagem para aqui",
+      dropHint: "ou clica para escolher um ficheiro",
+      genParams: "Parâmetros de geração",
+      pins: "Número de pinos",
+      linesN: "Número de linhas",
+      lineWeight: "Peso da linha",
+      lineWeightHint: "Quanta escuridão cada fio remove (maior = menos fios sobrepostos).",
+      minDistance: "Distância mínima entre pinos",
+      minDistanceHint: "Evita fios muito curtos entre pinos vizinhos.",
+      resolution: "Resolução de cálculo (px)",
+      syncPins: "Usar o mesmo número de pontos do molde",
+      generate: "Gerar",
+      stop: "Parar",
+      linesDrawn: "{0} linhas desenhadas — {1}%",
+      preparing: "A preparar…",
+      precalc: "A pré-calcular linhas… {0}%",
+      done: "Concluído",
+      originalLabel: "Cortada e em tons de cinzento",
+      framingLabel: "Enquadramento — fica em cor até gerares",
+      zoomIn: "Aproximar",
+      zoomOut: "Afastar",
+      zoomFit: "Ajustar",
+      zoomHint: "Usa a roda do rato ou os botões para ampliar e arrasta a imagem para reenquadrar. Fica em tons de cinzento quando geras.",
+      resultLabel: "Resultado string art",
+      preview3dTitle: "Pré-visualização 3D",
+      preview3dHint: "Arrasta para rodar a peça e usa a roda do rato para aproximar. Os pregos são sempre pretos.",
+      maximize: "Maximizar a vista 3D",
+      minimize: "Minimizar a vista 3D",
+      threadColor: "Cor da linha",
+      boardShape: "Suporte",
+      boardRect: "Placa retangular",
+      boardRound: "Placa circular",
+      boardColor: "Cor da madeira",
+      error3D: "A pré-visualização 3D precisa de WebGL, que não está disponível neste navegador.",
+      sequenceTitle: "Sequência de fios",
+      sequenceHint: "A ordem pela qual deves passar o fio nos pinos.",
+      copySeq: "Copiar",
+      copied: "Copiado!",
+      downloadSeq: "Descarregar .txt",
+      downloadSteps: "PDF de instruções",
+      downloadPng: "Descarregar PNG",
+      sThread: "Comprimento estimado de fio",
+      sLines: "Linhas",
+      noImageYet: "Carrega uma imagem para começar.",
+      errorJsPDF: "Erro: o jsPDF não está carregado.",
+      errorNoImage: "Escolhe primeiro uma imagem.",
+      errorNotImage: "Esse ficheiro não é uma imagem.",
+      errorTooBig: "Essa combinação precisa de demasiada memória. Reduz a resolução de cálculo ou o número de pinos.",
+
+      pdfStepsTitle: "String art — sequência de fios",
+      pdfStepsSubtitle: "{0} pinos · {1} linhas · raio {2} cm",
+      pdfPage: "Página",
+      pdfOf: "de",
+
+      footerText: "Pontos e números a vermelho, circunferência e moldura a preto — pronto a imprimir à escala 100%."
+    };
+  </script>
+  <script>
+    window.I18N.fr = {
+      title: "String Art Studio",
+      headerHint: "Générez le PDF du gabarit de perçage (points + rayon) et transformez une photo en séquence de fils.",
+      language: "Langue",
+
+      tabTemplate: "PDF du gabarit",
+      tabGenerator: "Générateur de String Art",
+
+      paramsTitle: "Paramètres",
+      points: "Nombre de points",
+      pointsHint: "Clous/pointes régulièrement espacés sur le cercle.",
+      radiusCm: "Rayon du cercle (cm)",
+      radiusHint: "Rayon du cercle où sont placés les points.",
+      layoutTitle: "Page et mise en page",
+      pageSize: "Format de page",
+      pageAuto: "Auto (le plus petit qui convient)",
+      pageCustom: "Personnalisé",
+      orientation: "Orientation",
+      portrait: "Portrait",
+      landscape: "Paysage",
+      customWidth: "Largeur (mm)",
+      customHeight: "Hauteur (mm)",
+      optionsTitle: "Options",
+      showFrame: "Cadre carré autour du dessin",
+      showPageBorder: "Bordure de page",
+      showCenter: "Croix centrale",
+      labelEvery: "Numéroter tous les N points",
+      labelEveryHint: "Utilisez 2 ou 5 si les points se chevauchent.",
+      startAt: "Position du point 0",
+      startTop: "Haut (12 heures)",
+      startRight: "Droite (3 heures)",
+      startBottom: "Bas (6 heures)",
+      startLeft: "Gauche (9 heures)",
+      direction: "Sens de numérotation",
+      clockwise: "Horaire",
+      counterClockwise: "Anti-horaire",
+
+      previewTitle: "Aperçu",
+      summaryTitle: "Résumé",
+      sDiameter: "Diamètre",
+      sDrawing: "Taille du dessin",
+      sPage: "Page",
+      sSpacing: "Espacement entre points",
+      sCircumference: "Circonférence",
+
+      downloadPdf: "Télécharger le PDF",
+      downloadSvg: "Télécharger le SVG",
+      fitToPage: "Ajuster à la page",
+      warnNoFit: "Le dessin ({0} mm) ne tient pas sur la page choisie ({1} mm). Agrandissez la page ou réduisez le rayon.",
+      warnDense: "Avec {0} points l'espacement n'est que de {1} mm. Les numéros risquent de se chevaucher — augmentez « Numéroter tous les N points ».",
+
+      genTitle: "Image source",
+      selectImage: "Choisir une image",
+      imageHint: "Meilleurs résultats avec des portraits rapprochés très contrastés. L'image est recadrée en carré puis en cercle.",
+      dropTitle: "Glissez une image ici",
+      dropHint: "ou cliquez pour choisir un fichier",
+      genParams: "Paramètres de génération",
+      pins: "Nombre de pointes",
+      linesN: "Nombre de lignes",
+      lineWeight: "Poids du fil",
+      lineWeightHint: "Quantité de noir retirée par fil (plus élevé = moins de fils superposés).",
+      minDistance: "Distance minimale entre pointes",
+      minDistanceHint: "Évite les fils très courts entre pointes voisines.",
+      resolution: "Résolution de calcul (px)",
+      syncPins: "Utiliser le même nombre de points que le gabarit",
+      generate: "Générer",
+      stop: "Arrêter",
+      linesDrawn: "{0} lignes tracées — {1}%",
+      preparing: "Préparation…",
+      precalc: "Pré-calcul des lignes… {0}%",
+      done: "Terminé",
+      originalLabel: "Recadrée et en niveaux de gris",
+      framingLabel: "Cadrage — reste en couleur jusqu’à la génération",
+      zoomIn: "Zoom avant",
+      zoomOut: "Zoom arrière",
+      zoomFit: "Ajuster",
+      zoomHint: "Utilisez la molette ou les boutons pour zoomer et faites glisser l’image pour la recadrer. Elle passe en niveaux de gris à la génération.",
+      resultLabel: "Résultat string art",
+      preview3dTitle: "Aperçu 3D",
+      preview3dHint: "Faites glisser pour tourner la pièce et utilisez la molette pour vous rapprocher. Les clous sont toujours noirs.",
+      maximize: "Agrandir la vue 3D",
+      minimize: "Réduire la vue 3D",
+      threadColor: "Couleur du fil",
+      boardShape: "Support",
+      boardRect: "Planche rectangulaire",
+      boardRound: "Planche ronde",
+      boardColor: "Couleur du bois",
+      error3D: "L’aperçu 3D nécessite WebGL, indisponible dans ce navigateur.",
+      sequenceTitle: "Séquence de fils",
+      sequenceHint: "L'ordre dans lequel passer le fil autour des pointes.",
+      copySeq: "Copier",
+      copied: "Copié !",
+      downloadSeq: "Télécharger .txt",
+      downloadSteps: "PDF d'instructions",
+      downloadPng: "Télécharger le PNG",
+      sThread: "Longueur de fil estimée",
+      sLines: "Lignes",
+      noImageYet: "Chargez une image pour commencer.",
+      errorJsPDF: "Erreur : jsPDF n'est pas chargé.",
+      errorNoImage: "Choisissez d'abord une image.",
+      errorNotImage: "Ce fichier n'est pas une image.",
+      errorTooBig: "Cette combinaison demande trop de mémoire. Réduisez la résolution de calcul ou le nombre de pointes.",
+
+      pdfStepsTitle: "String art — séquence de fils",
+      pdfStepsSubtitle: "{0} pointes · {1} lignes · rayon {2} cm",
+      pdfPage: "Page",
+      pdfOf: "sur",
+
+      footerText: "Points et numéros en rouge, cercle et cadre en noir — à imprimer à l'échelle 100 %."
+    };
+
+    window.I18N.es = {
+      title: "String Art Studio",
+      headerHint: "Genera el PDF de la plantilla de taladrado (puntos + radio) y convierte cualquier foto en una secuencia de hilos.",
+      language: "Idioma",
+
+      tabTemplate: "PDF de la plantilla",
+      tabGenerator: "Generador de String Art",
+
+      paramsTitle: "Parámetros",
+      points: "Número de puntos",
+      pointsHint: "Clavos/pines repartidos uniformemente en la circunferencia.",
+      radiusCm: "Radio de la circunferencia (cm)",
+      radiusHint: "Radio de la circunferencia donde se colocan los puntos.",
+      layoutTitle: "Página y disposición",
+      pageSize: "Tamaño de página",
+      pageAuto: "Automático (el menor que quepa)",
+      pageCustom: "Personalizado",
+      orientation: "Orientación",
+      portrait: "Vertical",
+      landscape: "Horizontal",
+      customWidth: "Ancho (mm)",
+      customHeight: "Alto (mm)",
+      optionsTitle: "Opciones",
+      showFrame: "Marco cuadrado alrededor del dibujo",
+      showPageBorder: "Borde de página",
+      showCenter: "Cruz central",
+      labelEvery: "Numerar cada N puntos",
+      labelEveryHint: "Usa 2 o 5 cuando los puntos se solapan.",
+      startAt: "Posición del punto 0",
+      startTop: "Arriba (12 en punto)",
+      startRight: "Derecha (3 en punto)",
+      startBottom: "Abajo (6 en punto)",
+      startLeft: "Izquierda (9 en punto)",
+      direction: "Sentido de numeración",
+      clockwise: "Horario",
+      counterClockwise: "Antihorario",
+
+      previewTitle: "Vista previa",
+      summaryTitle: "Resumen",
+      sDiameter: "Diámetro",
+      sDrawing: "Tamaño del dibujo",
+      sPage: "Página",
+      sSpacing: "Separación entre puntos",
+      sCircumference: "Perímetro",
+
+      downloadPdf: "Descargar PDF",
+      downloadSvg: "Descargar SVG",
+      fitToPage: "Ajustar a la página",
+      warnNoFit: "El dibujo ({0} mm) no cabe en la página elegida ({1} mm). Aumenta la página o reduce el radio.",
+      warnDense: "Con {0} puntos la separación es de solo {1} mm. Los números pueden solaparse — aumenta «Numerar cada N puntos».",
+
+      genTitle: "Imagen de origen",
+      selectImage: "Elegir imagen",
+      imageHint: "Mejores resultados con retratos de primer plano y mucho contraste. La imagen se recorta en cuadrado y luego en círculo.",
+      dropTitle: "Arrastra una imagen aquí",
+      dropHint: "o haz clic para elegir un archivo",
+      genParams: "Parámetros de generación",
+      pins: "Número de pines",
+      linesN: "Número de líneas",
+      lineWeight: "Peso del hilo",
+      lineWeightHint: "Cuánta oscuridad quita cada hilo (mayor = menos hilos superpuestos).",
+      minDistance: "Distancia mínima entre pines",
+      minDistanceHint: "Evita hilos muy cortos entre pines vecinos.",
+      resolution: "Resolución de cálculo (px)",
+      syncPins: "Usar el mismo número de puntos que la plantilla",
+      generate: "Generar",
+      stop: "Parar",
+      linesDrawn: "{0} líneas dibujadas — {1}%",
+      preparing: "Preparando…",
+      precalc: "Precalculando líneas… {0}%",
+      done: "Completado",
+      originalLabel: "Recortada y en escala de grises",
+      framingLabel: "Encuadre — se mantiene en color hasta generar",
+      zoomIn: "Acercar",
+      zoomOut: "Alejar",
+      zoomFit: "Ajustar",
+      zoomHint: "Usa la rueda o los botones para ampliar y arrastra la imagen para reencuadrarla. Pasa a escala de grises al generar.",
+      resultLabel: "Resultado string art",
+      preview3dTitle: "Vista previa 3D",
+      preview3dHint: "Arrastra para girar la pieza y usa la rueda para acercarte. Los clavos son siempre negros.",
+      maximize: "Maximizar la vista 3D",
+      minimize: "Minimizar la vista 3D",
+      threadColor: "Color del hilo",
+      boardShape: "Soporte",
+      boardRect: "Tablero rectangular",
+      boardRound: "Tablero circular",
+      boardColor: "Color de la madera",
+      error3D: "La vista previa 3D necesita WebGL, que no está disponible en este navegador.",
+      sequenceTitle: "Secuencia de hilos",
+      sequenceHint: "El orden en que hay que pasar el hilo por los pines.",
+      copySeq: "Copiar",
+      copied: "¡Copiado!",
+      downloadSeq: "Descargar .txt",
+      downloadSteps: "PDF de instrucciones",
+      downloadPng: "Descargar PNG",
+      sThread: "Longitud estimada de hilo",
+      sLines: "Líneas",
+      noImageYet: "Carga una imagen para empezar.",
+      errorJsPDF: "Error: jsPDF no está cargado.",
+      errorNoImage: "Elige primero una imagen.",
+      errorNotImage: "Ese archivo no es una imagen.",
+      errorTooBig: "Esa combinación necesita demasiada memoria. Reduce la resolución de cálculo o el número de pines.",
+
+      pdfStepsTitle: "String art — secuencia de hilos",
+      pdfStepsSubtitle: "{0} pines · {1} líneas · radio {2} cm",
+      pdfPage: "Página",
+      pdfOf: "de",
+
+      footerText: "Puntos y números en rojo, circunferencia y marco en negro — listo para imprimir al 100 %."
+    };
+
+    window.I18N.it = {
+      title: "String Art Studio",
+      headerHint: "Genera il PDF della dima di foratura (punti + raggio) e trasforma qualsiasi foto in una sequenza di fili.",
+      language: "Lingua",
+
+      tabTemplate: "PDF della dima",
+      tabGenerator: "Generatore di String Art",
+
+      paramsTitle: "Parametri",
+      points: "Numero di punti",
+      pointsHint: "Chiodi/pin equidistanti sulla circonferenza.",
+      radiusCm: "Raggio della circonferenza (cm)",
+      radiusHint: "Raggio della circonferenza su cui stanno i punti.",
+      layoutTitle: "Pagina e impaginazione",
+      pageSize: "Formato pagina",
+      pageAuto: "Automatico (il più piccolo che entra)",
+      pageCustom: "Personalizzato",
+      orientation: "Orientamento",
+      portrait: "Verticale",
+      landscape: "Orizzontale",
+      customWidth: "Larghezza (mm)",
+      customHeight: "Altezza (mm)",
+      optionsTitle: "Opzioni",
+      showFrame: "Cornice quadrata attorno al disegno",
+      showPageBorder: "Bordo pagina",
+      showCenter: "Crocino centrale",
+      labelEvery: "Numerare ogni N punti",
+      labelEveryHint: "Usa 2 o 5 quando i punti si sovrappongono.",
+      startAt: "Posizione del punto 0",
+      startTop: "In alto (ore 12)",
+      startRight: "A destra (ore 3)",
+      startBottom: "In basso (ore 6)",
+      startLeft: "A sinistra (ore 9)",
+      direction: "Verso di numerazione",
+      clockwise: "Orario",
+      counterClockwise: "Antiorario",
+
+      previewTitle: "Anteprima",
+      summaryTitle: "Riepilogo",
+      sDiameter: "Diametro",
+      sDrawing: "Dimensione del disegno",
+      sPage: "Pagina",
+      sSpacing: "Distanza tra i punti",
+      sCircumference: "Circonferenza",
+
+      downloadPdf: "Scarica PDF",
+      downloadSvg: "Scarica SVG",
+      fitToPage: "Adatta alla pagina",
+      warnNoFit: "Il disegno ({0} mm) non entra nella pagina scelta ({1} mm). Aumenta la pagina o riduci il raggio.",
+      warnDense: "Con {0} punti la distanza è di soli {1} mm. I numeri possono sovrapporsi — aumenta «Numerare ogni N punti».",
+
+      genTitle: "Immagine sorgente",
+      selectImage: "Scegli un'immagine",
+      imageHint: "Risultati migliori con ritratti ravvicinati e molto contrastati. L'immagine viene ritagliata in quadrato e poi in cerchio.",
+      dropTitle: "Trascina qui un'immagine",
+      dropHint: "oppure clicca per scegliere un file",
+      genParams: "Parametri di generazione",
+      pins: "Numero di pin",
+      linesN: "Numero di linee",
+      lineWeight: "Peso del filo",
+      lineWeightHint: "Quanto scuro toglie ogni filo (più alto = meno fili sovrapposti).",
+      minDistance: "Distanza minima tra pin",
+      minDistanceHint: "Evita fili molto corti tra pin vicini.",
+      resolution: "Risoluzione di calcolo (px)",
+      syncPins: "Usa lo stesso numero di punti della dima",
+      generate: "Genera",
+      stop: "Ferma",
+      linesDrawn: "{0} linee disegnate — {1}%",
+      preparing: "Preparazione…",
+      precalc: "Precalcolo delle linee… {0}%",
+      done: "Completato",
+      originalLabel: "Ritagliata e in scala di grigi",
+      framingLabel: "Inquadratura — resta a colori fino alla generazione",
+      zoomIn: "Ingrandisci",
+      zoomOut: "Riduci",
+      zoomFit: "Adatta",
+      zoomHint: "Usa la rotella o i pulsanti per lo zoom e trascina l’immagine per reinquadrarla. Passa in scala di grigi alla generazione.",
+      resultLabel: "Risultato string art",
+      preview3dTitle: "Anteprima 3D",
+      preview3dHint: "Trascina per ruotare l’opera e usa la rotella per avvicinarti. I chiodi sono sempre neri.",
+      maximize: "Ingrandisci la vista 3D",
+      minimize: "Riduci la vista 3D",
+      threadColor: "Colore del filo",
+      boardShape: "Supporto",
+      boardRect: "Tavola rettangolare",
+      boardRound: "Tavola rotonda",
+      boardColor: "Colore del legno",
+      error3D: "L’anteprima 3D richiede WebGL, non disponibile in questo browser.",
+      sequenceTitle: "Sequenza dei fili",
+      sequenceHint: "L'ordine in cui passare il filo attorno ai pin.",
+      copySeq: "Copia",
+      copied: "Copiato!",
+      downloadSeq: "Scarica .txt",
+      downloadSteps: "PDF di istruzioni",
+      downloadPng: "Scarica PNG",
+      sThread: "Lunghezza stimata del filo",
+      sLines: "Linee",
+      noImageYet: "Carica un'immagine per iniziare.",
+      errorJsPDF: "Errore: jsPDF non è caricato.",
+      errorNoImage: "Scegli prima un'immagine.",
+      errorNotImage: "Quel file non è un'immagine.",
+      errorTooBig: "Questa combinazione richiede troppa memoria. Riduci la risoluzione di calcolo o il numero di pin.",
+
+      pdfStepsTitle: "String art — sequenza dei fili",
+      pdfStepsSubtitle: "{0} pin · {1} linee · raggio {2} cm",
+      pdfPage: "Pagina",
+      pdfOf: "di",
+
+      footerText: "Punti e numeri in rosso, cerchio e cornice in nero — pronto da stampare al 100 %."
+    };
+
+    window.I18N.de = {
+      title: "String Art Studio",
+      headerHint: "Erzeuge die Bohrschablone als PDF (Punkte + Radius) und verwandle jedes Foto in eine Fadenreihenfolge.",
+      language: "Sprache",
+
+      tabTemplate: "Schablonen-PDF",
+      tabGenerator: "String-Art-Generator",
+
+      paramsTitle: "Parameter",
+      points: "Anzahl der Punkte",
+      pointsHint: "Gleichmäßig auf dem Kreis verteilte Nägel/Stifte.",
+      radiusCm: "Kreisradius (cm)",
+      radiusHint: "Radius des Kreises, auf dem die Punkte liegen.",
+      layoutTitle: "Seite & Layout",
+      pageSize: "Seitenformat",
+      pageAuto: "Automatisch (kleinstes passendes)",
+      pageCustom: "Benutzerdefiniert",
+      orientation: "Ausrichtung",
+      portrait: "Hochformat",
+      landscape: "Querformat",
+      customWidth: "Breite (mm)",
+      customHeight: "Höhe (mm)",
+      optionsTitle: "Optionen",
+      showFrame: "Quadratischer Rahmen um die Zeichnung",
+      showPageBorder: "Seitenrand",
+      showCenter: "Mittelkreuz",
+      labelEvery: "Jeden N-ten Punkt nummerieren",
+      labelEveryHint: "Nutze 2 oder 5, wenn sich Punkte überlappen.",
+      startAt: "Position von Punkt 0",
+      startTop: "Oben (12 Uhr)",
+      startRight: "Rechts (3 Uhr)",
+      startBottom: "Unten (6 Uhr)",
+      startLeft: "Links (9 Uhr)",
+      direction: "Nummerierungsrichtung",
+      clockwise: "Im Uhrzeigersinn",
+      counterClockwise: "Gegen den Uhrzeigersinn",
+
+      previewTitle: "Vorschau",
+      summaryTitle: "Zusammenfassung",
+      sDiameter: "Durchmesser",
+      sDrawing: "Zeichnungsgröße",
+      sPage: "Seite",
+      sSpacing: "Abstand zwischen Punkten",
+      sCircumference: "Umfang",
+
+      downloadPdf: "PDF herunterladen",
+      downloadSvg: "SVG herunterladen",
+      fitToPage: "An Seite anpassen",
+      warnNoFit: "Die Zeichnung ({0} mm) passt nicht auf die gewählte Seite ({1} mm). Vergrößere die Seite oder verkleinere den Radius.",
+      warnDense: "Bei {0} Punkten beträgt der Abstand nur {1} mm. Die Zahlen können sich überlappen — erhöhe „Jeden N-ten Punkt nummerieren“.",
+
+      genTitle: "Quellbild",
+      selectImage: "Bild auswählen",
+      imageHint: "Beste Ergebnisse mit kontrastreichen Nahaufnahmen. Das Bild wird quadratisch und dann kreisförmig zugeschnitten.",
+      dropTitle: "Bild hierher ziehen",
+      dropHint: "oder klicken, um eine Datei zu wählen",
+      genParams: "Generierungsparameter",
+      pins: "Anzahl der Stifte",
+      linesN: "Anzahl der Linien",
+      lineWeight: "Fadengewicht",
+      lineWeightHint: "Wie viel Dunkelheit jeder Faden entfernt (höher = weniger überlappende Fäden).",
+      minDistance: "Mindestabstand zwischen Stiften",
+      minDistanceHint: "Vermeidet sehr kurze Fäden zwischen benachbarten Stiften.",
+      resolution: "Rechenauflösung (px)",
+      syncPins: "Gleiche Punktzahl wie die Schablone verwenden",
+      generate: "Generieren",
+      stop: "Stoppen",
+      linesDrawn: "{0} Linien gezeichnet — {1}%",
+      preparing: "Vorbereitung…",
+      precalc: "Linien werden vorberechnet… {0}%",
+      done: "Fertig",
+      originalLabel: "Zugeschnitten & Graustufen",
+      framingLabel: "Bildausschnitt — bleibt farbig bis zur Erzeugung",
+      zoomIn: "Vergrößern",
+      zoomOut: "Verkleinern",
+      zoomFit: "Anpassen",
+      zoomHint: "Zoome mit dem Mausrad oder den Schaltflächen und zieh das Bild, um den Ausschnitt zu wählen. Bei der Erzeugung wird es in Graustufen umgewandelt.",
+      resultLabel: "String-Art-Ergebnis",
+      preview3dTitle: "3D-Vorschau",
+      preview3dHint: "Zieh, um das Werk zu drehen, und nutze das Mausrad, um näher zu kommen. Die Nägel sind immer schwarz.",
+      maximize: "3D-Ansicht maximieren",
+      minimize: "3D-Ansicht minimieren",
+      threadColor: "Fadenfarbe",
+      boardShape: "Träger",
+      boardRect: "Rechteckige Platte",
+      boardRound: "Runde Platte",
+      boardColor: "Holzfarbe",
+      error3D: "Die 3D-Vorschau benötigt WebGL, das in diesem Browser nicht verfügbar ist.",
+      sequenceTitle: "Fadenreihenfolge",
+      sequenceHint: "Die Reihenfolge, in der der Faden um die Stifte geführt wird.",
+      copySeq: "Kopieren",
+      copied: "Kopiert!",
+      downloadSeq: ".txt herunterladen",
+      downloadSteps: "Anleitungs-PDF",
+      downloadPng: "PNG herunterladen",
+      sThread: "Geschätzte Fadenlänge",
+      sLines: "Linien",
+      noImageYet: "Lade ein Bild, um zu starten.",
+      errorJsPDF: "Fehler: jsPDF ist nicht geladen.",
+      errorNoImage: "Wähle zuerst ein Bild aus.",
+      errorNotImage: "Diese Datei ist kein Bild.",
+      errorTooBig: "Diese Kombination braucht zu viel Speicher. Verringere die Rechenauflösung oder die Anzahl der Stifte.",
+
+      pdfStepsTitle: "String Art — Fadenreihenfolge",
+      pdfStepsSubtitle: "{0} Stifte · {1} Linien · Radius {2} cm",
+      pdfPage: "Seite",
+      pdfOf: "von",
+
+      footerText: "Punkte und Zahlen in Rot, Kreis und Rahmen in Schwarz — bereit zum Druck in 100 % Größe."
+    };
+  </script>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1 id="header-title"></h1>
+      <div class="hint" id="header-hint"></div>
+    </div>
+    <div id="language-selector"></div>
+  </header>
+
+  <main id="app"></main>
+
+  <script id="template-engine">
+    // ---------------------------------------------------------------
+    // Template engine
+    //
+    // The whole drawing is defined in "design units" where the circle
+    // radius is exactly 90 u, which is the proportion system used by the
+    // reference A0 template. Every derived measure is a fixed ratio of the
+    // radius, so a template keeps the same look at any physical size.
+    // ---------------------------------------------------------------
+    (function (root) {
+      var MM_PER_PT = 25.4 / 72;
+
+      var PAGE_SIZES = {
+        A0: [841, 1189], A1: [594, 841], A2: [420, 594],
+        A3: [297, 420], A4: [210, 297]
+      };
+      var AUTO_ORDER = ['A4', 'A3', 'A2', 'A1', 'A0'];
+
+      // Ratios expressed in design units (radius = 90 u)
+      var D = {
+        radius: 90,
+        circleStroke: 1,
+        dotRadius: 0.5,
+        fontSize: 2,
+        labelRadial: 4,      // outward offset of the number from its point
+        labelTangential: 1,  // sideways offset, along the numbering direction
+        frameHalf: 96,       // half side of the square frame
+        borderStroke: 0.5    // page border / frame stroke, in mm (not scaled)
+      };
+
+      // Times x-height, used to sit the numbers on their optical centre the
+      // same way SVG's dominant-baseline:middle does.
+      var TIMES_X_HEIGHT = 0.448;
+
+      var START_ANGLES = { top: -90, right: 0, bottom: 90, left: 180 };
+
+      function num(v, fallback) {
+        var n = parseFloat(v);
+        return isFinite(n) ? n : fallback;
+      }
+
+      function computeLayout(o) {
+        var points = Math.max(2, Math.round(num(o.points, 288)));
+        var R = Math.max(1, num(o.radiusCm, 28) * 10);
+        var u = R / D.radius;
+
+        var drawing = 2 * D.frameHalf * u;
+
+        var pageW, pageH, pageLabel;
+        if (o.pageSize === 'custom') {
+          pageW = Math.max(10, num(o.customW, 210));
+          pageH = Math.max(10, num(o.customH, 297));
+          pageLabel = 'Custom';
+        } else {
+          var name = o.pageSize;
+          if (name === 'auto' || !PAGE_SIZES[name]) {
+            name = 'A0';
+            for (var i = 0; i < AUTO_ORDER.length; i++) {
+              var s = PAGE_SIZES[AUTO_ORDER[i]];
+              if (Math.min(s[0], s[1]) >= drawing) { name = AUTO_ORDER[i]; break; }
+            }
+          }
+          var size = PAGE_SIZES[name];
+          var landscape = o.orientation === 'landscape';
+          pageW = landscape ? size[1] : size[0];
+          pageH = landscape ? size[0] : size[1];
+          pageLabel = name;
+        }
+
+        var labelEvery = Math.max(1, Math.round(num(o.labelEvery, 1)));
+        var step = 360 / points;
+        var start = START_ANGLES[o.startAt] != null ? START_ANGLES[o.startAt] : START_ANGLES.top;
+        var dir = o.clockwise === false ? -1 : 1;
+
+        var cx = pageW / 2, cy = pageH / 2;
+        var labelRadial = D.labelRadial * u;
+        var labelBaseline = (D.labelTangential + D.fontSize * TIMES_X_HEIGHT / 2) * u;
+
+        var pts = [];
+        for (var k = 0; k < points; k++) {
+          var deg = start + dir * k * step;
+          var rad = deg * Math.PI / 180;
+          var ca = Math.cos(rad), sa = Math.sin(rad);
+          var px = cx + R * ca, py = cy + R * sa;
+          pts.push({
+            i: k,
+            deg: deg,
+            ca: ca, sa: sa,
+            x: px,
+            y: py,
+            // Baseline anchor of the number: pushed outwards along the radius,
+            // nudged sideways, and set to read outwards from the centre.
+            ax: px + ca * labelRadial - sa * labelBaseline,
+            ay: py + sa * labelRadial + ca * labelBaseline,
+            labelled: k % labelEvery === 0
+          });
+        }
+
+        // Numbers read radially, so they collide when the gap between two
+        // labelled points, measured on the ring they sit on, drops below the
+        // height of a digit.
+        var labelGap = 2 * Math.PI * (R + D.labelRadial * u) / points * labelEvery;
+        var digitHeight = 1.372 * u;
+
+        return {
+          points: points, R: R, u: u,
+          labelEvery: labelEvery,
+          labelsOverlap: labelGap < digitHeight * 1.15,
+          pageW: pageW, pageH: pageH, pageLabel: pageLabel,
+          cx: cx, cy: cy,
+          circleStroke: D.circleStroke * u,
+          dotRadius: D.dotRadius * u,
+          fontMm: D.fontSize * u,
+          frameHalf: D.frameHalf * u,
+          borderStroke: D.borderStroke,
+          drawing: drawing,
+          spacing: 2 * Math.PI * R / points,
+          circumference: 2 * Math.PI * R,
+          fits: drawing <= Math.min(pageW, pageH) + 1e-6,
+          pts: pts,
+          showFrame: o.showFrame !== false,
+          showPageBorder: o.showPageBorder !== false,
+          showCenter: !!o.showCenter
+        };
+      }
+
+      function fmt(n) { return (Math.round(n * 1000) / 1000).toString(); }
+
+      function toSvg(L) {
+        var s = [];
+        s.push('<?xml version="1.0" encoding="UTF-8"?>');
+        s.push('<svg xmlns="http://www.w3.org/2000/svg" width="' + fmt(L.pageW) + 'mm" height="' + fmt(L.pageH) +
+               'mm" viewBox="0 0 ' + fmt(L.pageW) + ' ' + fmt(L.pageH) + '">');
+        s.push('<rect x="0" y="0" width="' + fmt(L.pageW) + '" height="' + fmt(L.pageH) + '" fill="#fff"/>');
+
+        if (L.showPageBorder) {
+          var h = L.borderStroke / 2;
+          s.push('<rect x="' + fmt(h) + '" y="' + fmt(h) + '" width="' + fmt(L.pageW - L.borderStroke) +
+                 '" height="' + fmt(L.pageH - L.borderStroke) + '" fill="none" stroke="#000" stroke-width="' + fmt(L.borderStroke) + '"/>');
+        }
+        if (L.showFrame) {
+          s.push('<rect x="' + fmt(L.cx - L.frameHalf) + '" y="' + fmt(L.cy - L.frameHalf) + '" width="' + fmt(2 * L.frameHalf) +
+                 '" height="' + fmt(2 * L.frameHalf) + '" fill="none" stroke="#000" stroke-width="' + fmt(L.borderStroke) + '"/>');
+        }
+        if (L.showCenter) {
+          var m = L.frameHalf * 0.04;
+          s.push('<path d="M' + fmt(L.cx - m) + ' ' + fmt(L.cy) + 'H' + fmt(L.cx + m) + 'M' + fmt(L.cx) + ' ' + fmt(L.cy - m) +
+                 'V' + fmt(L.cy + m) + '" stroke="#000" stroke-width="' + fmt(L.borderStroke) + '"/>');
+        }
+
+        s.push('<circle cx="' + fmt(L.cx) + '" cy="' + fmt(L.cy) + '" r="' + fmt(L.R) +
+               '" fill="none" stroke="#000" stroke-width="' + fmt(L.circleStroke) + '"/>');
+
+        s.push('<g fill="#f00" font-family="Times New Roman, Times, serif" font-size="' + fmt(L.fontMm) +
+               '" text-anchor="middle">');
+        for (var i = 0; i < L.pts.length; i++) {
+          var p = L.pts[i];
+          s.push('<circle cx="' + fmt(p.x) + '" cy="' + fmt(p.y) + '" r="' + fmt(L.dotRadius) + '"/>');
+          if (p.labelled) {
+            s.push('<text x="' + fmt(p.ax) + '" y="' + fmt(p.ay) + '" transform="rotate(' + fmt(p.deg) + ' ' +
+                   fmt(p.ax) + ' ' + fmt(p.ay) + ')">' + p.i + '</text>');
+          }
+        }
+        s.push('</g>');
+        s.push('</svg>');
+        return s.join('\n');
+      }
+
+      // jsPDF's own circle() approximates with 4 Bézier segments, which is
+      // ~0.03% off — visible as a fraction of a millimetre on an A0 template.
+      function strokeCircle(doc, cx, cy, r, segments) {
+        var n = segments || 32;
+        var a = 2 * Math.PI / n;
+        var k = 4 / 3 * Math.tan(a / 4);
+        var segs = [];
+        for (var i = 0; i < n; i++) {
+          var t0 = i * a, t1 = t0 + a;
+          var c0 = Math.cos(t0), s0 = Math.sin(t0), c1 = Math.cos(t1), s1 = Math.sin(t1);
+          var p0x = r * c0, p0y = r * s0;
+          segs.push([
+            r * (c0 - k * s0) - p0x, r * (s0 + k * c0) - p0y,
+            r * (c1 + k * s1) - p0x, r * (s1 - k * c1) - p0y,
+            r * c1 - p0x, r * s1 - p0y
+          ]);
+        }
+        doc.lines(segs, cx + r, cy, [1, 1], 'S', true);
+      }
+
+      function toPdf(L, jsPDF) {
+        var doc = new jsPDF({
+          unit: 'mm',
+          format: [L.pageW, L.pageH],
+          orientation: L.pageW > L.pageH ? 'landscape' : 'portrait',
+          compress: true
+        });
+
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineJoin('miter');
+
+        if (L.showPageBorder) {
+          var h = L.borderStroke / 2;
+          doc.setLineWidth(L.borderStroke);
+          doc.rect(h, h, L.pageW - L.borderStroke, L.pageH - L.borderStroke, 'S');
+        }
+        if (L.showFrame) {
+          doc.setLineWidth(L.borderStroke);
+          doc.rect(L.cx - L.frameHalf, L.cy - L.frameHalf, 2 * L.frameHalf, 2 * L.frameHalf, 'S');
+        }
+        if (L.showCenter) {
+          var m = L.frameHalf * 0.04;
+          doc.setLineWidth(L.borderStroke);
+          doc.line(L.cx - m, L.cy, L.cx + m, L.cy);
+          doc.line(L.cx, L.cy - m, L.cx, L.cy + m);
+        }
+
+        doc.setLineWidth(L.circleStroke);
+        strokeCircle(doc, L.cx, L.cy, L.R, 128);
+
+        doc.setFillColor(255, 0, 0);
+        for (var i = 0; i < L.pts.length; i++) {
+          doc.circle(L.pts[i].x, L.pts[i].y, L.dotRadius, 'F');
+        }
+
+        doc.setFont('times', 'normal');
+        doc.setFontSize(L.fontMm / MM_PER_PT);
+        doc.setTextColor(255, 0, 0);
+        for (var j = 0; j < L.pts.length; j++) {
+          var p = L.pts[j];
+          if (!p.labelled) continue;
+          // jsPDF mis-places align/baseline once a rotation is involved, so the
+          // baseline origin is centred here by hand. Its angle grows
+          // counter-clockwise while the layout angle grows clockwise on a
+          // y-down page, hence the sign flip.
+          var label = String(p.i);
+          var half = doc.getTextWidth(label) / 2;
+          doc.text(label, p.ax - p.ca * half, p.ay - p.sa * half, { angle: -p.deg });
+        }
+
+        return doc;
+      }
+
+      root.TemplateEngine = {
+        MM_PER_PT: MM_PER_PT,
+        PAGE_SIZES: PAGE_SIZES,
+        AUTO_ORDER: AUTO_ORDER,
+        DESIGN: D,
+        computeLayout: computeLayout,
+        toSvg: toSvg,
+        toPdf: toPdf
+      };
+    })(typeof window !== 'undefined' ? window : this);
+  </script>
+
+  <script id="string-art-worker" type="javascript/worker">
+    // ---------------------------------------------------------------
+    // Greedy string art solver, run off the main thread.
+    //
+    // Repeatedly pick the chord that covers the most remaining darkness, then
+    // subtract the thread's contribution from the error image.
+    // ---------------------------------------------------------------
+    function pinCoords(pins, size) {
+      var c = size / 2, r = size / 2 - 0.5, xs = new Int32Array(pins), ys = new Int32Array(pins);
+      for (var i = 0; i < pins; i++) {
+        var a = 2 * Math.PI * i / pins;
+        xs[i] = Math.floor(c + r * Math.cos(a));
+        ys[i] = Math.floor(c + r * Math.sin(a));
+      }
+      return { xs: xs, ys: ys };
+    }
+
+    self.onmessage = function (e) {
+      var d = e.data;
+      if (d.cmd !== 'run') return;
+
+      var size = d.size, pins = d.pins, maxLines = d.lines;
+      var weight = d.lineWeight, minDist = d.minDistance, gray = d.gray;
+
+      var pc = pinCoords(pins, size);
+      var px = pc.xs, py = pc.ys;
+
+      // Pass 1: measure every chord the solver can actually ask for, so the
+      // pixel cache can live in one flat buffer. Candidates are always at
+      // least minDist pins away *the short way round*, so chords that are only
+      // far apart by index are never queried and need no cache entry.
+      var nn = pins * pins;
+      var offset = new Uint32Array(nn), length = new Uint32Array(nn);
+      var total = 0, a, b, dx, dy, len;
+      for (a = 0; a < pins; a++) {
+        for (b = a + minDist; b < pins; b++) {
+          if (pins - (b - a) < minDist) continue;
+          dx = px[b] - px[a]; dy = py[b] - py[a];
+          len = Math.sqrt(dx * dx + dy * dy) | 0;
+          if (len < 1) continue;
+          length[a * pins + b] = length[b * pins + a] = len;
+          total += len;
+        }
+      }
+
+      // Refuse absurd combinations before asking for the buffer, so the tab
+      // gets a clear message instead of thrashing or dying. 100M pixels is
+      // 400 MB, which covers everything up to roughly 500 pins at 1200 px.
+      var cache;
+      if (total > 100e6) {
+        self.postMessage({ type: 'error', message: 'too-big' });
+        return;
+      }
+      try {
+        cache = new Uint32Array(total);
+      } catch (err) {
+        self.postMessage({ type: 'error', message: 'too-big' });
+        return;
+      }
+
+      // Pass 2: rasterise each chord straight into the buffer. Both directions
+      // share one run of pixels.
+      var cursor = 0, lastPct = -1;
+      for (a = 0; a < pins; a++) {
+        var x0 = px[a], y0 = py[a];
+        for (b = a + minDist; b < pins; b++) {
+          var slot = a * pins + b;
+          len = length[slot];
+          if (!len) continue;
+          offset[slot] = offset[b * pins + a] = cursor;
+          var last = len - 1;
+          if (last === 0) {
+            cache[cursor] = y0 * size + x0;
+          } else {
+            var x1 = px[b], y1 = py[b];
+            for (var k = 0; k < len; k++) {
+              var j = last - k;
+              cache[cursor + k] = (((k * y1 + j * y0) / last) | 0) * size +
+                                  (((k * x1 + j * x0) / last) | 0);
+            }
+          }
+          cursor += len;
+        }
+        var pct = Math.round((a + 1) / pins * 100);
+        if (pct !== lastPct) { lastPct = pct; self.postMessage({ type: 'precalc', value: pct }); }
+      }
+
+      // Error image: how much darkness is still owed at each pixel. It only
+      // ever holds whole numbers in 0..255, so one byte per pixel is enough and
+      // keeps far more of it in cache than a float array would.
+      var err = new Uint8Array(size * size);
+      for (var i = 0; i < err.length; i++) err[i] = 255 - gray[i];
+
+      var sequence = new Int32Array(maxLines + 1);
+      var pin = 0, count = 1;
+
+      // Ring buffer of the pins used most recently, plus a flag per pin so the
+      // candidate scan can reject them without walking the ring every time.
+      // A pin in the ring can never be picked again, so the entries are always
+      // distinct and clearing the flag of the evicted one is safe.
+      var RECENT = 20;
+      var recent = new Int32Array(RECENT).fill(-1), recentAt = 0;
+      var isRecent = new Uint8Array(pins);
+      var batch = [];
+
+      for (var l = 0; l < maxLines; l++) {
+        var best = -1, bestErr = -1, bestIdx = 0;
+        var limit = pins - minDist;
+
+        for (var off = minDist; off < limit; off++) {
+          var test = pin + off;
+          if (test >= pins) test -= pins;
+          if (isRecent[test]) continue;
+
+          var idx = test * pins + pin, n = length[idx];
+          if (!n) continue;
+          var sum = 0;
+          for (var q = offset[idx], qend = q + n; q < qend; q++) sum += err[cache[q]];
+          if (sum > bestErr) { bestErr = sum; best = test; bestIdx = idx; }
+        }
+        if (best < 0) break;
+
+        for (var w = offset[bestIdx], wend = w + length[bestIdx]; w < wend; w++) {
+          var p = cache[w], t = err[p] - weight;
+          err[p] = t < 0 ? 0 : t;
+        }
+
+        sequence[count++] = best;
+        batch.push(best);
+        var evicted = recent[recentAt];
+        if (evicted >= 0) isRecent[evicted] = 0;
+        recent[recentAt] = best; isRecent[best] = 1;
+        recentAt = recentAt + 1 === RECENT ? 0 : recentAt + 1;
+        pin = best;
+
+        if (batch.length >= 40 || l === maxLines - 1) {
+          self.postMessage({ type: 'lines', pins: batch, drawn: l + 1, total: maxLines });
+          batch = [];
+        }
+      }
+
+      self.postMessage({ type: 'done', sequence: Array.prototype.slice.call(sequence.subarray(0, count)) });
+    };
+  </script>
+
+  <script>
+  (function () {
+    var h = React.createElement;
+    var TE = window.TemplateEngine;
+
+    window.__currentLanguage = 'pt';
+    window.__languageListeners = [];
+
+    function fmt(str, args) {
+      return String(str).replace(/\{(\d+)\}/g, function (m, i) {
+        return args[+i] != null ? args[+i] : m;
+      });
+    }
+    function useLang() {
+      var s = React.useState(window.__currentLanguage);
+      var lang = s[0], setLang = s[1];
+      React.useEffect(function () {
+        var l = function (v) { setLang(v); };
+        window.__languageListeners.push(l);
+        return function () {
+          window.__languageListeners = window.__languageListeners.filter(function (x) { return x !== l; });
+        };
+      }, []);
+      return function (key) {
+        var v = (window.I18N[lang] && window.I18N[lang][key]) || window.I18N.en[key] || key;
+        return arguments.length > 1 ? fmt(v, Array.prototype.slice.call(arguments, 1)) : v;
+      };
+    }
+
+    function n1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
+    function n2(v) { return (Math.round(v * 100) / 100).toFixed(2); }
+
+    function download(blob, name) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    }
+
+    function Field(p) {
+      return h('div', { className: 'field' },
+        h('label', null, p.label),
+        p.children,
+        p.hint ? h('div', { className: 'hint' }, p.hint) : null
+      );
+    }
+
+    function NumberInput(p) {
+      return h('input', {
+        type: 'number', value: p.value, min: p.min, max: p.max, step: p.step || 1,
+        onChange: function (e) { p.onChange(e.target.value); }
+      });
+    }
+
+    function Check(p) {
+      return h('div', { className: 'checkline' },
+        h('input', { type: 'checkbox', id: p.id, checked: p.checked, onChange: function (e) { p.onChange(e.target.checked); } }),
+        h('label', { htmlFor: p.id }, p.label)
+      );
+    }
+
+    // -------------------------------------------------------------
+    // Template tab
+    // -------------------------------------------------------------
+    function TemplatePanel(props) {
+      var t = props.t;
+      var st = React.useState({
+        pageSize: 'auto', orientation: 'portrait', customW: 600, customH: 600,
+        showFrame: true, showPageBorder: true, showCenter: false,
+        labelEvery: 1, startAt: 'top', clockwise: true
+      });
+      var o = st[0], setO = st[1];
+      function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
+
+      var layout = React.useMemo(function () {
+        return TE.computeLayout(Object.assign({}, o, { points: props.points, radiusCm: props.radiusCm }));
+      }, [o, props.points, props.radiusCm]);
+
+      var svg = React.useMemo(function () { return TE.toSvg(layout); }, [layout]);
+
+      function baseName() {
+        return 'string-art-template-' + layout.points + 'pts-r' + n1(layout.R / 10) + 'cm';
+      }
+      function savePdf() {
+        var jsPDF = window.jspdf && window.jspdf.jsPDF;
+        if (!jsPDF) { alert(t('errorJsPDF')); return; }
+        TE.toPdf(layout, jsPDF).save(baseName() + '.pdf');
+      }
+      function saveSvg() {
+        download(new Blob([svg], { type: 'image/svg+xml' }), baseName() + '.svg');
+      }
+      function fitToPage() {
+        var maxR = Math.min(layout.pageW, layout.pageH) / (2 * TE.DESIGN.frameHalf / TE.DESIGN.radius);
+        props.setRadiusCm(Math.floor(maxR / 10 * 100) / 100);
+      }
+
+      var isoPages = ['auto'].concat(TE.AUTO_ORDER.slice().reverse()).concat(['custom']);
+
+      return h('div', { className: 'row' },
+        h('div', { className: 'col', style: { flex: '1 1 380px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('paramsTitle')),
+            h(Field, { label: t('points'), hint: t('pointsHint') },
+              h(NumberInput, { value: props.points, min: 3, max: 2000, onChange: props.setPoints })),
+            h(Field, { label: t('radiusCm'), hint: t('radiusHint') },
+              h(NumberInput, { value: props.radiusCm, min: 1, max: 200, step: 0.1, onChange: props.setRadiusCm }))
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('layoutTitle')),
+            h('div', { className: 'grid2' },
+              h(Field, { label: t('pageSize') },
+                h('select', { value: o.pageSize, onChange: function (e) { set('pageSize', e.target.value); } },
+                  isoPages.map(function (p) {
+                    return h('option', { key: p, value: p },
+                      p === 'auto' ? t('pageAuto') : p === 'custom' ? t('pageCustom') : p);
+                  }))),
+              o.pageSize !== 'custom' ? h(Field, { label: t('orientation') },
+                h('select', { value: o.orientation, onChange: function (e) { set('orientation', e.target.value); } },
+                  h('option', { value: 'portrait' }, t('portrait')),
+                  h('option', { value: 'landscape' }, t('landscape')))) : null,
+              o.pageSize === 'custom' ? h(Field, { label: t('customWidth') },
+                h(NumberInput, { value: o.customW, min: 20, max: 3000, onChange: function (v) { set('customW', v); } })) : null,
+              o.pageSize === 'custom' ? h(Field, { label: t('customHeight') },
+                h(NumberInput, { value: o.customH, min: 20, max: 3000, onChange: function (v) { set('customH', v); } })) : null
+            ),
+            h('div', { className: 'controls' },
+              h('button', { className: 'btn secondary', onClick: fitToPage }, t('fitToPage')))
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('optionsTitle')),
+            h('div', { className: 'grid2' },
+              h(Field, { label: t('startAt') },
+                h('select', { value: o.startAt, onChange: function (e) { set('startAt', e.target.value); } },
+                  h('option', { value: 'top' }, t('startTop')),
+                  h('option', { value: 'right' }, t('startRight')),
+                  h('option', { value: 'bottom' }, t('startBottom')),
+                  h('option', { value: 'left' }, t('startLeft')))),
+              h(Field, { label: t('direction') },
+                h('select', { value: o.clockwise ? 'cw' : 'ccw', onChange: function (e) { set('clockwise', e.target.value === 'cw'); } },
+                  h('option', { value: 'cw' }, t('clockwise')),
+                  h('option', { value: 'ccw' }, t('counterClockwise')))),
+              h(Field, { label: t('labelEvery'), hint: t('labelEveryHint') },
+                h(NumberInput, { value: o.labelEvery, min: 1, max: 50, onChange: function (v) { set('labelEvery', v); } }))
+            ),
+            h(Check, { id: 'optFrame', checked: o.showFrame, label: t('showFrame'), onChange: function (v) { set('showFrame', v); } }),
+            h(Check, { id: 'optBorder', checked: o.showPageBorder, label: t('showPageBorder'), onChange: function (v) { set('showPageBorder', v); } }),
+            h(Check, { id: 'optCenter', checked: o.showCenter, label: t('showCenter'), onChange: function (v) { set('showCenter', v); } })
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('summaryTitle')),
+            h('div', { className: 'stat' }, h('span', null, t('sDiameter')), h('b', null, n1(layout.R * 2 / 10) + ' cm')),
+            h('div', { className: 'stat' }, h('span', null, t('sDrawing')), h('b', null, n1(layout.drawing) + ' × ' + n1(layout.drawing) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('sPage')), h('b', null, layout.pageLabel + ' — ' + n1(layout.pageW) + ' × ' + n1(layout.pageH) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('sCircumference')), h('b', null, n1(layout.circumference / 10) + ' cm')),
+            h('div', { className: 'stat' }, h('span', null, t('sSpacing')), h('b', null, n2(layout.spacing) + ' mm'))
+          )
+        ),
+
+        h('div', { className: 'col', style: { flex: '2 1 520px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('previewTitle')),
+            !layout.fits ? h('div', { className: 'alert err' },
+              t('warnNoFit', n1(layout.drawing), n1(Math.min(layout.pageW, layout.pageH)))) : null,
+            layout.labelsOverlap ? h('div', { className: 'alert warn' },
+              t('warnDense', layout.points, n2(layout.spacing))) : null,
+            h('div', { className: 'previewWrap', dangerouslySetInnerHTML: { __html: svg } }),
+            h('div', { className: 'controls', style: { marginTop: '14px' } },
+              h('button', { className: 'btn', onClick: savePdf }, t('downloadPdf')),
+              h('button', { className: 'btn secondary', onClick: saveSvg }, t('downloadSvg')))
+          )
+        )
+      );
+    }
+
+    // -------------------------------------------------------------
+    // Generator tab
+    // -------------------------------------------------------------
+    var WORKER_SRC = null;
+    function makeWorker() {
+      if (WORKER_SRC === null) WORKER_SRC = document.getElementById('string-art-worker').textContent;
+      return new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: 'application/javascript' })));
+    }
+
+    // The framing is a square window over the source image: at zoom 1 it is the
+    // largest square that fits, and pan slides it around, measured in source
+    // pixels. Below zoom 1 the window is larger than the photo, so the parts
+    // that fall outside stay white and the thread simply ignores them.
+    var ZOOM_MIN = 0.25, ZOOM_MAX = 8;
+
+    function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+    function clampView(el, v) {
+      var zoom = clamp(v.zoom, ZOOM_MIN, ZOOM_MAX);
+      var span = Math.min(el.width, el.height) / zoom;
+      var lx = Math.abs(el.width - span) / 2, ly = Math.abs(el.height - span) / 2;
+      return { zoom: zoom, panX: clamp(v.panX, -lx, lx), panY: clamp(v.panY, -ly, ly) };
+    }
+
+    function viewRect(el, v) {
+      var span = Math.min(el.width, el.height) / v.zoom;
+      return { sx: (el.width - span) / 2 + v.panX, sy: (el.height - span) / 2 + v.panY, span: span };
+    }
+
+    // Zooms by `factor` while keeping the point at (fx, fy) of the window still.
+    function zoomedView(el, v, factor, fx, fy) {
+      var r = viewRect(el, v);
+      var zoom = clamp(v.zoom * factor, ZOOM_MIN, ZOOM_MAX);
+      var span = Math.min(el.width, el.height) / zoom;
+      return clampView(el, {
+        zoom: zoom,
+        panX: r.sx + fx * (r.span - span) - (el.width - span) / 2,
+        panY: r.sy + fy * (r.span - span) - (el.height - span) / 2
+      });
+    }
+
+    function drawFrame(ctx, el, size, v) {
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+      var r = viewRect(el, v);
+      ctx.drawImage(el, r.sx, r.sy, r.span, r.span, 0, 0, size, size);
+    }
+
+    // Whites out everything beyond the circle, so the preview shows only what
+    // the thread can actually reach.
+    function maskCircle(ctx, size) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, size, size);
+      ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI, true);
+      ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.restore();
+    }
+
+    // Greyscales the canvas in place and returns the darkness map for the solver.
+    function toGrayscale(ctx, size) {
+      var d = ctx.getImageData(0, 0, size, size);
+      var gray = new Uint8Array(size * size);
+      var c0 = size / 2, r2 = (size / 2) * (size / 2);
+      for (var y = 0; y < size; y++) {
+        for (var x = 0; x < size; x++) {
+          var i = y * size + x, p = i * 4;
+          var v = (d.data[p] + d.data[p + 1] + d.data[p + 2]) / 3;
+          var dx = x - c0 + 0.5, dy = y - c0 + 0.5;
+          if (dx * dx + dy * dy > r2) v = 255;
+          gray[i] = v;
+          d.data[p] = d.data[p + 1] = d.data[p + 2] = v; d.data[p + 3] = 255;
+        }
+      }
+      ctx.putImageData(d, 0, 0);
+      return gray;
+    }
+
+    function DropZone(p) {
+      var stOver = React.useState(false); var over = stOver[0], setOver = stOver[1];
+      var inputRef = React.useRef(null);
+
+      function take(file) {
+        if (!file) return;
+        if (!/^image\//.test(file.type)) { alert(p.errorText); return; }
+        p.onFile(file);
+      }
+
+      return h('div', null,
+        h('button', {
+          type: 'button',
+          className: 'dropzone' + (over ? ' over' : ''),
+          onClick: function () { inputRef.current.click(); },
+          onDragOver: function (e) { e.preventDefault(); setOver(true); },
+          onDragEnter: function (e) { e.preventDefault(); setOver(true); },
+          onDragLeave: function () { setOver(false); },
+          onDrop: function (e) {
+            e.preventDefault(); setOver(false);
+            take(e.dataTransfer.files && e.dataTransfer.files[0]);
+          }
+        },
+          h('svg', {
+            viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+            strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true'
+          },
+            h('path', { d: 'M12 16.5V9.75m0 0 3 3m-3-3-3 3' }),
+            h('path', { d: 'M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z' })
+          ),
+          h('span', { className: 'dz-title' }, p.title),
+          h('span', { className: 'dz-sub' }, p.hint),
+          p.fileName ? h('span', { className: 'dz-file' }, p.fileName) : null
+        ),
+        h('input', {
+          ref: inputRef, type: 'file', accept: 'image/*', style: { display: 'none' },
+          onChange: function (e) {
+            take(e.target.files && e.target.files[0]);
+            e.target.value = '';
+          }
+        })
+      );
+    }
+
+    // -------------------------------------------------------------
+    // 3D preview
+    // -------------------------------------------------------------
+    // Normalised units: the nails stand on a circle of radius 1, the board is
+    // wider than that so it always frames the drawing, and the threads climb
+    // from just above the board up to the nail heads.
+    var D3 = { radius: 1, margin: 1.09, thickness: 0.07, nailH: 0.085, nailR: 0.0065 };
+
+    function drop3d(mesh) {
+      if (!mesh) return;
+      if (mesh.parent) mesh.parent.remove(mesh);
+      if (mesh.geometry) mesh.geometry.dispose();
+    }
+
+    function Preview3D(p) {
+      var t = p.t;
+      var stThread = React.useState('#1c1c1c'); var thread = stThread[0], setThread = stThread[1];
+      var stBoard = React.useState('#c8a06a'); var board = stBoard[0], setBoard = stBoard[1];
+      var stShape = React.useState('rect'); var shape = stShape[0], setShape = stShape[1];
+      var stFail = React.useState(false); var failed = stFail[0], setFailed = stFail[1];
+      var stMax = React.useState(false); var maxed = stMax[0], setMaxed = stMax[1];
+
+      var hostRef = React.useRef(null), sceneRef = React.useRef(null);
+      var camRef = React.useRef({ azimuth: -0.35, polar: 0.78, distance: 3.2 });
+      var dragRef = React.useRef(null);
+
+      React.useEffect(function () {
+        var host = hostRef.current;
+        if (!host || !window.THREE) { setFailed(true); return; }
+
+        var renderer;
+        try {
+          renderer = new THREE.WebGLRenderer({ antialias: true });
+        } catch (e) { setFailed(true); return; }
+
+        // Colours are given as sRGB hex, so let three.js convert them properly.
+        THREE.ColorManagement.legacyMode = false;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        host.appendChild(renderer.domElement);
+
+        var scene = new THREE.Scene();
+        scene.background = new THREE.Color('#eef0f3');
+        var camera = new THREE.PerspectiveCamera(38, 1.6, 0.05, 60);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+        var key = new THREE.DirectionalLight(0xffffff, 0.85);
+        key.position.set(2.4, 4.2, 2.2); scene.add(key);
+        var fill = new THREE.DirectionalLight(0xffffff, 0.3);
+        fill.position.set(-2.6, 1.6, -2.2); scene.add(fill);
+
+        var st = {
+          renderer: renderer, scene: scene, camera: camera, host: host, frame: 0,
+          boardMat: new THREE.MeshStandardMaterial({ roughness: 0.72, metalness: 0.04 }),
+          // Same opacity as the flat preview: a single thread barely darkens
+          // the board, and the shading comes from how many of them overlap.
+          // Skipping the depth write lets them build up instead of hiding
+          // each other, while the board and nails still occlude them.
+          threadMat: new THREE.LineBasicMaterial({ transparent: true, opacity: 0.32, depthWrite: false }),
+          nailMat: new THREE.MeshStandardMaterial({ color: '#131313', roughness: 0.35, metalness: 0.6 }),
+          boardMesh: null, nailMesh: null, threadMesh: null
+        };
+
+        function render() {
+          st.frame = 0;
+          var c = camRef.current, s = Math.sin(c.polar);
+          camera.position.set(
+            c.distance * s * Math.sin(c.azimuth),
+            c.distance * Math.cos(c.polar),
+            c.distance * s * Math.cos(c.azimuth)
+          );
+          camera.lookAt(0, 0, 0);
+          renderer.render(scene, camera);
+        }
+        // Nothing moves on its own, so only draw when something actually changed.
+        st.request = function () { if (!st.frame) st.frame = requestAnimationFrame(render); };
+        sceneRef.current = st;
+
+        function resize() {
+          var w = host.clientWidth, hh = host.clientHeight;
+          if (!w || !hh) return;
+          renderer.setSize(w, hh, false);
+          camera.aspect = w / hh;
+          camera.updateProjectionMatrix();
+          st.request();
+        }
+        var ro = new ResizeObserver(resize);
+        ro.observe(host);
+        resize();
+
+        function onWheel(e) {
+          e.preventDefault();
+          var c = camRef.current;
+          c.distance = clamp(c.distance * (e.deltaY < 0 ? 0.9 : 1 / 0.9), 1.5, 9);
+          st.request();
+        }
+        host.addEventListener('wheel', onWheel, { passive: false });
+
+        return function () {
+          ro.disconnect();
+          host.removeEventListener('wheel', onWheel);
+          if (st.frame) cancelAnimationFrame(st.frame);
+          drop3d(st.boardMesh); drop3d(st.nailMesh); drop3d(st.threadMesh);
+          st.boardMat.dispose(); st.threadMat.dispose(); st.nailMat.dispose();
+          renderer.dispose();
+          if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
+          sceneRef.current = null;
+        };
+      }, []);
+
+      React.useEffect(function () {
+        var st = sceneRef.current;
+        if (!st) return;
+        drop3d(st.boardMesh);
+        var r = D3.radius * D3.margin;
+        st.boardMesh = new THREE.Mesh(
+          shape === 'round'
+            ? new THREE.CylinderGeometry(r, r, D3.thickness, 128)
+            : new THREE.BoxGeometry(2 * r, D3.thickness, 2 * r),
+          st.boardMat
+        );
+        st.boardMesh.position.y = -D3.thickness / 2;
+        st.scene.add(st.boardMesh);
+        st.request();
+      }, [shape]);
+
+      React.useEffect(function () {
+        var st = sceneRef.current;
+        if (!st || !p.pins) return;
+        var pins = p.pins, R = D3.radius, i;
+
+        drop3d(st.nailMesh);
+        var nails = new THREE.InstancedMesh(
+          new THREE.CylinderGeometry(D3.nailR * 1.7, D3.nailR, D3.nailH, 8), st.nailMat, pins);
+        var m = new THREE.Matrix4();
+        for (i = 0; i < pins; i++) {
+          var a = 2 * Math.PI * i / pins;
+          m.makeTranslation(R * Math.cos(a), D3.nailH / 2, R * Math.sin(a));
+          nails.setMatrixAt(i, m);
+        }
+        nails.instanceMatrix.needsUpdate = true;
+        st.nailMesh = nails;
+        st.scene.add(nails);
+        st.request();
+      }, [p.pins]);
+
+      React.useEffect(function () {
+        var st = sceneRef.current;
+        if (!st) return;
+
+        // Dropped up front so a new run clears the old threads while it solves.
+        drop3d(st.threadMesh);
+        st.threadMesh = null;
+        if (!p.seq || !p.pins) { st.request(); return; }
+
+        var pins = p.pins, seq = p.seq, R = D3.radius, i;
+        var cos = new Float32Array(pins), sin = new Float32Array(pins);
+        for (i = 0; i < pins; i++) {
+          var ang = 2 * Math.PI * i / pins;
+          cos[i] = Math.cos(ang); sin[i] = Math.sin(ang);
+        }
+
+        var n = seq.length - 1;
+        var pos = new Float32Array(n * 6);
+        var y0 = D3.nailH * 0.16, y1 = D3.nailH * 0.9;
+        for (i = 0; i < n; i++) {
+          var from = seq[i], to = seq[i + 1], k = i * 6;
+          var y = y0 + (y1 - y0) * (n > 1 ? i / (n - 1) : 0);
+          pos[k] = R * cos[from]; pos[k + 1] = y; pos[k + 2] = R * sin[from];
+          pos[k + 3] = R * cos[to]; pos[k + 4] = y; pos[k + 5] = R * sin[to];
+        }
+        var geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        st.threadMesh = new THREE.LineSegments(geo, st.threadMat);
+        st.scene.add(st.threadMesh);
+        st.request();
+      }, [p.seq, p.pins]);
+
+      React.useEffect(function () {
+        var st = sceneRef.current;
+        if (st) { st.threadMat.color.set(thread); st.request(); }
+      }, [thread]);
+
+      React.useEffect(function () {
+        var st = sceneRef.current;
+        if (st) { st.boardMat.color.set(board); st.request(); }
+      }, [board]);
+
+      // While the view covers the window, the page behind it should not scroll
+      // and Escape should get you out. The renderer follows the new size on its
+      // own through the resize observer.
+      React.useEffect(function () {
+        if (!maxed) return;
+        var previous = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        function onKey(e) { if (e.key === 'Escape') setMaxed(false); }
+        document.addEventListener('keydown', onKey);
+        return function () {
+          document.body.style.overflow = previous;
+          document.removeEventListener('keydown', onKey);
+        };
+      }, [maxed]);
+
+      function onPointerDown(e) {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        dragRef.current = { x: e.clientX, y: e.clientY };
+      }
+      function onPointerMove(e) {
+        var drag = dragRef.current;
+        if (!drag) return;
+        var c = camRef.current;
+        c.azimuth -= (e.clientX - drag.x) * 0.008;
+        c.polar = clamp(c.polar - (e.clientY - drag.y) * 0.006, 0.06, 1.5);
+        drag.x = e.clientX; drag.y = e.clientY;
+        if (sceneRef.current) sceneRef.current.request();
+      }
+      function onPointerUp(e) {
+        dragRef.current = null;
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+
+      function swatch(value, onChange) {
+        return h('div', { className: 'swatch' },
+          h('input', { type: 'color', value: value, onChange: function (e) { onChange(e.target.value); } }),
+          h('code', null, value));
+      }
+
+      return h('div', { className: 'card' },
+        h('h2', null, t('preview3dTitle')),
+        failed ? h('div', { className: 'alert err' }, t('error3D')) : h('div', { className: 'row' },
+          h('div', { className: 'col', style: { flex: '2 1 420px' } },
+            maxed ? h('div', {
+              className: 'stageBackdrop', onClick: function () { setMaxed(false); }
+            }) : null,
+            h('div', { className: 'stageBox' },
+              h('div', {
+                className: 'stage3d' + (maxed ? ' max' : ''), ref: hostRef,
+                onPointerDown: onPointerDown, onPointerMove: onPointerMove,
+                onPointerUp: onPointerUp, onPointerCancel: onPointerUp
+              },
+                h('button', {
+                  type: 'button', className: 'expand',
+                  title: t(maxed ? 'minimize' : 'maximize'),
+                  'aria-label': t(maxed ? 'minimize' : 'maximize'),
+                  // Kept from reaching the stage, which would read it as a drag.
+                  onPointerDown: function (e) { e.stopPropagation(); },
+                  onClick: function () { setMaxed(!maxed); }
+                },
+                  h('svg', {
+                    viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+                    strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true'
+                  },
+                    h('path', {
+                      d: maxed
+                        ? 'M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25'
+                        : 'M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15'
+                    })
+                  )
+                )
+              )
+            ),
+            h('div', { className: 'hint', style: { marginTop: '8px' } }, t('preview3dHint'))
+          ),
+          h('div', { className: 'col', style: { flex: '1 1 210px' } },
+            h(Field, { label: t('boardShape') },
+              h('div', { className: 'segmented' },
+                h('button', {
+                  type: 'button', className: shape === 'rect' ? 'on' : '',
+                  onClick: function () { setShape('rect'); }
+                }, t('boardRect')),
+                h('button', {
+                  type: 'button', className: shape === 'round' ? 'on' : '',
+                  onClick: function () { setShape('round'); }
+                }, t('boardRound')))),
+            h(Field, { label: t('boardColor') }, swatch(board, setBoard)),
+            h(Field, { label: t('threadColor') }, swatch(thread, setThread))
+          )
+        )
+      );
+    }
+
+    function GeneratorPanel(props) {
+      var t = props.t;
+      var DISPLAY = 1000, PREVIEW = 700;
+
+      var stP = React.useState({ pins: 288, lines: 3000, lineWeight: 20, minDistance: 20, size: 500, sync: true });
+      var o = stP[0], setO = stP[1];
+      function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
+
+      var stImg = React.useState(null); var imgEl = stImg[0], setImgEl = stImg[1];
+      var stView = React.useState({ zoom: 1, panX: 0, panY: 0 }); var view = stView[0], setView = stView[1];
+      var stGray = React.useState(false); var grayed = stGray[0], setGrayed = stGray[1];
+      var stRun = React.useState(false); var running = stRun[0], setRunning = stRun[1];
+      var stMsg = React.useState(''); var msg = stMsg[0], setMsg = stMsg[1];
+      var stPct = React.useState(0); var pct = stPct[0], setPct = stPct[1];
+      var stSeq = React.useState(null); var seq = stSeq[0], setSeq = stSeq[1];
+      // Pin count the current sequence was solved with, which is what the
+      // summary and the 3D view have to use rather than the live field value.
+      var stRan = React.useState(0); var runPins = stRan[0], setRunPins = stRan[1];
+      var stCopied = React.useState(false); var copied = stCopied[0], setCopied = stCopied[1];
+      var stName = React.useState(''); var fileName = stName[0], setFileName = stName[1];
+
+      var srcRef = React.useRef(null), outRef = React.useRef(null);
+      var workerRef = React.useRef(null), drawRef = React.useRef({ pin: 0, coords: null });
+      var dragRef = React.useRef(null);
+
+      var pins = o.sync ? props.points : o.pins;
+
+      React.useEffect(function () {
+        return function () { if (workerRef.current) workerRef.current.terminate(); };
+      }, []);
+
+      // The preview stays in colour while the framing is being chosen; only
+      // pressing Generate greyscales it.
+      React.useEffect(function () {
+        if (!imgEl || !srcRef.current) return;
+        var cv = srcRef.current;
+        cv.width = cv.height = PREVIEW;
+        var ctx = cv.getContext('2d', { willReadFrequently: true });
+        drawFrame(ctx, imgEl, PREVIEW, view);
+        maskCircle(ctx, PREVIEW);
+        // Outline the reachable area, which is otherwise invisible once the
+        // photo is zoomed out far enough not to touch it.
+        ctx.beginPath();
+        ctx.arc(PREVIEW / 2, PREVIEW / 2, PREVIEW / 2 - 1, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        setGrayed(false);
+      }, [imgEl, view]);
+
+      React.useEffect(function () {
+        if (imgEl) resetOutput();
+      }, [imgEl]);
+
+      // Registered by hand because React makes wheel listeners passive, which
+      // would let the page scroll instead of zooming.
+      React.useEffect(function () {
+        var cv = srcRef.current;
+        if (!cv || !imgEl) return;
+        function onWheel(e) {
+          e.preventDefault();
+          var b = cv.getBoundingClientRect();
+          var factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+          var fx = (e.clientX - b.left) / b.width, fy = (e.clientY - b.top) / b.height;
+          setView(function (v) { return zoomedView(imgEl, v, factor, fx, fy); });
+        }
+        cv.addEventListener('wheel', onWheel, { passive: false });
+        return function () { cv.removeEventListener('wheel', onWheel); };
+      }, [imgEl]);
+
+      function onFile(f) {
+        var image = new Image();
+        image.onload = function () {
+          setSeq(null);
+          setFileName(f.name);
+          setView({ zoom: 1, panX: 0, panY: 0 });
+          setImgEl(image);
+          URL.revokeObjectURL(image.src);
+        };
+        image.src = URL.createObjectURL(f);
+      }
+
+      function zoom(factor) {
+        if (imgEl) setView(function (v) { return zoomedView(imgEl, v, factor, 0.5, 0.5); });
+      }
+
+      function onPointerDown(e) {
+        if (!imgEl) return;
+        var box = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.setPointerCapture(e.pointerId);
+        dragRef.current = { x: e.clientX, y: e.clientY, width: box.width };
+      }
+
+      function onPointerMove(e) {
+        var drag = dragRef.current;
+        if (!drag || !imgEl) return;
+        var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        drag.x = e.clientX; drag.y = e.clientY;
+        setView(function (v) {
+          var perPixel = Math.min(imgEl.width, imgEl.height) / v.zoom / drag.width;
+          return clampView(imgEl, { zoom: v.zoom, panX: v.panX - dx * perPixel, panY: v.panY - dy * perPixel });
+        });
+      }
+
+      function onPointerUp(e) {
+        dragRef.current = null;
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+
+      function resetOutput() {
+        var cv = outRef.current;
+        cv.width = cv.height = DISPLAY;
+        var ctx = cv.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, DISPLAY, DISPLAY);
+        ctx.strokeStyle = 'rgba(0,0,0,0.32)';
+        ctx.lineWidth = Math.max(0.5, DISPLAY / 1400);
+        ctx.lineCap = 'round';
+      }
+
+      function start() {
+        if (!imgEl) { alert(t('errorNoImage')); return; }
+        if (workerRef.current) workerRef.current.terminate();
+
+        var size = Math.max(100, Math.min(1200, parseInt(o.size, 10) || 500));
+
+        // Freeze the chosen framing: the solver gets it at the working
+        // resolution, the preview shows the same thing at preview resolution.
+        var work = document.createElement('canvas');
+        work.width = work.height = size;
+        var wctx = work.getContext('2d', { willReadFrequently: true });
+        drawFrame(wctx, imgEl, size, view);
+        var gray = toGrayscale(wctx, size);
+
+        var pv = srcRef.current;
+        pv.width = pv.height = PREVIEW;
+        var pctx = pv.getContext('2d', { willReadFrequently: true });
+        drawFrame(pctx, imgEl, PREVIEW, view);
+        toGrayscale(pctx, PREVIEW);
+        setGrayed(true);
+
+        var np = Math.max(8, Math.min(1000, parseInt(pins, 10) || 288));
+        setRunPins(np);
+        var scale = DISPLAY / size;
+        var coords = [];
+        var c = size / 2, r = size / 2 - 0.5;
+        for (var i = 0; i < np; i++) {
+          var a = 2 * Math.PI * i / np;
+          coords.push([Math.floor(c + r * Math.cos(a)) * scale, Math.floor(c + r * Math.sin(a)) * scale]);
+        }
+        drawRef.current = { pin: 0, coords: coords };
+
+        resetOutput();
+        setSeq(null); setRunning(true); setPct(0); setMsg(t('preparing'));
+
+        var w = makeWorker();
+        workerRef.current = w;
+        w.onmessage = function (ev) {
+          var d = ev.data;
+          if (d.type === 'precalc') {
+            setPct(0); setMsg(t('precalc', d.value));
+          } else if (d.type === 'lines') {
+            var ctx = outRef.current.getContext('2d');
+            var st = drawRef.current;
+            ctx.beginPath();
+            for (var k = 0; k < d.pins.length; k++) {
+              ctx.moveTo(st.coords[st.pin][0], st.coords[st.pin][1]);
+              ctx.lineTo(st.coords[d.pins[k]][0], st.coords[d.pins[k]][1]);
+              st.pin = d.pins[k];
+            }
+            ctx.stroke();
+            setPct(Math.round(d.drawn / d.total * 100));
+            setMsg(t('linesDrawn', d.drawn, Math.round(d.drawn / d.total * 100)));
+          } else if (d.type === 'done') {
+            setSeq(d.sequence); setRunning(false); setPct(100); setMsg(t('done'));
+            w.terminate(); workerRef.current = null;
+          } else if (d.type === 'error') {
+            setRunning(false); setMsg('');
+            alert(t('errorTooBig'));
+            w.terminate(); workerRef.current = null;
+          }
+        };
+        w.postMessage({
+          cmd: 'run', gray: gray, size: size, pins: np,
+          lines: Math.max(1, Math.min(20000, parseInt(o.lines, 10) || 3000)),
+          lineWeight: Math.max(1, parseInt(o.lineWeight, 10) || 20),
+          minDistance: Math.max(1, Math.min(Math.floor(np / 3), parseInt(o.minDistance, 10) || 20))
+        });
+      }
+
+      function stop() {
+        if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
+        setRunning(false); setMsg('');
+      }
+
+      var threadM = React.useMemo(function () {
+        if (!seq || !runPins) return 0;
+        var R = props.radiusCm * 10, sum = 0;
+        for (var i = 1; i < seq.length; i++) {
+          var da = Math.abs(seq[i] - seq[i - 1]) * 2 * Math.PI / runPins;
+          sum += 2 * R * Math.abs(Math.sin(da / 2));
+        }
+        return sum / 1000;
+      }, [seq, props.radiusCm, runPins]);
+
+      function copySeq() {
+        var text = seq.join(',');
+        var done = function () {
+          setCopied(true); setTimeout(function () { setCopied(false); }, 1500);
+        };
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+        } else {
+          fallbackCopy(text, done);
+        }
+      }
+      function fallbackCopy(text, done) {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) { /* clipboard unavailable */ }
+        document.body.removeChild(ta);
+      }
+      function saveTxt() {
+        download(new Blob([seq.join(',')], { type: 'text/plain' }), 'string-art-sequence.txt');
+      }
+      function savePng() {
+        outRef.current.toBlob(function (b) { download(b, 'string-art.png'); });
+      }
+      function saveStepsPdf() {
+        var jsPDF = window.jspdf && window.jspdf.jsPDF;
+        if (!jsPDF) { alert(t('errorJsPDF')); return; }
+        var doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+        var W = 210, H = 297, top = 26, bottom = 16, cols = 5;
+        var colW = (W - 24) / cols, lineH = 4.4;
+        var perCol = Math.floor((H - top - bottom) / lineH), perPage = perCol * cols;
+        var totalSteps = seq.length - 1;
+        var pages = Math.max(1, Math.ceil(totalSteps / perPage));
+
+        for (var p = 0; p < pages; p++) {
+          if (p) doc.addPage();
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(0);
+          doc.text(t('pdfStepsTitle'), 12, 14);
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
+          doc.text(t('pdfStepsSubtitle', runPins, totalSteps, n1(props.radiusCm)), 12, 19.5);
+          doc.text(t('pdfPage') + ' ' + (p + 1) + ' ' + t('pdfOf') + ' ' + pages, W - 12, 19.5, { align: 'right' });
+          doc.setDrawColor(200); doc.setLineWidth(0.2); doc.line(12, 22, W - 12, 22);
+
+          doc.setFontSize(8); doc.setTextColor(0);
+          for (var s = 0; s < perPage; s++) {
+            var idx = p * perPage + s;
+            if (idx >= totalSteps) break;
+            var col = Math.floor(s / perCol), rowN = s % perCol;
+            var x = 12 + col * colW, y = top + rowN * lineH;
+            doc.setTextColor(150);
+            doc.text(String(idx + 1) + '.', x, y);
+            doc.setTextColor(0);
+            // The core PDF fonts are WinAnsi-encoded, which has no arrow glyph.
+            doc.text(seq[idx] + ' \u00BB ' + seq[idx + 1], x + 9, y);
+          }
+        }
+        doc.save('string-art-steps.pdf');
+      }
+
+      return h('div', { className: 'row' },
+        h('div', { className: 'col', style: { flex: '1 1 340px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('genTitle')),
+            h(Field, { label: t('selectImage'), hint: t('imageHint') },
+              h(DropZone, {
+                title: t('dropTitle'), hint: t('dropHint'),
+                errorText: t('errorNotImage'), fileName: fileName, onFile: onFile
+              })),
+            h(Field, { label: t('resolution') },
+              h(NumberInput, { value: o.size, min: 100, max: 1200, step: 50, onChange: function (v) { set('size', v); } }))
+          ),
+          h('div', { className: 'card' },
+            h('h2', null, t('genParams')),
+            h(Check, { id: 'syncPins', checked: o.sync, label: t('syncPins'), onChange: function (v) { set('sync', v); } }),
+            h(Field, { label: t('pins') },
+              h('input', {
+                type: 'number', value: pins, min: 8, max: 1000, disabled: o.sync,
+                onChange: function (e) { set('pins', e.target.value); }
+              })),
+            h(Field, { label: t('linesN') },
+              h(NumberInput, { value: o.lines, min: 100, max: 20000, step: 100, onChange: function (v) { set('lines', v); } })),
+            h(Field, { label: t('lineWeight'), hint: t('lineWeightHint') },
+              h(NumberInput, { value: o.lineWeight, min: 1, max: 100, onChange: function (v) { set('lineWeight', v); } })),
+            h(Field, { label: t('minDistance'), hint: t('minDistanceHint') },
+              h(NumberInput, { value: o.minDistance, min: 1, max: 200, onChange: function (v) { set('minDistance', v); } })),
+            h('div', { className: 'controls' },
+              h('button', { className: 'btn', onClick: start, disabled: !imgEl || running }, t('generate')),
+              h('button', { className: 'btn danger', onClick: stop, disabled: !running }, t('stop')))
+          ),
+          seq ? h('div', { className: 'card' },
+            h('h2', null, t('summaryTitle')),
+            h('div', { className: 'stat' }, h('span', null, t('sLines')), h('b', null, String(seq.length - 1))),
+            h('div', { className: 'stat' }, h('span', null, t('sThread')), h('b', null, n1(threadM) + ' m'))
+          ) : null
+        ),
+
+        h('div', { className: 'col', style: { flex: '2 1 520px' } },
+          h('div', { className: 'card' },
+            h('div', { className: 'row' },
+              h('div', { className: 'col' },
+                h('div', { className: 'caption' }, grayed ? t('originalLabel') : t('framingLabel')),
+                h('div', { className: 'canvasWrap' + (imgEl ? ' framing' : '') },
+                  h('canvas', {
+                    ref: srcRef,
+                    onPointerDown: onPointerDown, onPointerMove: onPointerMove,
+                    onPointerUp: onPointerUp, onPointerCancel: onPointerUp
+                  })),
+                h('div', { className: 'zoombar' },
+                  h('button', {
+                    type: 'button', className: 'zoombtn', disabled: !imgEl,
+                    title: t('zoomOut'), 'aria-label': t('zoomOut'),
+                    onClick: function () { zoom(1 / 1.25); }
+                  }, '\u2212'),
+                  h('span', { className: 'zoomval' }, Math.round(view.zoom * 100) + '%'),
+                  h('button', {
+                    type: 'button', className: 'zoombtn', disabled: !imgEl,
+                    title: t('zoomIn'), 'aria-label': t('zoomIn'),
+                    onClick: function () { zoom(1.25); }
+                  }, '+'),
+                  h('button', {
+                    type: 'button', className: 'btn secondary small', disabled: !imgEl,
+                    onClick: function () { setView({ zoom: 1, panX: 0, panY: 0 }); }
+                  }, t('zoomFit'))
+                ),
+                h('div', { className: 'hint' }, t('zoomHint'))),
+              h('div', { className: 'col' },
+                h('div', { className: 'caption' }, t('resultLabel')),
+                h('div', { className: 'canvasWrap' }, h('canvas', { ref: outRef })))
+            ),
+            (running || msg) ? h('div', { style: { marginTop: '14px' } },
+              h('div', { className: 'progress' }, h('div', { style: { width: pct + '%' } }, pct > 8 ? pct + '%' : '')),
+              h('div', { className: 'hint', style: { marginTop: '6px' } }, msg)
+            ) : h('div', { className: 'hint', style: { marginTop: '14px' } }, imgEl ? '' : t('noImageYet'))
+          ),
+
+          seq ? h('div', { className: 'card' },
+            h('h2', null, t('sequenceTitle')),
+            h('div', { className: 'hint', style: { marginBottom: '8px' } }, t('sequenceHint')),
+            h('textarea', { rows: 6, readOnly: true, value: seq.join(',') }),
+            h('div', { className: 'controls', style: { marginTop: '12px' } },
+              h('button', { className: 'btn secondary', onClick: copySeq }, copied ? t('copied') : t('copySeq')),
+              h('button', { className: 'btn secondary', onClick: saveTxt }, t('downloadSeq')),
+              h('button', { className: 'btn secondary', onClick: savePng }, t('downloadPng')),
+              h('button', { className: 'btn', onClick: saveStepsPdf }, t('downloadSteps')))
+          ) : null,
+
+          runPins ? h(Preview3D, { t: t, seq: seq, pins: runPins }) : null
+        )
+      );
+    }
+
+    // -------------------------------------------------------------
+    function App() {
+      var t = useLang();
+      var stTab = React.useState('generator'); var tab = stTab[0], setTab = stTab[1];
+      var stPts = React.useState(288); var points = stPts[0], setPoints = stPts[1];
+      var stR = React.useState(28); var radiusCm = stR[0], setRadiusCm = stR[1];
+
+      var nPoints = Math.max(3, Math.min(2000, parseInt(points, 10) || 3));
+      var nRadius = Math.max(1, Math.min(200, parseFloat(radiusCm) || 1));
+
+      return h(React.Fragment, null,
+        h('div', { className: 'tabs' },
+          h('button', { className: 'tab' + (tab === 'generator' ? ' active' : ''), onClick: function () { setTab('generator'); } }, t('tabGenerator')),
+          h('button', { className: 'tab' + (tab === 'template' ? ' active' : ''), onClick: function () { setTab('template'); } }, t('tabTemplate'))
+        ),
+        tab === 'template'
+          ? h(TemplatePanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm })
+          : h(GeneratorPanel, { t: t, points: nPoints, radiusCm: nRadius }),
+        h('footer', null, t('footerText'))
+      );
+    }
+
+    function LanguageSelector() {
+      var stL = React.useState(window.__currentLanguage); var lang = stL[0], setLang = stL[1];
+      var stO = React.useState(false); var isOpen = stO[0], setIsOpen = stO[1];
+      var ref = React.useRef(null);
+      var t = function (k) { return (window.I18N[lang] && window.I18N[lang][k]) || window.I18N.en[k] || k; };
+
+      React.useEffect(function () {
+        var close = function (e) { if (ref.current && !ref.current.contains(e.target)) setIsOpen(false); };
+        document.addEventListener('mousedown', close);
+        document.addEventListener('scroll', close, true);
+        return function () {
+          document.removeEventListener('mousedown', close);
+          document.removeEventListener('scroll', close, true);
+        };
+      }, []);
+
+      React.useEffect(function () {
+        document.documentElement.lang = lang;
+        document.title = t('title');
+        document.getElementById('header-title').textContent = t('title');
+        document.getElementById('header-hint').textContent = t('headerHint');
+      }, [lang]);
+
+      function change(code) {
+        setLang(code); setIsOpen(false);
+        window.__currentLanguage = code;
+        window.__languageListeners.forEach(function (l) { l(code); });
+      }
+
+      var languages = [
+        { code: 'en', flag: 'https://flagcdn.com/w20/gb.png', name: 'English' },
+        { code: 'pt', flag: 'https://flagcdn.com/w20/pt.png', name: 'Português' },
+        { code: 'fr', flag: 'https://flagcdn.com/w20/fr.png', name: 'Français' },
+        { code: 'es', flag: 'https://flagcdn.com/w20/es.png', name: 'Español' },
+        { code: 'it', flag: 'https://flagcdn.com/w20/it.png', name: 'Italiano' },
+        { code: 'de', flag: 'https://flagcdn.com/w20/de.png', name: 'Deutsch' }
+      ];
+      var sel = languages.filter(function (l) { return l.code === lang; })[0];
+
+      return h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+        h('span', null, t('language') + ':'),
+        h('div', { ref: ref, className: 'custom-select-wrapper' },
+          h('button', {
+            type: 'button', className: 'custom-select-button',
+            onClick: function (e) { e.stopPropagation(); setIsOpen(!isOpen); }
+          },
+            h('span', { className: 'custom-select-label' },
+              h('img', { src: sel.flag, alt: sel.code.toUpperCase(), className: 'flag-icon' }),
+              h('span', null, sel.name)),
+            h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 20 20', fill: 'currentColor', className: 'custom-select-arrow' },
+              h('path', {
+                fillRule: 'evenodd', clipRule: 'evenodd',
+                d: 'M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z'
+              }))
+          ),
+          isOpen ? h('div', { className: 'custom-select-menu open' },
+            languages.map(function (l) {
+              return h('button', {
+                key: l.code, type: 'button',
+                className: 'custom-select-option' + (l.code === lang ? ' selected' : ''),
+                onMouseDown: function (e) { e.preventDefault(); e.stopPropagation(); change(l.code); }
+              },
+                h('img', { src: l.flag, alt: l.code.toUpperCase(), className: 'flag-icon' }),
+                h('span', null, l.name));
+            })
+          ) : null
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('app')).render(h(App));
+    ReactDOM.createRoot(document.getElementById('language-selector')).render(h(LanguageSelector));
+
+    var init = window.I18N[window.__currentLanguage] || window.I18N.en;
+    document.title = init.title;
+    document.getElementById('header-title').textContent = init.title;
+    document.getElementById('header-hint').textContent = init.headerHint;
+  })();
+  </script>
+</body>
+</html>
