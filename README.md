@@ -1,9 +1,10 @@
 # String Art Studio
 
-A single-file, zero-build web app that does two things:
+A single-file, zero-build web app that does three things:
 
 1. **String art generator** — turns a photo into the sequence of pins the thread has to pass through, using a greedy chord-selection algorithm. This is the view the page opens on.
 2. **Template PDF** — draws the drilling/nailing template from just two numbers, the **number of points** and the **circle radius in cm**. The output is a print-at-100% PDF with a black circle, red points and a red number next to every point.
+3. **Nail ring STL** — models a printable ring carrying one nail per point, from those same two numbers, cuts it into arcs that clip together if it is bigger than the print bed, and exports it as an STL or a ZIP of STLs.
 
 Everything runs in the browser. Nothing is uploaded anywhere.
 
@@ -57,6 +58,8 @@ The round button in the top-right corner of the view blows it up to fill almost 
 
 It is drawn with [three.js](https://threejs.org/), loaded from a CDN as a plain global script so the file still needs no build step. The threads are one `LineSegments` buffer and the nails a single `InstancedMesh`, which keeps even a 20 000-line piece interactive. Threads climb gradually from just above the board to the nail heads, so the winding order stays visible, and they are drawn at the same opacity as the flat preview, so the shading comes from how many of them overlap rather than from each one being dark. The scene only redraws when something actually changes.
 
+The renderer, the lights, the orbit camera and the maximise button live in a `useStage3D` hook that the nail ring preview reuses, so both views behave the same way and there is only one place to fix.
+
 ## Template PDF
 
 | Input | Meaning |
@@ -87,6 +90,49 @@ The layout is defined in *design units* where the circle radius is exactly 90 u,
 | Square frame half-side | 96 | 96R / 90 |
 
 The numbers are set in Times and rotated to read radially outwards, matching the original template this project was modelled on. Because jsPDF misplaces text when `align`/`baseline` are combined with `angle`, the baseline origin is computed by hand from the text advance width and the Times x-height.
+
+## Nail ring STL
+
+Instead of drilling a board you can print the circle. This tab builds a flat band with one cylindrical nail standing on every point and exports it as a **binary STL in millimetres**, which any slicer opens at the right size.
+
+It reads the same **number of points** and **circle radius** as the template tab, so the printed ring and the printed template describe the same circle. The band straddles the point circle rather than sitting inside or outside it, so the thread still runs at exactly the requested radius.
+
+| Input | Default | Meaning |
+| --- | --- | --- |
+| Nail height | 12 mm | How far a nail stands above the band |
+| Nail diameter | 3 mm | Measured across the corners of the printed prism |
+| Ring width | 10 mm | Radial width of the band |
+| Ring thickness | 4 mm | Height of the band itself |
+| Ring segments | 1 | How many arcs to cut the ring into |
+| Joint clearance | 0.25 mm | Play left between a tab and its slot |
+| Numbered snap-off tags | off | A numbered pointer at every nail |
+
+### Cutting the ring into arcs
+
+A 28 cm radius gives a 57 cm ring, which no ordinary printer will take in one piece, so **ring segments** cuts it into that many arcs. Leave it at 1 and the ring comes out whole.
+
+Each cut lands in the middle of a nail gap, never on a nail, and leaves a **puzzle joint**: the arc ahead of the cut ends in a tab with a narrow neck and a round head that swells past it, and the arc behind it ends in the matching slot, whose two prongs close over the head. Pulling two arcs apart along the ring is blocked by the head; they only come apart the way they went together. Since the joint has to fit between two nails, its length is worked out from the room left there — roughly 1.7 mm at 288 points and a 28 cm radius, up to 8 mm on a sparser ring. **Joint clearance** is the gap left between tab and slot, 0.25 mm by default; raise it if your printer runs tight. That gap is measured perpendicular to the profile rather than shifted sideways, so it stays even where the head flares out.
+
+With the ring cut up, the button hands over a **ZIP** instead of a single STL, holding one file per arc named `…-PART_01_OF_10.stl` and so on. Each part is turned so its arc straddles the x axis and centred on the origin, which is where a slicer wants it, and the summary reports the **largest part** as it would sit on the bed so you can tell at a glance whether it fits.
+
+### Numbered snap-off tags
+
+The printed band carries no numbers, so **numbered snap-off tags** adds a pointer at every nail with its number raised on it, reading outwards along the radius exactly as the numbers on the paper template do. Each tag hangs off the outer wall on a stub about 2 mm wide and 1.6 mm thick: strong enough to survive printing, easy to snap or cut off once the picture is finished.
+
+Digits are drawn as seven raised strokes rather than typeset, which needs no font and prints cleanly. Their size follows the room between neighbouring nails, so on a crowded ring they shrink; below about 2.2 mm tall the tab says so and suggests either fewer points or no tags.
+
+### The summary and its warnings
+
+The summary reports the outer diameter, total height, point spacing, gap between nails, number of parts, the size of the largest part, the joint length once the ring is cut, and the **material volume** measured off the mesh a slicer will read. Warnings appear when the nails are close enough to merge, when no joint fits between them, when the tags are too small to read, and when the largest part still will not fit a 25 cm bed.
+
+The 3D preview turns and zooms exactly like the one on the generator tab, including the maximise button, and the part can be recoloured to match the filament you intend to use. Every other arc is drawn a shade darker, because at the size the whole ring is shown the joints themselves are a hairline.
+
+### How the solid is built
+
+- Everything is a closed solid in its own right: the band, each nail, the tab, the two prongs of a slot, and each tag and stroke. Solids that belong to the same part overlap rather than touch, so a slicer reads them as one body and never meets two faces in the same place.
+- Curves are emitted as polygons whose corners touch the nominal circle: 12 faces per nail, and enough steps for a facet of about 4 mm. The slot is the tab grown outwards by the clearance, walked at the same distances along the profile, so the two mate by construction.
+- Seams close on exactly the same coordinates, so every mesh is watertight, every directed edge is used once, and every facet is wound outwards. The reported volume counts the overlaps twice and so runs about a percent over the truth.
+- The preview and the exported files are built from the same triangle lists, so what you turn around on screen is what gets sliced.
 
 ## Project layout
 
