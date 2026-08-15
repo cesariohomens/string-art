@@ -32,7 +32,7 @@
 
 // Defaults for the mechanics, all overridable at runtime. See PROTOCOL.md for
 // where the turntable figure comes from.
-#define DEF_STEPS_DEG 279.25f
+#define DEF_STEPS_DEG 404.444f
 #define DEF_STEPS_MM_X 80.0f
 #define DEF_STEPS_MM_Z 400.0f
 #define DEF_X_MAX 300.0f

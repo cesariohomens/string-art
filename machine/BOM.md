@@ -2,7 +2,7 @@
 
 Prices are what these parts cost from the usual online sellers in 2026, in
 euros, and are meant for budgeting rather than quoting. The whole machine comes
-in around €200 if nothing is already in the drawer.
+in around €220 if nothing is already in the drawer, filament aside.
 
 ## Electronics
 
@@ -27,15 +27,14 @@ in around €200 if nothing is already in the drawer.
 | Qty | Part | Notes | ≈ € |
 | --- | --- | --- | --- |
 | 1 | MGN12 linear rail, 500 mm, with one block | This is what sets how big a ring the machine can wind | 28 |
-| 1 | GT2 belt, 6 mm, 3 m | 1.3 m goes round the turntable, the rest to the carriage | 8 |
+| 1 | GT2 belt, 6 mm, 4 m | 1.82 m of it is the rack round the turntable rim, cut to exactly 910 teeth so the two ends butt without breaking the pitch; the rest is the carriage run | 10 |
 | 3 | GT2 pulley, 20 teeth, 5 mm bore | | 2 ea |
 | 2 | GT2 idler, 20 teeth, toothed, with bearing | Belt return on the carriage and the turntable | 2 ea |
-| 1 | T8 leadscrew, 150 mm, 8 mm per turn, with brass nut | Lift | 8 |
-| 2 | Smooth rod, 8 mm, 120 mm | Lift guides | 4 |
+| 1 | T8 leadscrew, 200 mm, 8 mm per turn, with brass nut | Lift. The model draws 181 mm of screw between the nut at the bottom and the coupler at the top | 8 |
+| 2 | Smooth rod, 8 mm, 180 mm | Lift guides | 5 |
 | 4 | LM8UU | Or printed bushings if the lift is slow, which it is | 1 ea |
-| 8 | 623ZZ bearing | Turntable rollers, six minimum, eight is smoother | 0.6 ea |
-| 3 | 608ZZ bearing | Rim rollers, for boards wider than the turntable | 0.8 ea |
-| 1 | Lazy-susan bearing, 100 mm | Only if the printed roller ring is not wanted | 6 |
+| 24 | 623ZZ bearing | Two per frame sector carry the turntable, one lying down under the plate and one standing up against the rim, which is twenty-two of them on the stock machine. The other two are the carriage idler and a spare | 0.6 ea |
+| 1 | Lazy-susan bearing, 100 mm | Only worth it on a small table. Under a 580 mm one it is too short a base to stop the rim nodding, so the roller ring is the way | 6 |
 
 ## Thread path
 
@@ -45,19 +44,20 @@ in around €200 if nothing is already in the drawer.
 | 1 | Brass or steel tube, 4 mm outside, 200 mm | The guide itself. It must stay under 4 mm for the last 25 mm or it will not fit between nails | 3 |
 | 1 | Extension spring, 20 mm, light | Tension arm | 1 |
 | 1 | Felt washer, 20 mm | Drag on the spool, so it does not overrun | 1 |
-| — | Thread | Cotton or polyester, 0.3–0.6 mm. About 3 km for a dense picture | 8 |
+| — | Thread | Cotton or polyester, 0.3–0.6 mm. About 4 km for a dense picture on the full 580 mm ring; the average chord grows with the radius | 11 |
 
 ## Printed and cut
 
 | Qty | Part | Notes |
 | --- | --- | --- |
-| — | The printed parts | See `hardware/README.md` for the list, the quantities and how to orient them. About 900 g of PLA or PETG |
-| 1 | Board, 12 mm plywood or MDF, cut to the ring | Whatever the picture wants, up to 580 mm across |
+| — | The printed parts | See `hardware/README.md` for the list, the quantities and how to orient them. About 3.5 kg of PLA or PETG at 25 % infill, two thirds of which is the nine segments of the table |
+| 1 | Board, 12 mm plywood or MDF, cut to the ring | Whatever the picture wants, up to 580 mm across, which is also the size of the table under it |
 | 1 | Nail ring | Printed from the app's own STL tab, in the size the job is written for |
-| — | M3 screws, 8/10/12/16/20 mm, and M3 nuts | About 60 screws all told |
-| 40 | M3 heat-set inserts, 4.6 × 5.7 mm | |
+| — | M3 screws, 8/10/12/16/20 mm, and M3 nuts | About 200 screws and 80 nuts all told. The sector joints and the roller posts are most of them |
+| 110 | M3 heat-set inserts, 4.6 × 5.7 mm | |
+| — | M4 screws, 10/16/30 mm, and M4 nuts | About 40. Six of the long ones hold the board down to the hub |
 | 8 | M5 × 20 screws with nuts | Frame to base |
-| 4 | Rubber foot, 20 mm | The machine is happier not walking |
+| 11 | Rubber foot, 20 mm | One under each frame leg. The machine is happier not walking |
 
 ## What is deliberately not here
 

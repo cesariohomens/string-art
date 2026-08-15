@@ -180,7 +180,7 @@ Stored in NVS, editable from **Settings**, defaults in `firmware/src/config.h`.
 
 | Setting | Default | What it is |
 | --- | --- | --- |
-| `steps_deg` | 279.25 | motor steps per degree of turntable |
+| `steps_deg` | 404.444 | motor steps per degree of turntable |
 | `steps_mm_x` | 80 | steps per mm of radial travel |
 | `steps_mm_z` | 400 | steps per mm of lift |
 | `x_max` | 300 | how far out the eyelet reaches, mm |
@@ -191,17 +191,21 @@ Stored in NVS, editable from **Settings**, defaults in `firmware/src/config.h`.
 | `jerk` | 6 | speed a corner may be taken at without slowing, mm/s |
 
 `steps_deg` is the one that has to be right, and it is the only number that
-changes if the turntable does. A 20-tooth GT2 pulley moves 40 mm of belt per
-motor turn, and a 1.8° motor at 1/16 microstepping takes 3200 steps to do it. A
-400 mm turntable has 1257 mm of rim, so a full revolution is 100 531 steps, or
-**279.25 steps per degree** — one step is 0.0036°, which is 13 µm out at the
-rim. The other two are the usual printer numbers: 80 steps/mm for a GT2 belt,
-400 steps/mm for an 8 mm-per-turn leadscrew.
+changes if the turntable does. The turntable is turned by a length of GT2 belt
+bonded into its rim, working as a circular rack that a 20-tooth pinion climbs
+along. That belt is cut to a whole number of teeth so its two ends butt without
+breaking the pitch: **910 teeth** on the stock table, a pitch radius of
+289.66 mm. A 1.8° motor at 1/16 microstepping takes 3200 steps per turn and the
+pinion covers one tooth per 160 of them, so a full revolution of the table is
+145 600 steps, or **404.444 steps per degree** — 3640⁄9 exactly, since both
+tooth counts are whole. One step is 0.0025°, which is 12 µm at the rim. The
+other two are the usual printer numbers: 80 steps/mm for a GT2 belt, 400
+steps/mm for an 8 mm-per-turn leadscrew.
 
 The stock machine takes rings up to **290 mm radius**, which is what a 500 mm
 rail leaves once the guide has to reach past the far side of a nail. That covers
-the 280 mm ring the app offers by default. The turntable itself is 400 mm
-across, and boards wider than that are carried on three adjustable rollers at
-the rim rather than on a turntable the size of the board. A longer rail moves
-`x_max`; a different turntable moves `steps_deg`; both are parameters, here and
-in the OpenSCAD model.
+the 280 mm ring the app offers by default. The turntable is the same 580 mm
+across as the biggest board, since the rack sits in the rim below the top face
+and a flush board does not cover it. A longer rail moves `x_max`; a different
+turntable moves `steps_deg`; both are parameters, here and in the OpenSCAD
+model, where `belt_rack_teeth` and `belt_rack_r` carry the figures above.

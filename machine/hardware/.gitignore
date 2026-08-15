@@ -1,0 +1,2 @@
+# Exported meshes are built from the model by export.sh, so they are not kept.
+stl/
