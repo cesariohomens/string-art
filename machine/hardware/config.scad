@@ -448,7 +448,9 @@ z_coupler_d = 21;
 z_nema_bolt_r = nema_hole_pitch * sqrt(2) / 2;
 
 // The nail ring the machine is meant to be able to reach, for the clearance
-// check in machine.scad.
+// check in machine.scad. The thread is drawn a little fatter than the 0.5 mm
+// it really is, or a frame of the animation loses it altogether.
 show_board = true;
 nail_d = 3;
 nail_count = 288;
+thread_w = 0.9;

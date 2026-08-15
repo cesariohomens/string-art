@@ -25,12 +25,23 @@ pio test -e native         # the geometry, the g-code and a whole job, on a PC
 | `settings.*` | What survives a power cut, and what a factory reset removes |
 | `main.cpp` | Bringing it up, the button and the light |
 | `tools/pack-webui.mjs` | Puts the app and everything it loads onto the board, so the machine needs no internet |
+| `tools/walk.cpp` | Reads a job and prints the path it would walk, sampled at a frame rate |
 
 `geometry` and `gcode` are plain C++ with no Arduino in them, which is why they
 can be tested on a PC. `test/` has three suites: the path planning, the reader,
 and a whole job walked from the lines the app writes to the path the machine
 would take — including a check that the eyelet never passes inside a nail it is
 not wrapping.
+
+`walk.cpp` borrows the same two files to answer "where would the guide be, a
+thirtieth of a second from now" without a board attached. It is what
+[`hardware/animate.sh`](../hardware/animate.sh) films, and it will also tell you
+how long a job takes:
+
+```bash
+g++ -O2 -I src tools/walk.cpp src/geometry.cpp src/gcode.cpp -o /tmp/walk
+/tmp/walk < job.gcode
+```
 
 ## How the steppers are driven
 

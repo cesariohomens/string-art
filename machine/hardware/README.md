@@ -17,6 +17,7 @@ sectors by arithmetic, not by hand.
 | `machine.scad` | The assembly, bought parts included, for looking at |
 | `parts.scad` | The catalogue: what is printed, how many, and which way up |
 | `export.sh` | Writes every part to `stl/` |
+| `animate.sh` | Films the machine winding a picture, into `anim/` |
 
 Looking at the machine:
 
@@ -27,7 +28,10 @@ openscad machine.scad
 `machine.scad` has three variables at the top — `a_pos`, `x_pos`, `z_pos` — that
 put the axes wherever you want them, and `show_board` in `config.scad` draws a
 290 mm nail ring on the turntable so the guide's reach can be checked against
-it.
+it. Below those are the ones that put a job on the board: `ring_r`, `ring_nails`
+and `ring_phase` for the ring, and `seq` and `laid` for the thread — the nails
+the job goes round and how many of them are behind it. On its own the model
+draws no thread at all.
 
 Exporting:
 
@@ -37,6 +41,42 @@ Exporting:
 ```
 
 A full run takes a couple of minutes. Warnings are treated as failures.
+
+## The video
+
+```bash
+./animate.sh                            # anim/machine.mp4, 30 seconds, 1080p
+./animate.sh --shot close --seconds 12  # one camera instead of three
+./animate.sh --seq mine.txt             # a sequence saved from the app
+./animate.sh --nails 96 --radius 200 --passes 1
+```
+
+The guide's path is not animated by hand and it is not a second model of the
+machine either. The job goes through
+[`walk.cpp`](../firmware/tools/walk.cpp), which is the firmware's own g-code
+reader and geometry compiled for a PC, so the guide goes where the machine would
+go, laps what the machine would lap, and takes as long as the machine would take
+— acceleration aside, which is left out here exactly as it is in the estimate the
+app shows. What comes out is one row per frame: the three axes, and how many
+nails have been wrapped by then. `machine.scad` draws the rest.
+
+The default is a film in three shots, in the order the machine does them: a near
+shot held on the point where the rail crosses the ring, which is the only place a
+lap ever happens, running slowly enough to see one; the whole job from the side,
+sped up until it fits; and the finished picture from above. Each shot gets its own
+window of machine time, which is why the near one can crawl while the wide one
+covers an hour.
+
+Without `--seq` the sequence is made up rather than solved from an image: each
+leg skips a fixed number of nails, which draws the envelope of a circle, and the
+number skipped shares no factor with the ring so a pass visits every nail and
+closes. `--passes` stacks more envelopes inside each other.
+
+Rendering is the preview renderer, one process per core, at twice the output size
+and scaled back down, because OpenSCAD does not anti-alias and a 0.9 mm thread on
+a 740 mm machine is a pixel wide. A 30-second film is 900 frames and takes about
+a quarter of an hour on twelve cores; `--size 640x360 --super 1 --fps 15` is the
+way to check a change in half a minute. `--keep` leaves the frames behind.
 
 ## How big it is
 

@@ -41,17 +41,30 @@ a_pos = 0;
 x_pos = x_max;
 z_pos = 0;
 
+// The job on the board, which is what animate.sh drives frame by frame. On its
+// own the model draws the biggest ring the machine takes and no thread at all,
+// which is the arrangement worth checking the reach against.
+ring_r = board_radius_max;
+ring_nails = nail_count;
+ring_phase = 0;
+wrap_z = 6;             // where the thread is laid on the shank
+seq = [];               // the nails the job goes round, in the order it does
+laid = 0;               // how many of them are behind it
+
 machine();
 
 module machine() {
     frame();
     turntable(a_pos);
-    if (show_board) board();
+    // The board is keyed to the spigot, so it turns with the table and so does
+    // everything drawn on it.
+    rotate([0, 0, a_pos]) if (show_board) { board(); thread(); }
     gantry();
     x_axis(x_pos);
     z_axis(x_pos, z_pos);
     thread_path();
-    translate([0, frame_or + 70, box_floor]) {
+    if (len(seq) > 0) feed_line();
+    color("#3b4048") translate([0, frame_or + 70, box_floor]) {
         electronics_box();
         translate([0, 0, box_inner[2] + box_lid_t])
             rotate([180, 0, 0]) electronics_lid();
@@ -108,8 +121,7 @@ module turntable(a) {
 }
 
 module board() {
-    // The largest ring the stock machine takes, drawn to prove the guide can
-    // reach the innermost nail and clear the outermost.
+    // Plywood as wide as the table, with the ring of nails standing on it.
     color("#d9c7a3") translate([0, 0, board_z])
         difference() {
             cylinder(r = board_radius_max, h = board_t);
@@ -117,10 +129,47 @@ module board() {
                 cylinder(d = board_boss_d + 1, h = board_t + 2 * eps);
         }
     color("#404040")
-        for (i = [0 : nail_count - 1])
-            rotate([0, 0, i * 360 / nail_count])
-                translate([board_radius_max, 0, board_z + board_t])
-                    cylinder(d = nail_d, h = nail_h, $fn = 8);
+        for (i = [0 : ring_nails - 1])
+            translate(nail_at(i))
+                cylinder(d = nail_d, h = nail_h, $fn = 8);
+}
+
+// Where nail i stands, on the board and at the height the thread sits.
+function nail_at(i, z = 0) =
+    let (t = ring_phase + i * 360 / ring_nails)
+    [ring_r * cos(t), ring_r * sin(t), z_zero + z];
+
+// The thread: every leg the job has already laid, and the one being laid now,
+// running from the last nail the job went round to wherever the eyelet has got
+// to. Before the first lap that last nail is the one the thread was tied to by
+// hand, which is where the job starts. The eyelet is fixed on the +X rail, so in
+// the turning board's own frame it comes round the other way.
+module thread() {
+    if (len(seq) > 0) color("#26262c") {
+        for (i = [1 : max(1, laid) - 1])
+            strand(nail_at(seq[i - 1], wrap_z), nail_at(seq[i], wrap_z));
+        strand(nail_at(seq[max(0, laid - 1)], wrap_z),
+               [x_pos * cos(-a_pos), x_pos * sin(-a_pos), z_zero + z_pos]);
+    }
+}
+
+// The working thread on its way in: off the spool, past the arm that keeps it
+// under tension, and down the top of the guide tube, which is wherever the
+// carriage has taken it.
+module feed_line() {
+    from = [-gantry_x, rail_y - upright_t / 2 - 22, frame_top_z + upright_h / 2 + 10];
+    to = [x_pos, 0, z_pos + guide_clamp_z1];
+    color("#26262c") strand(from, to);
+}
+
+module strand(p, q) {
+    d = q - p;
+    len = norm(d);
+    if (len > 0.05)
+        translate((p + q) / 2)
+            rotate([0, 0, atan2(d[1], d[0])])
+                rotate([0, -asin((q[2] - p[2]) / len), 0])
+                    cube([len, thread_w, thread_w], center = true);
 }
 
 module gantry() {
