@@ -93,7 +93,7 @@ The numbers are set in Times and rotated to read radially outwards, matching the
 
 ## Template STL
 
-Instead of drilling a board you can print the circle. This tab builds a flat band with one cylindrical nail standing on every point and exports it as a **binary STL in millimetres**, which any slicer opens at the right size.
+Instead of drilling a board you can print the circle. This tab builds a flat band with a nail standing on every point and exports it as a **binary STL in millimetres**, which any slicer opens at the right size.
 
 It reads the same **number of points** and **circle radius** as the template tab, so the printed ring and the printed template describe the same circle. The band straddles the point circle rather than sitting inside or outside it, so the thread still runs at exactly the requested radius.
 
@@ -101,11 +101,22 @@ It reads the same **number of points** and **circle radius** as the template tab
 | --- | --- | --- |
 | Nail height | 12 mm | How far a nail stands above the band |
 | Nail diameter | 3 mm | Measured across the corners of the printed prism |
+| Nail tip | straight | Straight, a shrimp curl, or tapered 30% wider |
 | Ring width | 10 mm | Radial width of the band |
 | Ring thickness | 4 mm | Height of the band itself |
 | Ring segments | 1 | How many arcs to cut the ring into |
 | Joint clearance | 0.25 mm | Play left between a tab and its slot |
 | Numbered snap-off tags | off | A numbered pointer at every nail |
+
+### How the nails end
+
+Thread wraps the outer face of a nail and is pulled towards the centre of the circle, so the one way a finished loop can escape is upwards, over the tip. **Nail tip** offers three ends, and the second and third both work by making the top harder to leave than the shaft:
+
+- **Straight** is a plain post, quickest to print and the lightest of the three. Use it when the nails are tall enough that the thread never reaches the top anyway.
+- **Shrimp curl** climbs about two thirds of the height and then turns 100° outwards, ending in a tip that hangs over the shaft — roughly 5 mm past the nail axis at the default size — with the thread caught in the crook. The turn tapers to 72% of the shaft, which is what gives it the shrimp outline. It reaches its full height at the crown of the bend rather than at the tip, so a curl stands exactly as tall as the straight nail it replaces, and it takes no extra room between neighbours because it bends radially rather than along the ring. It does overhang, so print it with supports.
+- **Tapered 30% wider** grows steadily from the base to a tip 30% thicker, a cone the loop cannot ride up. It prints without supports, since the flare is only a few tenths of a millimetre off vertical, but the wide end is what the neighbouring nails have to make room for: the reported gap between nails is measured there, and on a crowded ring the tips will merge before the bases would.
+
+The gap between nails, and the warning that goes with it, always refer to the widest end of whichever tip is chosen, and the summary adds the tip diameter for a cone or the overhang for a curl. All three shapes work on a ring that is cut into arcs and carries numbered tags.
 
 ### Cutting the ring into arcs
 
@@ -123,13 +134,14 @@ Digits are drawn as seven raised strokes rather than typeset, which needs no fon
 
 ### The summary and its warnings
 
-The summary reports the outer diameter, total height, point spacing, gap between nails, number of parts, the size of the largest part, the joint length once the ring is cut, and the **material volume** measured off the mesh a slicer will read. Warnings appear when the nails are close enough to merge, when no joint fits between them, when the tags are too small to read, and when the largest part still will not fit a 25 cm bed.
+The summary reports the outer diameter, total height, point spacing, gap between nails, the tip diameter or curl overhang when the nails are shaped, number of parts, the size of the largest part, the joint length once the ring is cut, and the **material volume** measured off the mesh a slicer will read. Warnings appear when the nails are close enough to merge, when no joint fits between them, when the tags are too small to read, and when the largest part still will not fit a 25 cm bed.
 
 The 3D preview turns and zooms exactly like the one on the generator tab, including the maximise button, and the part can be recoloured to match the filament you intend to use. Every other arc is drawn a shade darker, because at the size the whole ring is shown the joints themselves are a hairline.
 
 ### How the solid is built
 
 - Everything is a closed solid in its own right: the band, each nail, the tab, the two prongs of a slot, and each tag and stroke. Solids that belong to the same part overlap rather than touch, so a slicer reads them as one body and never meets two faces in the same place.
+- A nail is a tube through a handful of circular sections, which is what lets one routine print all three tips: two sections for a post, a wider one on top for a cone, and eleven around the bend for a curl. Each section carries its own radius and the two axes its circle is drawn on, kept perpendicular to the path, and the bend radius is held above the nail's own so the inside of a curl cannot fold through itself.
 - Curves are emitted as polygons whose corners touch the nominal circle: 12 faces per nail, and enough steps for a facet of about 4 mm. The slot is the tab grown outwards by the clearance, walked at the same distances along the profile, so the two mate by construction.
 - Seams close on exactly the same coordinates, so every mesh is watertight, every directed edge is used once, and every facet is wound outwards. The reported volume counts the overlaps twice and so runs about a percent over the truth.
 - The preview and the exported files are built from the same triangle lists, so what you turn around on screen is what gets sliced.
