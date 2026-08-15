@@ -96,6 +96,7 @@ String statusJson() {
        ",\"z\":" + String(p.z, 2) + "},";
   s += "\"queue\":" + String(motion::queueDepth()) + ",";
   s += "\"motors\":" + String(motion::enabled() ? "true" : "false") + ",";
+  s += "\"homed\":" + String(motion::homed() ? "true" : "false") + ",";
   s += "\"setup\":" + String(setup_mode ? "true" : "false") + ",";
   s += "\"error\":\"" + jsonEscape(job::error()) + "\"}";
   return s;

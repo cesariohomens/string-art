@@ -38,8 +38,12 @@ void enable(bool on);
 bool enabled();
 
 // Drives an axis onto its switch, backs off and comes in again slowly, then
-// calls that position zero. Blocking, and only ever called while idle.
+// declares the end of the travel the switch sits at: zero for X, z_max for Z.
+// Blocking, and only ever called while idle.
 bool home(int axis);
 bool endstop(int axis);
+
+// Whether X and Z have found their switches since the motors were last let go.
+bool homed();
 
 }  // namespace motion

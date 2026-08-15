@@ -62,7 +62,14 @@ That is what lets a job written for one machine run at the same surface speed on
 another.
 
 Homing is the exception: it steps the axis itself rather than going through the
-queue, because it is the one move whose length nobody knows in advance.
+queue, because it is the one move whose length nobody knows in advance. It also
+goes a different way on each axis. X's switch is at the inner end of the rail, so
+homing X declares zero; Z's is at the **top** of the lift, because there is no
+room for one under the carriage, so homing Z drives up and declares `z_max`.
+Getting that backwards drives the eyelet down onto the board looking for a switch
+that is not there, which is why the two ends are stated once, as
+`HOME_X_AT_TOP` and `HOME_Z_AT_TOP` in `config.h`, and read from there by the
+firmware, by `walk.cpp` and by the job test.
 
 ## Memory
 

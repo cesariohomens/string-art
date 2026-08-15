@@ -15,8 +15,8 @@
 #define PIN_Z_STEP 14
 #define PIN_Z_DIR 27
 #define PIN_ENABLE 13   // one line for all three drivers, active low
-#define PIN_X_MIN 16
-#define PIN_Z_MIN 17
+#define PIN_X_HOME 16
+#define PIN_Z_HOME 17
 #define PIN_BUTTON 4    // a tap pauses, thirty seconds resets
 #define PIN_LED 2
 #define PIN_THREAD 39   // optional switch on the tension arm, 0 to disable
@@ -25,6 +25,16 @@
 #define AXIS_X 1
 #define AXIS_Z 2
 #define AXIS_COUNT 3
+
+// Which end of its travel each axis finds its switch at, which is a fact about
+// where the brackets are in machine/hardware and not a preference. X comes in
+// to the middle of the board. Z goes up: the rod block sits directly under the
+// lift carriage, so a switch below it could only be found by driving the eyelet
+// down onto the board, and the guide tube would have to grow by the height of
+// the switch to make room. An axis that homes at the top declares `z_max` where
+// it trips rather than zero, so the travel and the switch have to agree.
+#define HOME_X_AT_TOP 0
+#define HOME_Z_AT_TOP 1
 
 // How many moves may be queued. A wrap is about forty of them, so this keeps
 // the steppers fed while a line of g-code is read off the filesystem.

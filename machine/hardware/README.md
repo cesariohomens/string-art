@@ -253,11 +253,14 @@ That is 3200 microsteps per motor turn × 910 rack teeth ÷ (20 pinion teeth ×
    what `Z0` means to the firmware.
 9. **Endstops.** X under the beam where the carriage's tab reaches it, Z above
    the top of the Z travel. Both brackets are slotted; trip points are set with
-   the machine in front of you.
+   the machine in front of you. Which end each switch is at is not a choice at
+   this stage: the firmware drives towards them, and towards the wrong end for Z
+   means down onto the board. See `HOME_Z_AT_TOP` in `../firmware/src/config.h`.
 10. **Thread path.** Spool holder and tension arm on the back of an upright,
     thread from the spool over the arm, up over the beam and down the tube.
 11. **Electronics.** Box wherever it will sit, drivers in, then the wiring in
     `../PROTOCOL.md`.
 
-Then home X and Z, line nail 0 up with the guide by hand, `G92 A0`, and the
-machine knows where it is.
+Then home the machine — Z lifts to its switch first, then X comes in to the
+middle — line nail 0 up with the guide by hand, `G92 A0`, and it knows where it
+is.

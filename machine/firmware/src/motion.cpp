@@ -41,6 +41,9 @@ portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 volatile int32_t pos[AXIS_COUNT] = {0, 0, 0};   // where the steppers are
 int32_t plan_pos[AXIS_COUNT] = {0, 0, 0};       // where the queue leaves them
 bool motors_on = false;
+// The turntable has no switch and is never counted here: nail 0 is declared by
+// hand, so A is as good as homed the moment a job says G92 A0.
+bool found_home[AXIS_COUNT] = {false, false, false};
 
 Block *cur = nullptr;
 uint32_t cur_step = 0;
@@ -236,8 +239,8 @@ void begin() {
   }
   pinMode(PIN_ENABLE, OUTPUT);
   enable(false);
-  pinMode(PIN_X_MIN, INPUT_PULLUP);
-  pinMode(PIN_Z_MIN, INPUT_PULLUP);
+  pinMode(PIN_X_HOME, INPUT_PULLUP);
+  pinMode(PIN_Z_HOME, INPUT_PULLUP);
 
   timer = timerBegin(0, 80, true);   // one tick of the counter per microsecond
   timerAttachInterrupt(timer, &onTick, true);
@@ -247,10 +250,15 @@ void begin() {
 
 void enable(bool on) {
   motors_on = on;
+  // Released motors can be pushed about by hand, and X and Z are the two that
+  // would then be lying about where they are.
+  if (!on) found_home[AXIS_X] = found_home[AXIS_Z] = false;
   digitalWrite(PIN_ENABLE, on ? LOW : HIGH);   // the drivers are active low
 }
 
 bool enabled() { return motors_on; }
+
+bool homed() { return found_home[AXIS_X] && found_home[AXIS_Z]; }
 
 geo::Pose position() {
   geo::Pose p;
@@ -368,8 +376,8 @@ bool moveTo(const geo::Pose &target, float feed_mm_min) {
 }
 
 bool endstop(int axis) {
-  if (axis == AXIS_X) return digitalRead(PIN_X_MIN) == LOW;
-  if (axis == AXIS_Z) return digitalRead(PIN_Z_MIN) == LOW;
+  if (axis == AXIS_X) return digitalRead(PIN_X_HOME) == LOW;
+  if (axis == AXIS_Z) return digitalRead(PIN_Z_HOME) == LOW;
   return false;
 }
 
@@ -383,6 +391,11 @@ bool home(int axis) {
 
   const float travel = axis == AXIS_X ? settings.x_max : settings.z_max;
   const float per_mm = settings.steps_mm[axis];
+  // Towards the switch, which is not the same way on both axes: X's is at the
+  // bottom of the travel and Z's is at the top. See HOME_*_AT_TOP in config.h
+  // for why, and for what has to move if a bracket ever does.
+  const bool at_top = axis == AXIS_X ? HOME_X_AT_TOP : HOME_Z_AT_TOP;
+  const float towards = at_top ? 1.0f : -1.0f;
 
   auto run = [&](float mm, float mms, bool until_switch) -> bool {
     uint32_t steps = (uint32_t)fabsf(mm * per_mm);
@@ -400,15 +413,19 @@ bool home(int axis) {
     return !until_switch;
   };
 
-  // In until it trips, off the switch, then back on slowly for a repeatable
-  // edge. Both switches sit at the low end of their axis.
-  if (!run(-(travel + 10), DEF_HOME_MMS, true)) return false;
-  run(3, DEF_HOME_MMS / 2, false);
-  if (!run(-6, DEF_HOME_MMS / 4, true)) return false;
+  // On until it trips, off the switch, then back on slowly for a repeatable
+  // edge.
+  if (!run(towards * (travel + 10), DEF_HOME_MMS, true)) return false;
+  run(-towards * 3, DEF_HOME_MMS / 2, false);
+  if (!run(towards * 6, DEF_HOME_MMS / 4, true)) return false;
 
+  // The switch is the end of the travel it sits at, so a top switch reads the
+  // ceiling and not zero. Z's is: after homing the guide is as high as it goes.
+  const float end = at_top ? travel : 0;
   geo::Pose p = position();
-  if (axis == AXIS_X) p.x = 0; else p.z = 0;
+  if (axis == AXIS_X) p.x = end; else p.z = end;
   setPosition(p);
+  found_home[axis] = true;
   return true;
 }
 

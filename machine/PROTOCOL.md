@@ -19,7 +19,16 @@ in and out over it and up and down.
 machine constant (`X_OFFSET`), set once during calibration.
 
 `A` has no endstop. Nail 0 is lined up with the guide by hand at the start of a
-job and the position is declared with `G92 A0`. `X` and `Z` home to switches.
+job and the position is declared with `G92 A0`.
+
+`X` and `Z` home to switches, at opposite ends of their travel. X's is at the
+inner end, so homing X declares `X0`, the turntable axis. Z's is at the **top**,
+because the rod block sits directly under the lift carriage and there is nowhere
+below it to put one, so homing Z declares `z_max` and leaves the guide as high as
+it goes. `G28` therefore does Z first and then X, and a job that starts with it
+can assume the eyelet is over the middle of the board and clear of the nails.
+Anything that changes this — moving a bracket, lengthening the travel — has to
+change `HOME_Z_AT_TOP` and `z_max` in `firmware/src/config.h` to match.
 
 ## The wrap
 
@@ -60,7 +69,7 @@ machine of any size.
 | `G0 [A] [X] [Z] [F]` | rapid move, no thread expected |
 | `G1 [A] [X] [Z] [F]` | move at feed |
 | `G4 P<ms>` | dwell |
-| `G28 [X] [Z]` | home; with no letters, both |
+| `G28 [X] [Z]` | home; with no letters, both, Z first. Leaves X at 0 and Z at `z_max` |
 | `G92 [A] [X] [Z]` | declare the current position |
 | `M17` / `M18` | energise / release the motors |
 | `M112` | stop everything now |
@@ -82,17 +91,24 @@ A generated job looks like this:
 ; string-art 288 points, radius 280.0 mm
 M115
 G28
-M701 R280.00 N288 H6.00 D3.00 O2.20 P0.00
+M701 R280.00 N288 H6.00 D3.00 O3.00 P0.00
 M702 F4200 S1200
 G92 A0
 M17
+G0 Z6.00
 M700 P0
 M700 P143
 M700 P37
 ...
-G0 Z20
+M400
+G0 Z20.00
 M18
 ```
+
+The `G0` after `M17` is what brings the guide down from where homing left it. It
+is not what sets the wrap height — every waypoint of a wrap carries the `H` from
+`M701` — but it means the descent happens over the middle of the board, on its
+own, rather than as part of the run out to the first nail.
 
 ## HTTP API
 
@@ -124,12 +140,20 @@ the machine from a page opened anywhere.
   "line": 1483,
   "lines": 3002,
   "position": { "a": 137.5, "x": 281.2, "z": 6.0 },
+  "queue": 12,
+  "motors": true,
   "homed": true,
+  "setup": false,
   "error": ""
 }
 ```
 
 `state` is one of `idle`, `running`, `paused`, `homing`, `error`.
+
+`homed` says whether X and Z have found their switches since the motors were
+last released, which is what makes `position` worth reading. Releasing them —
+`M18`, the end of a job, a stop — puts it back to false, because a carriage that
+is free to be pushed by hand is a carriage whose position is a guess.
 
 ## Network
 
@@ -163,8 +187,8 @@ input-only pins, which have no pull-up of their own.
 | `X` step / dir | 33 / 32 | radial carriage |
 | `Z` step / dir | 14 / 27 | lift |
 | driver enable | 13 | one line for all three, active low |
-| `X` endstop | 16 | to GND, `INPUT_PULLUP` |
-| `Z` endstop | 17 | to GND, `INPUT_PULLUP` |
+| `X` endstop | 16 | inner end of the rail, to GND, `INPUT_PULLUP` |
+| `Z` endstop | 17 | top of the lift, to GND, `INPUT_PULLUP` |
 | button | 4 | to GND: a tap pauses, thirty seconds resets |
 | status LED | 2 | the one on the board |
 | thread sensor | 39 | optional switch on the tension arm, 10 kΩ to 3V3 |
@@ -184,7 +208,7 @@ Stored in NVS, editable from **Settings**, defaults in `firmware/src/config.h`.
 | `steps_mm_x` | 80 | steps per mm of radial travel |
 | `steps_mm_z` | 400 | steps per mm of lift |
 | `x_max` | 300 | how far out the eyelet reaches, mm |
-| `z_max` | 60 | how high it lifts, mm |
+| `z_max` | 60 | how high it lifts, mm, and where homing leaves it |
 | `x_offset` | 0 | eyelet ahead of the carriage datum, mm |
 | `eyelet_r` | 1.1 | radius of the eyelet tip, mm |
 | `accel` | 900 | mm/s², and degrees/s² for the turntable |

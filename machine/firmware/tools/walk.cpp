@@ -26,16 +26,18 @@
 #include <string>
 #include <vector>
 
+#include "config.h"
 #include "gcode.h"
 #include "geometry.h"
 
 namespace {
 
-// From firmware/src/config.h. Kept here rather than included because config.h
-// is written for the board and pulls in Arduino pin numbers.
-const float kEyeletR = 1.1f;
-const float kMaxDps = 100.0f, kMaxMms = 120.0f, kMaxMmsZ = 12.0f;
-const float kFeedTravel = 4200.0f, kFeedOrbit = 1200.0f;
+// The machine as it leaves the bench. Taken from config.h rather than copied,
+// so that a machine whose settings have been changed is the only way this can
+// be wrong.
+const float kEyeletR = DEF_EYELET_R;
+const float kMaxDps = DEF_MAX_DPS, kMaxMms = DEF_MAX_MMS, kMaxMmsZ = DEF_MAX_MMS_Z;
+const float kFeedTravel = DEF_FEED_TRAVEL, kFeedOrbit = DEF_FEED_ORBIT;
 
 struct Stop {
   geo::Pose p;
@@ -127,11 +129,11 @@ int main(int argc, char **argv) {
       if (g.has('F')) feed_current = g.get('F');
       arrive(t, g.code == 0 ? feed_travel : feed_current);
     } else if (g.kind == 'G' && g.code == 28) {
-      // Both switches are at the low end of their axis, so homing leaves the
-      // guide at the middle of the board and on its surface. It is not part of
-      // the picture, so it costs no time here.
-      at.x = 0;
-      at.z = 0;
+      // X's switch is at the middle of the board and Z's is at the top of the
+      // lift, so homing leaves the guide over the axis and as high as it goes.
+      // It is not part of the picture, so it costs no time here.
+      at.x = HOME_X_AT_TOP ? DEF_X_MAX : 0;
+      at.z = HOME_Z_AT_TOP ? DEF_Z_MAX : 0;
       stops.push_back({at, clock, wraps});
     } else if (g.kind == 'G' && g.code == 92) {
       if (g.has('A')) at.a = g.get('A');

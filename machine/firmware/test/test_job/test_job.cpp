@@ -7,17 +7,19 @@
 #include <string>
 #include <vector>
 
+#include "config.h"
 #include "gcode.cpp"
 #include "geometry.cpp"
 
 namespace {
 
-const float kRailMm = 300;
-const float kEyeletR = 1.1f;
+const float kRailMm = DEF_X_MAX;
+const float kEyeletR = DEF_EYELET_R;
 
 struct Walk {
   std::vector<geo::Pose> poses;
   geo::Ring ring;
+  geo::Pose homed;      // where G28 leaves the machine
   float travel_feed = 0, orbit_feed = 0;
   int wraps = 0;
   float lowest_x = 1e9f, highest_x = 0;
@@ -39,6 +41,14 @@ Walk run(const std::vector<std::string> &lines, const char **fault) {
       if (g.has('A')) at.a = g.get('A');
       if (g.has('X')) at.x = g.get('X');
       if (g.has('Z')) at.z = g.get('Z');
+      w.poses.push_back(at);
+    } else if (g.kind == 'G' && g.code == 28) {
+      // Homing is the one move a job does not describe, so where it leaves the
+      // machine is a promise the firmware makes to whoever wrote the job. Each
+      // axis ends up at the end of its travel that its switch sits at.
+      at.x = HOME_X_AT_TOP ? DEF_X_MAX : 0;
+      at.z = HOME_Z_AT_TOP ? DEF_Z_MAX : 0;
+      w.homed = at;
       w.poses.push_back(at);
     } else if (g.kind == 'G' && g.code == 92) {
       if (g.has('A')) at.a = g.get('A');
@@ -145,6 +155,28 @@ void test_a_job_reads_back_as_it_was_written(void) {
   TEST_ASSERT_EQUAL(50, w.wraps);
   TEST_ASSERT_EQUAL_FLOAT(4200, w.travel_feed);
   TEST_ASSERT_EQUAL_FLOAT(1200, w.orbit_feed);
+}
+
+void test_homing_leaves_the_guide_above_the_nails(void) {
+  // The nails the hardware model stands on the board, which the guide has to
+  // be clear of before the carriage is allowed to move.
+  const float kNailH = 15;
+
+  geo::Ring r = stock();
+  const char *fault = nullptr;
+  Walk w = run(jobFor(sequence(5, r.nails), r), &fault);
+  TEST_ASSERT_NULL(fault);
+
+  // Z's switch is at the top of the lift, because there is no room for one
+  // under the carriage, so homing declares the ceiling and not the floor. Read
+  // the other way round it drives the eyelet down onto the board looking for a
+  // switch that is not there.
+  TEST_ASSERT_EQUAL_FLOAT(DEF_Z_MAX, w.homed.z);
+  TEST_ASSERT_TRUE_MESSAGE(w.homed.z > kNailH,
+                           "homing leaves the guide down among the nails");
+  // X's is at the other end, which puts the guide over the middle of the board
+  // with nothing under it on the way down to wrap height.
+  TEST_ASSERT_EQUAL_FLOAT(0, w.homed.x);
 }
 
 void test_nothing_in_the_job_leaves_the_machine(void) {
@@ -265,6 +297,7 @@ int main(int, char **) {
   UNITY_BEGIN();
   RUN_TEST(test_the_app_default_ring_is_one_the_machine_can_wind);
   RUN_TEST(test_a_job_reads_back_as_it_was_written);
+  RUN_TEST(test_homing_leaves_the_guide_above_the_nails);
   RUN_TEST(test_nothing_in_the_job_leaves_the_machine);
   RUN_TEST(test_every_nail_asked_for_is_gone_round);
   RUN_TEST(test_the_guide_never_touches_a_nail_it_is_not_wrapping);

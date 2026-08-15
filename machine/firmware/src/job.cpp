@@ -114,9 +114,13 @@ String execute(const String &text) {
         State was = st;
         st = kHoming;
         motion::enable(true);
+        // Z first, and it homes upwards, so the guide is lifted clear of the
+        // nails before the carriage is sent anywhere. If it never finds its
+        // switch then nobody knows how high the guide is, which is the last
+        // moment at which moving X is a good idea.
         bool good = true;
-        if (!any || g.has('X')) good = motion::home(AXIS_X) && good;
-        if (!any || g.has('Z')) good = motion::home(AXIS_Z) && good;
+        if (!any || g.has('Z')) good = motion::home(AXIS_Z);
+        if (good && (!any || g.has('X'))) good = motion::home(AXIS_X);
         st = was;
         if (!good) {
           fail("homing did not find a switch");

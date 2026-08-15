@@ -110,11 +110,12 @@ Four numbers, once, under Settings:
 | `steps_deg` | Mark the turntable, tell it to turn 360°, and measure the error. 404.444 is right for the stock table, whose rim rack is 910 GT2 teeth, driven by a 20-tooth pinion at 1/16 microstepping |
 | `steps_mm_x` | Ask for 100 mm, measure what you got, scale it. 80 for a GT2 belt at 1/16 |
 | `x_offset` | Home X, then measure from the turntable axis to the eyelet. This is the number that decides whether the lap lands on the nail or beside it |
-| Wrap height | Home Z with the guide just clear of the board, then set the wrap height on the machine tab to about half the nail |
+| `z_max` | Z's switch is at the top of the lift, so homing goes up and calls the switch `z_max`. Home Z, then jog down until the eyelet just touches the board: it should read `Z0` there, and if it does not, move `z_max` by the difference. Every height in a job is measured from that zero |
 
-Then line nail 0 up with the guide by eye before every job. The machine has no
-switch on the turntable and does not need one: the job's `G92 A0` says "this is
-nail 0", and everything follows from there.
+Set the wrap height on the machine tab to about half the nail, and line nail 0 up
+with the guide by eye before every job. The machine has no switch on the
+turntable and does not need one: the job's `G92 A0` says "this is nail 0", and
+everything follows from there.
 
 ## Running a job
 
