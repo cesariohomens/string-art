@@ -232,21 +232,23 @@ void stop() {
 }
 
 void tick() {
-  if (st != kRunning) return;
+  if (st == kError) return;
 
-  // A wrap in progress comes first: its waypoints are already promised.
-  if (path_live) {
-    pumpPath();
-    if (path_live) return;
-  }
+  // A wrap in progress comes first, and it is finished whether it came from a
+  // job or from someone typing M700 into the console with nothing running.
+  if (path_live && st != kPaused) pumpPath();
+  if (st != kRunning || path_live) return;
 
   // One line per turn of the loop while there is room, so the server still gets
   // a look in between them.
   int budget = 4;
   while (st == kRunning && !path_live && budget-- > 0 && !motion::queueFull()) {
     if (!file || !file.available()) {
+      // Out of lines, but not out of moves: wait for the queue to drain by
+      // coming back later rather than by standing here, or the machine stops
+      // answering for as long as it takes to finish.
+      if (!motion::queueEmpty()) return;
       if (file) file.close();
-      motion::waitIdle();
       motion::enable(false);
       st = kIdle;
       return;
