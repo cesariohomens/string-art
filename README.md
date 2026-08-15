@@ -1,12 +1,13 @@
 # String Art Studio
 
-A single-file, zero-build web app that does three things:
+A single-file, zero-build web app that does four things:
 
 1. **String art generator** — turns a photo into the sequence of pins the thread has to pass through, using a greedy chord-selection algorithm. This is the view the page opens on.
 2. **Template PDF** — draws the drilling/nailing template from just two numbers, the **number of points** and the **circle radius in cm**. The output is a print-at-100% PDF with a black circle, red points and a red number next to every point.
 3. **Template STL** — models a printable ring carrying one nail per point, from those same two numbers, cuts it into arcs that clip together if it is bigger than the print bed, and exports it as an STL or a ZIP of STLs.
+4. **Winding machine** — writes the job for the machine in [`machine/`](machine/), which strings the picture itself. Download the `.gcode`, or send it straight to the machine and drive it from the same page.
 
-Everything runs in the browser. Nothing is uploaded anywhere.
+Everything runs in the browser. Nothing is uploaded anywhere, except to a machine you tell it to talk to.
 
 ## Running it
 
@@ -146,10 +147,55 @@ The 3D preview turns and zooms exactly like the one on the generator tab, includ
 - Seams close on exactly the same coordinates, so every mesh is watertight, every directed edge is used once, and every facet is wound outwards. The reported volume counts the overlaps twice and so runs about a percent over the truth.
 - The preview and the exported files are built from the same triangle lists, so what you turn around on screen is what gets sliced.
 
+## Winding machine
+
+The fourth tab writes jobs for the machine in [`machine/`](machine/): a
+turntable that carries the board, a guide on a rail that reaches over it, and an
+ESP32 that runs the whole thing off a page it serves itself. The machine is
+described, down to its wiring and its g-code, in
+[`machine/PROTOCOL.md`](machine/PROTOCOL.md); how to build one is in
+[`machine/README.md`](machine/README.md).
+
+The tab takes the sequence from the generator — which is why the sequence now
+lives in the app rather than in the generator tab, and survives switching tabs —
+or a `.txt` saved from an earlier run. Alongside the usual number of points and
+radius it asks for the few things only the machine knows: the height the thread
+is laid at, the diameter of the nails, the radius of the guide's tip, and how
+far the guide can reach.
+
+| Input | Default | Meaning |
+| --- | --- | --- |
+| Wrap height | 6 mm | Where the thread is laid on the shank, measured from the board |
+| Nail diameter | 3 mm | The same nails the STL tab prints |
+| Guide tip radius | 1.1 mm | The outside of the eyelet, which has to pass between two nails |
+| Orbit radius | worked out | How far the eyelet stays from the nail while it goes round it |
+| Machine reach | 300 mm | How far the guide gets from the middle of the turntable |
+| Travel and wrap feeds | 4200 / 1200 mm/min | Measured at the eyelet, so a job runs at the same speed on any size of machine |
+
+The orbit is chosen for you: it has to clear the nail it is going round without
+reaching the next one along, which on a 288-point 28 cm ring leaves a window
+between 2.6 and 4.6 mm. When no radius satisfies both — nails closer than about
+5.5 mm — the tab refuses the job and says which of the three numbers to change,
+rather than letting the machine drive into the ring.
+
+A job is a header stating the ring and then one line per nail, so a
+3000-wrap picture is about 30 kB rather than several megabytes of arcs, and the
+same file runs on a machine of any size. **Download .gcode** saves it;
+**Send to the machine** posts it to `printer.local` (or whatever address you
+give it) with the user and password, after which the same card shows what the
+machine is doing and offers start, pause and stop. The summary estimates how
+long it will take, which for a dense picture is worth knowing before you press
+anything.
+
+Opened over `https`, a browser will not let the page talk to a machine that
+speaks `http`; the tab says so. Open the app over `http`, from a file, or from
+the machine itself, which serves this very page out of its own flash.
+
 ## Project layout
 
 ```
 index.html   the entire application
+machine/     the winding machine: protocol, bill of materials, hardware, firmware
 README.md    this file
 LICENSE
 ```

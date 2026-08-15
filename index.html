@@ -174,6 +174,60 @@
       tabTemplate: "Template PDF",
       tabGenerator: "String Art Generator",
       tabRing: "Template STL",
+      tabMachine: "Winding machine",
+
+      mJobTitle: "What to wind",
+      mFromGenerator: "{0} wraps, from the generator tab.",
+      mNoSequence: "Make a sequence in the generator tab, or load one you saved earlier.",
+      mLoadSequence: "Load a sequence (.txt)",
+      mUseGenerator: "Use the generator's sequence",
+      mLoaded: "{0} wraps, from {1}.",
+      mMachineTitle: "Machine",
+      mWrapHeight: "Wrap height (mm)",
+      mWrapHeightHint: "Where the thread is laid on the nail, measured up from the board.",
+      mEyelet: "Guide tip radius (mm)",
+      mEyeletHint: "The outside of the eyelet the thread runs through. It has to pass between two nails.",
+      mOrbitAuto: "Work the orbit out for me",
+      mOrbit: "Orbit radius (mm)",
+      mOrbitHint: "Eyelet to nail, while it goes round.",
+      mFeedTravel: "Travel feed (mm/min)",
+      mFeedOrbit: "Wrap feed (mm/min)",
+      mPhase: "Angle of nail 0 (°)",
+      mPhaseHint: "Leave at zero unless the ring is mounted turned on the turntable.",
+      mReach: "Machine reach (mm)",
+      mReachHint: "How far the guide gets from the middle of the turntable. The stock machine reaches 300 mm.",
+      mSOrbit: "Orbit radius",
+      mSWraps: "Wraps",
+      mSPath: "Path the guide walks",
+      mSTime: "Estimated time",
+      mSSize: "Job size",
+      mWarnCrowded: "{0} nails on this circle sit {1} mm apart, too close for a {2} mm guide tip to get between them. Use fewer nails, a wider circle, or a finer guide.",
+      mWarnOrbit: "On this ring the orbit has to be between {0} and {1} mm.",
+      mWarnReach: "This ring needs {0} mm of reach and the machine has {1} mm.",
+      mSendTitle: "Send it over",
+      mHost: "Machine address",
+      mHostHint: "printer.local, or the address your router gave it.",
+      mUser: "User",
+      mPass: "Password",
+      mDownloadGcode: "Download .gcode",
+      mSend: "Send to the machine",
+      mRefresh: "Check the machine",
+      mStart: "Start",
+      mPause: "Pause",
+      mResume: "Carry on",
+      mStop: "Stop",
+      mStateIdle: "Waiting",
+      mStateRunning: "Winding",
+      mStatePaused: "Paused",
+      mStateHoming: "Homing",
+      mStateError: "Stopped on an error",
+      mOffline: "Nothing answered at {0}.",
+      mSent: "Sent {0} wraps. Tie the thread to nail {1}, line it up with the guide, then press Start.",
+      mRefused: "The machine would not take the job: {0}",
+      mDenied: "The machine did not accept that user and password.",
+      mWarnPoints: "This sequence was made for {0} nails, so that is the count the job uses.",
+      mProgress: "line {0} of {1}",
+      mInsecure: "This page came over https and the machine speaks http, so the browser will block the connection. Open the app from the machine itself, or over http.",
 
       paramsTitle: "Parameters",
       points: "Number of points",
@@ -325,6 +379,60 @@
       tabTemplate: "PDF do molde",
       tabGenerator: "Gerador de String Art",
       tabRing: "STL do molde",
+      tabMachine: "Máquina de enrolar",
+
+      mJobTitle: "O que enrolar",
+      mFromGenerator: "{0} laçadas, vindas do separador do gerador.",
+      mNoSequence: "Cria uma sequência no separador do gerador, ou carrega uma que tenhas guardado.",
+      mLoadSequence: "Carregar sequência (.txt)",
+      mUseGenerator: "Usar a sequência do gerador",
+      mLoaded: "{0} laçadas, de {1}.",
+      mMachineTitle: "Máquina",
+      mWrapHeight: "Altura da laçada (mm)",
+      mWrapHeightHint: "Onde o fio assenta no prego, medido a partir da placa.",
+      mEyelet: "Raio da ponta do guia (mm)",
+      mEyeletHint: "O exterior do ilhó por onde passa o fio. Tem de caber entre dois pregos.",
+      mOrbitAuto: "Calcular a órbita por mim",
+      mOrbit: "Raio da órbita (mm)",
+      mOrbitHint: "Do ilhó ao prego, enquanto lhe dá a volta.",
+      mFeedTravel: "Velocidade de deslocação (mm/min)",
+      mFeedOrbit: "Velocidade da laçada (mm/min)",
+      mPhase: "Ângulo do prego 0 (°)",
+      mPhaseHint: "Deixa a zero, a não ser que o aro esteja montado rodado no prato.",
+      mReach: "Alcance da máquina (mm)",
+      mReachHint: "Até onde o guia chega a partir do centro do prato. A máquina de série alcança 300 mm.",
+      mSOrbit: "Raio da órbita",
+      mSWraps: "Laçadas",
+      mSPath: "Percurso do guia",
+      mSTime: "Tempo estimado",
+      mSSize: "Tamanho do trabalho",
+      mWarnCrowded: "{0} pregos nesta circunferência ficam a {1} mm uns dos outros, pouco para uma ponta de guia de {2} mm passar entre eles. Usa menos pregos, uma circunferência maior, ou um guia mais fino.",
+      mWarnOrbit: "Neste aro a órbita tem de estar entre {0} e {1} mm.",
+      mWarnReach: "Este aro precisa de {0} mm de alcance e a máquina tem {1} mm.",
+      mSendTitle: "Enviar para a máquina",
+      mHost: "Endereço da máquina",
+      mHostHint: "printer.local, ou o endereço que o router lhe deu.",
+      mUser: "Utilizador",
+      mPass: "Palavra-passe",
+      mDownloadGcode: "Descarregar .gcode",
+      mSend: "Enviar para a máquina",
+      mRefresh: "Ver o estado da máquina",
+      mStart: "Iniciar",
+      mPause: "Pausa",
+      mResume: "Continuar",
+      mStop: "Parar",
+      mStateIdle: "À espera",
+      mStateRunning: "A enrolar",
+      mStatePaused: "Em pausa",
+      mStateHoming: "A procurar as origens",
+      mStateError: "Parada com um erro",
+      mOffline: "Não respondeu nada em {0}.",
+      mSent: "Enviadas {0} laçadas. Ata o fio ao prego {1}, alinha-o com o guia, e carrega em Iniciar.",
+      mRefused: "A máquina não aceitou o trabalho: {0}",
+      mDenied: "A máquina não aceitou esse utilizador e palavra-passe.",
+      mWarnPoints: "Esta sequência foi feita para {0} pregos, por isso é essa a contagem que o trabalho usa.",
+      mProgress: "linha {0} de {1}",
+      mInsecure: "Esta página veio por https e a máquina fala http, por isso o browser bloqueia a ligação. Abre a app a partir da própria máquina, ou por http.",
 
       paramsTitle: "Parâmetros",
       points: "Número de pontos",
@@ -477,6 +585,60 @@
       tabTemplate: "PDF du gabarit",
       tabGenerator: "Générateur de String Art",
       tabRing: "STL du gabarit",
+      tabMachine: "Machine à enrouler",
+
+      mJobTitle: "Ce qu'il faut enrouler",
+      mFromGenerator: "{0} tours, venus de l'onglet générateur.",
+      mNoSequence: "Créez une séquence dans l'onglet générateur, ou chargez-en une que vous avez gardée.",
+      mLoadSequence: "Charger une séquence (.txt)",
+      mUseGenerator: "Utiliser la séquence du générateur",
+      mLoaded: "{0} tours, depuis {1}.",
+      mMachineTitle: "Machine",
+      mWrapHeight: "Hauteur du tour (mm)",
+      mWrapHeightHint: "Là où le fil se pose sur la pointe, mesuré depuis la planche.",
+      mEyelet: "Rayon du bout du guide (mm)",
+      mEyeletHint: "L'extérieur de l'œillet où passe le fil. Il doit passer entre deux pointes.",
+      mOrbitAuto: "Calculer l'orbite pour moi",
+      mOrbit: "Rayon de l'orbite (mm)",
+      mOrbitHint: "De l'œillet à la pointe, pendant qu'il en fait le tour.",
+      mFeedTravel: "Vitesse de déplacement (mm/min)",
+      mFeedOrbit: "Vitesse du tour (mm/min)",
+      mPhase: "Angle de la pointe 0 (°)",
+      mPhaseHint: "Laissez à zéro, sauf si l'anneau est monté tourné sur le plateau.",
+      mReach: "Portée de la machine (mm)",
+      mReachHint: "Jusqu'où le guide s'éloigne du centre du plateau. La machine de série atteint 300 mm.",
+      mSOrbit: "Rayon de l'orbite",
+      mSWraps: "Tours",
+      mSPath: "Chemin parcouru par le guide",
+      mSTime: "Temps estimé",
+      mSSize: "Taille du travail",
+      mWarnCrowded: "{0} pointes sur ce cercle sont à {1} mm l'une de l'autre, trop peu pour qu'un bout de guide de {2} mm passe entre elles. Prenez moins de pointes, un cercle plus grand, ou un guide plus fin.",
+      mWarnOrbit: "Sur cet anneau l'orbite doit être entre {0} et {1} mm.",
+      mWarnReach: "Cet anneau demande {0} mm de portée et la machine en a {1} mm.",
+      mSendTitle: "Envoyer à la machine",
+      mHost: "Adresse de la machine",
+      mHostHint: "printer.local, ou l'adresse que votre box lui a donnée.",
+      mUser: "Utilisateur",
+      mPass: "Mot de passe",
+      mDownloadGcode: "Télécharger le .gcode",
+      mSend: "Envoyer à la machine",
+      mRefresh: "Voir l'état de la machine",
+      mStart: "Démarrer",
+      mPause: "Pause",
+      mResume: "Reprendre",
+      mStop: "Arrêter",
+      mStateIdle: "En attente",
+      mStateRunning: "En train d'enrouler",
+      mStatePaused: "En pause",
+      mStateHoming: "Prise des origines",
+      mStateError: "Arrêtée sur une erreur",
+      mOffline: "Rien n'a répondu à {0}.",
+      mSent: "{0} tours envoyés. Attachez le fil à la pointe {1}, alignez-la avec le guide, puis appuyez sur Démarrer.",
+      mRefused: "La machine n'a pas pris le travail : {0}",
+      mDenied: "La machine n'a pas accepté cet utilisateur et ce mot de passe.",
+      mWarnPoints: "Cette séquence a été faite pour {0} pointes, c'est donc ce compte que le travail utilise.",
+      mProgress: "ligne {0} sur {1}",
+      mInsecure: "Cette page est arrivée en https et la machine parle http, donc le navigateur bloque la connexion. Ouvrez l'application depuis la machine elle-même, ou en http.",
 
       paramsTitle: "Paramètres",
       points: "Nombre de points",
@@ -628,6 +790,60 @@
       tabTemplate: "PDF de la plantilla",
       tabGenerator: "Generador de String Art",
       tabRing: "STL de la plantilla",
+      tabMachine: "Máquina de enrollar",
+
+      mJobTitle: "Qué enrollar",
+      mFromGenerator: "{0} vueltas, de la pestaña del generador.",
+      mNoSequence: "Crea una secuencia en la pestaña del generador, o carga una que hayas guardado.",
+      mLoadSequence: "Cargar secuencia (.txt)",
+      mUseGenerator: "Usar la secuencia del generador",
+      mLoaded: "{0} vueltas, de {1}.",
+      mMachineTitle: "Máquina",
+      mWrapHeight: "Altura de la vuelta (mm)",
+      mWrapHeightHint: "Dónde se apoya el hilo en el pin, medido desde el tablero.",
+      mEyelet: "Radio de la punta de la guía (mm)",
+      mEyeletHint: "El exterior del ojal por donde pasa el hilo. Tiene que caber entre dos pines.",
+      mOrbitAuto: "Calcular la órbita por mí",
+      mOrbit: "Radio de la órbita (mm)",
+      mOrbitHint: "Del ojal al pin, mientras le da la vuelta.",
+      mFeedTravel: "Velocidad de desplazamiento (mm/min)",
+      mFeedOrbit: "Velocidad de la vuelta (mm/min)",
+      mPhase: "Ángulo del pin 0 (°)",
+      mPhaseHint: "Déjalo en cero, salvo que el aro esté montado girado en el plato.",
+      mReach: "Alcance de la máquina (mm)",
+      mReachHint: "Hasta dónde llega la guía desde el centro del plato. La máquina de serie alcanza 300 mm.",
+      mSOrbit: "Radio de la órbita",
+      mSWraps: "Vueltas",
+      mSPath: "Recorrido de la guía",
+      mSTime: "Tiempo estimado",
+      mSSize: "Tamaño del trabajo",
+      mWarnCrowded: "{0} pines en esta circunferencia quedan a {1} mm unos de otros, poco para que una punta de guía de {2} mm pase entre ellos. Usa menos pines, una circunferencia mayor, o una guía más fina.",
+      mWarnOrbit: "En este aro la órbita tiene que estar entre {0} y {1} mm.",
+      mWarnReach: "Este aro necesita {0} mm de alcance y la máquina tiene {1} mm.",
+      mSendTitle: "Enviar a la máquina",
+      mHost: "Dirección de la máquina",
+      mHostHint: "printer.local, o la dirección que le haya dado el router.",
+      mUser: "Usuario",
+      mPass: "Contraseña",
+      mDownloadGcode: "Descargar el .gcode",
+      mSend: "Enviar a la máquina",
+      mRefresh: "Ver el estado de la máquina",
+      mStart: "Empezar",
+      mPause: "Pausa",
+      mResume: "Seguir",
+      mStop: "Parar",
+      mStateIdle: "Esperando",
+      mStateRunning: "Enrollando",
+      mStatePaused: "En pausa",
+      mStateHoming: "Buscando los orígenes",
+      mStateError: "Parada por un error",
+      mOffline: "No contestó nada en {0}.",
+      mSent: "Enviadas {0} vueltas. Ata el hilo al pin {1}, alinéalo con la guía y pulsa Empezar.",
+      mRefused: "La máquina no aceptó el trabajo: {0}",
+      mDenied: "La máquina no aceptó ese usuario y contraseña.",
+      mWarnPoints: "Esta secuencia se hizo para {0} pines, así que es esa la cuenta que usa el trabajo.",
+      mProgress: "línea {0} de {1}",
+      mInsecure: "Esta página llegó por https y la máquina habla http, así que el navegador bloquea la conexión. Abre la app desde la propia máquina, o por http.",
 
       paramsTitle: "Parámetros",
       points: "Número de puntos",
@@ -779,6 +995,60 @@
       tabTemplate: "PDF della dima",
       tabGenerator: "Generatore di String Art",
       tabRing: "STL della dima",
+      tabMachine: "Macchina avvolgitrice",
+
+      mJobTitle: "Cosa avvolgere",
+      mFromGenerator: "{0} giri, dalla scheda del generatore.",
+      mNoSequence: "Crea una sequenza nella scheda del generatore, o caricane una che hai salvato.",
+      mLoadSequence: "Carica una sequenza (.txt)",
+      mUseGenerator: "Usa la sequenza del generatore",
+      mLoaded: "{0} giri, da {1}.",
+      mMachineTitle: "Macchina",
+      mWrapHeight: "Altezza del giro (mm)",
+      mWrapHeightHint: "Dove il filo si appoggia sul pin, misurato dalla tavola.",
+      mEyelet: "Raggio della punta della guida (mm)",
+      mEyeletHint: "L'esterno dell'occhiello in cui passa il filo. Deve passare fra due pin.",
+      mOrbitAuto: "Calcola tu l'orbita",
+      mOrbit: "Raggio dell'orbita (mm)",
+      mOrbitHint: "Dall'occhiello al pin, mentre gli gira intorno.",
+      mFeedTravel: "Velocità di spostamento (mm/min)",
+      mFeedOrbit: "Velocità del giro (mm/min)",
+      mPhase: "Angolo del pin 0 (°)",
+      mPhaseHint: "Lascia a zero, a meno che l'anello sia montato ruotato sul piatto.",
+      mReach: "Sbraccio della macchina (mm)",
+      mReachHint: "Quanto la guida si allontana dal centro del piatto. La macchina di serie arriva a 300 mm.",
+      mSOrbit: "Raggio dell'orbita",
+      mSWraps: "Giri",
+      mSPath: "Percorso della guida",
+      mSTime: "Tempo stimato",
+      mSSize: "Dimensione del lavoro",
+      mWarnCrowded: "{0} pin su questo cerchio stanno a {1} mm l'uno dall'altro, troppo poco perché una punta di guida da {2} mm ci passi in mezzo. Usa meno pin, un cerchio più grande, o una guida più sottile.",
+      mWarnOrbit: "Su questo anello l'orbita deve stare fra {0} e {1} mm.",
+      mWarnReach: "Questo anello chiede {0} mm di sbraccio e la macchina ne ha {1} mm.",
+      mSendTitle: "Manda alla macchina",
+      mHost: "Indirizzo della macchina",
+      mHostHint: "printer.local, o l'indirizzo che le ha dato il router.",
+      mUser: "Utente",
+      mPass: "Password",
+      mDownloadGcode: "Scarica il .gcode",
+      mSend: "Manda alla macchina",
+      mRefresh: "Guarda lo stato della macchina",
+      mStart: "Avvia",
+      mPause: "Pausa",
+      mResume: "Riprendi",
+      mStop: "Ferma",
+      mStateIdle: "In attesa",
+      mStateRunning: "Sta avvolgendo",
+      mStatePaused: "In pausa",
+      mStateHoming: "Cerca gli zeri",
+      mStateError: "Ferma per un errore",
+      mOffline: "Non ha risposto niente a {0}.",
+      mSent: "Mandati {0} giri. Lega il filo al pin {1}, allinealo con la guida, poi premi Avvia.",
+      mRefused: "La macchina non ha preso il lavoro: {0}",
+      mDenied: "La macchina non ha accettato quell'utente e password.",
+      mWarnPoints: "Questa sequenza è stata fatta per {0} pin, quindi è quel numero che il lavoro usa.",
+      mProgress: "riga {0} di {1}",
+      mInsecure: "Questa pagina è arrivata in https e la macchina parla http, così il browser blocca il collegamento. Apri l'app dalla macchina stessa, o in http.",
 
       paramsTitle: "Parametri",
       points: "Numero di punti",
@@ -930,6 +1200,60 @@
       tabTemplate: "Schablonen-PDF",
       tabGenerator: "String-Art-Generator",
       tabRing: "Schablonen-STL",
+      tabMachine: "Wickelmaschine",
+
+      mJobTitle: "Was gewickelt wird",
+      mFromGenerator: "{0} Umschlingungen, aus dem Generator-Tab.",
+      mNoSequence: "Erzeuge eine Reihenfolge im Generator-Tab, oder lade eine gespeicherte.",
+      mLoadSequence: "Reihenfolge laden (.txt)",
+      mUseGenerator: "Die Reihenfolge aus dem Generator nehmen",
+      mLoaded: "{0} Umschlingungen, aus {1}.",
+      mMachineTitle: "Maschine",
+      mWrapHeight: "Wickelhöhe (mm)",
+      mWrapHeightHint: "Wo der Faden am Stift liegt, vom Brett aus gemessen.",
+      mEyelet: "Radius der Führungsspitze (mm)",
+      mEyeletHint: "Die Außenseite der Öse, durch die der Faden läuft. Sie muss zwischen zwei Stifte passen.",
+      mOrbitAuto: "Den Umlauf für mich ausrechnen",
+      mOrbit: "Umlaufradius (mm)",
+      mOrbitHint: "Von der Öse zum Stift, während sie ihn umrundet.",
+      mFeedTravel: "Eilgang (mm/min)",
+      mFeedOrbit: "Wickelvorschub (mm/min)",
+      mPhase: "Winkel von Stift 0 (°)",
+      mPhaseHint: "Auf null lassen, außer der Ring sitzt verdreht auf dem Teller.",
+      mReach: "Reichweite der Maschine (mm)",
+      mReachHint: "Wie weit die Führung von der Tellermitte wegkommt. Die Standardmaschine schafft 300 mm.",
+      mSOrbit: "Umlaufradius",
+      mSWraps: "Umschlingungen",
+      mSPath: "Weg der Führung",
+      mSTime: "Geschätzte Dauer",
+      mSSize: "Größe des Auftrags",
+      mWarnCrowded: "{0} Stifte auf diesem Kreis stehen {1} mm auseinander, zu wenig für eine {2} mm starke Führungsspitze dazwischen. Nimm weniger Stifte, einen größeren Kreis oder eine feinere Führung.",
+      mWarnOrbit: "Auf diesem Ring muss der Umlauf zwischen {0} und {1} mm liegen.",
+      mWarnReach: "Dieser Ring braucht {0} mm Reichweite, die Maschine hat {1} mm.",
+      mSendTitle: "An die Maschine schicken",
+      mHost: "Adresse der Maschine",
+      mHostHint: "printer.local, oder die Adresse, die ihr der Router gegeben hat.",
+      mUser: "Benutzer",
+      mPass: "Passwort",
+      mDownloadGcode: ".gcode herunterladen",
+      mSend: "An die Maschine schicken",
+      mRefresh: "Nach der Maschine sehen",
+      mStart: "Starten",
+      mPause: "Pause",
+      mResume: "Weiter",
+      mStop: "Anhalten",
+      mStateIdle: "Wartet",
+      mStateRunning: "Wickelt",
+      mStatePaused: "Pausiert",
+      mStateHoming: "Sucht die Nullpunkte",
+      mStateError: "Wegen eines Fehlers angehalten",
+      mOffline: "Unter {0} hat nichts geantwortet.",
+      mSent: "{0} Umschlingungen geschickt. Binde den Faden an Stift {1}, richte ihn zur Führung aus und drücke Starten.",
+      mRefused: "Die Maschine hat den Auftrag nicht angenommen: {0}",
+      mDenied: "Die Maschine hat diesen Benutzer und dieses Passwort nicht akzeptiert.",
+      mWarnPoints: "Diese Reihenfolge wurde für {0} Stifte gemacht, also rechnet der Auftrag damit.",
+      mProgress: "Zeile {0} von {1}",
+      mInsecure: "Diese Seite kam über https und die Maschine spricht http, deshalb blockiert der Browser die Verbindung. Öffne die App von der Maschine selbst, oder über http.",
 
       paramsTitle: "Parameter",
       points: "Anzahl der Punkte",
@@ -1951,6 +2275,122 @@
     })(typeof window !== 'undefined' ? window : this);
   </script>
 
+  <script>
+    // ---------------------------------------------------------------
+    // Jobs for the winding machine
+    //
+    // The machine is told the ring it is working on and then given one line per
+    // nail; it works out the path itself, which is why a job is thirty
+    // kilobytes rather than several megabytes and why the same file runs on a
+    // machine of any size. The rules about what the guide can reach are the
+    // same ones the firmware enforces, and they are written out in
+    // machine/PROTOCOL.md.
+    // ---------------------------------------------------------------
+    (function (root) {
+      var D = {
+        height: 6,        // where the thread is laid on the shank, mm above the board
+        nailD: 3,         // matches the printed ring
+        eyeletR: 1.1,     // the tip of the guide
+        feedTravel: 4200, // mm/min at the eyelet
+        feedOrbit: 1200,
+        phase: 0,         // where nail 0 sits, degrees
+        rail: 300,        // how far out the stock machine reaches, mm
+        park: 20          // how high it lifts when the job is done, mm
+      };
+
+      function spacingOf(radius, points) {
+        return points > 0 ? 2 * Math.PI * radius / points : 0;
+      }
+
+      // Too tight and the guide grinds along the nail it is going round; too
+      // wide and, on the far side of the lap, it reaches the next one along.
+      function limits(o) {
+        var spacing = spacingOf(o.radius, o.points);
+        return {
+          spacing: spacing,
+          low: o.nailD / 2 + o.eyeletR,
+          high: spacing - o.nailD / 2 - o.eyeletR
+        };
+      }
+
+      function orbitFor(o) {
+        var l = limits(o);
+        if (l.high < l.low) return 0;
+        // Hugging the nail keeps the loop tight, but not so close that the
+        // machine's own slop drags the guide along it.
+        var want = l.low + 0.4;
+        return want > l.high ? (l.low + l.high) / 2 : want;
+      }
+
+      // What is wrong with the job, or an empty list. Anything here stops the
+      // machine before it can drive into something.
+      function faults(o, orbit) {
+        var l = limits(o), out = [];
+        if (!(o.points >= 3) || !(o.radius > 1)) out.push('ring');
+        else if (l.high < l.low) out.push('crowded');
+        else if (orbit < l.low || orbit > l.high) out.push('orbit');
+        if (o.radius + orbit + o.eyeletR > o.rail) out.push('rail');
+        return out;
+      }
+
+      // Travel is the chord between two nails; the lap is a full circle round
+      // each of them. Acceleration is not counted, so a real job runs a little
+      // slower than this.
+      function estimate(o, seq, orbit) {
+        var travel = 0, i;
+        for (i = 1; i < seq.length; i++) {
+          var da = Math.abs(seq[i] - seq[i - 1]) * 2 * Math.PI / o.points;
+          travel += 2 * o.radius * Math.abs(Math.sin(da / 2));
+        }
+        var laps = seq.length * 2 * Math.PI * orbit;
+        return {
+          travelMm: travel,
+          orbitMm: laps,
+          seconds: travel / o.feedTravel * 60 + laps / o.feedOrbit * 60
+        };
+      }
+
+      function plan(opts) {
+        var o = Object.assign({}, D, opts);
+        o.orbit = opts && opts.orbit > 0 ? opts.orbit : orbitFor(o);
+        var l = limits(o);
+        o.spacing = l.spacing;
+        o.minOrbit = l.low;
+        o.maxOrbit = l.high;
+        o.faults = faults(o, o.orbit);
+        return o;
+      }
+
+      function toGcode(opts, seq) {
+        var o = plan(opts);
+        var out = [];
+        out.push('; string art winding job');
+        out.push('; ' + o.points + ' nails on a ' + o.radius.toFixed(1) + ' mm circle, ' +
+                 seq.length + ' wraps');
+        out.push('; tie the thread to nail ' + seq[0] + ' and line it up with the guide before starting');
+        out.push('M115');
+        out.push('G28');
+        out.push('M701 R' + o.radius.toFixed(2) + ' N' + o.points + ' H' + o.height.toFixed(2) +
+                 ' D' + o.nailD.toFixed(2) + ' O' + o.orbit.toFixed(2) + ' P' + o.phase.toFixed(2));
+        out.push('M702 F' + Math.round(o.feedTravel) + ' S' + Math.round(o.feedOrbit));
+        out.push('G92 A0');
+        out.push('M17');
+        // Up to working height before the first run, so the guide is not
+        // dragged across the board on its way out.
+        out.push('G0 Z' + o.height.toFixed(2));
+        for (var i = 0; i < seq.length; i++) out.push('M700 P' + seq[i]);
+        out.push('M400');
+        out.push('G0 Z' + o.park.toFixed(2));
+        out.push('M18');
+        return out.join('\n') + '\n';
+      }
+
+      root.MachineEngine = {
+        D: D, plan: plan, orbitFor: orbitFor, estimate: estimate, toGcode: toGcode
+      };
+    })(window);
+  </script>
+
   <script id="string-art-worker" type="javascript/worker">
     // ---------------------------------------------------------------
     // Greedy string art solver, run off the main thread.
@@ -2942,6 +3382,12 @@
 
       var pins = o.sync ? props.points : o.pins;
 
+      // The machine tab reads the sequence from the app rather than from here,
+      // because this panel is thrown away as soon as another tab is opened.
+      function publish(list, np) {
+        if (props.onSequence) props.onSequence(list ? { pins: list, points: np } : null);
+      }
+
       React.useEffect(function () {
         return function () { if (workerRef.current) workerRef.current.terminate(); };
       }, []);
@@ -2988,7 +3434,7 @@
       function onFile(f) {
         var image = new Image();
         image.onload = function () {
-          setSeq(null);
+          setSeq(null); publish(null);
           setFileName(f.name);
           setView({ zoom: 1, panX: 0, panY: 0 });
           setImgEl(image);
@@ -3067,7 +3513,7 @@
         drawRef.current = { pin: 0, coords: coords };
 
         resetOutput();
-        setSeq(null); setRunning(true); setPct(0); setMsg(t('preparing'));
+        setSeq(null); publish(null); setRunning(true); setPct(0); setMsg(t('preparing'));
 
         var w = makeWorker();
         workerRef.current = w;
@@ -3089,6 +3535,7 @@
             setMsg(t('linesDrawn', d.drawn, Math.round(d.drawn / d.total * 100)));
           } else if (d.type === 'done') {
             setSeq(d.sequence); setRunning(false); setPct(100); setMsg(t('done'));
+            publish(d.sequence, np);
             w.terminate(); workerRef.current = null;
           } else if (d.type === 'error') {
             setRunning(false); setMsg('');
@@ -3271,11 +3718,319 @@
     }
 
     // -------------------------------------------------------------
+    // Winding machine tab
+    // -------------------------------------------------------------
+    function MachinePanel(props) {
+      var t = props.t;
+      var ME = window.MachineEngine;
+
+      var st = React.useState({
+        height: ME.D.height, eyeletR: ME.D.eyeletR, nailD: ME.D.nailD,
+        orbitAuto: true, orbit: 3, phase: 0,
+        feedTravel: ME.D.feedTravel, feedOrbit: ME.D.feedOrbit, reach: ME.D.rail,
+        host: 'printer.local', user: 'admin', pass: 'admin'
+      });
+      var o = st[0], setO = st[1];
+      function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
+
+      // A sequence loaded from a file wins over the one in the generator tab,
+      // until it is put away again.
+      var stFile = React.useState(null); var loaded = stFile[0], setLoaded = stFile[1];
+      var stStatus = React.useState(null); var status = stStatus[0], setStatus = stStatus[1];
+      var stNote = React.useState(null); var note = stNote[0], setNote = stNote[1];
+      var stBusy = React.useState(false); var busy = stBusy[0], setBusy = stBusy[1];
+
+      var source = loaded || props.sequence;
+      var seq = source ? source.pins : null;
+      var points = source ? source.points : props.points;
+      var radius = props.radiusCm * 10;
+
+      var job = React.useMemo(function () {
+        return ME.plan({
+          points: points, radius: radius,
+          nailD: num(o.nailD, 3), eyeletR: num(o.eyeletR, 1.1),
+          height: num(o.height, 6), phase: num(o.phase, 0),
+          orbit: o.orbitAuto ? 0 : num(o.orbit, 3),
+          feedTravel: num(o.feedTravel, 4200), feedOrbit: num(o.feedOrbit, 1200),
+          rail: num(o.reach, 300)
+        });
+      }, [points, radius, o]);
+
+      var sums = React.useMemo(function () {
+        if (!seq || !seq.length) return null;
+        return ME.estimate(job, seq, job.orbit);
+      }, [job, seq]);
+
+      var gcode = React.useMemo(function () {
+        if (!seq || !seq.length || job.faults.length) return '';
+        return ME.toGcode(job, seq);
+      }, [job, seq]);
+
+      function num(v, dflt) { var n = parseFloat(v); return isFinite(n) ? n : dflt; }
+
+      function onFile(f) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var pins = String(reader.result).split(/[^0-9]+/)
+            .filter(function (s) { return s.length; })
+            .map(function (s) { return parseInt(s, 10); });
+          if (!pins.length) return;
+          var most = 0;
+          for (var i = 0; i < pins.length; i++) if (pins[i] > most) most = pins[i];
+          // A saved sequence carries no pin count of its own, so it is taken
+          // from the highest number in it, or from the field if that is bigger.
+          setLoaded({ pins: pins, points: Math.max(most + 1, props.points), name: f.name });
+        };
+        reader.readAsText(f);
+      }
+
+      // Everything the machine is asked goes through here, so the password and
+      // the excuses are in one place.
+      function call(path, options) {
+        var base = String(o.host || '').trim().replace(/\/+$/, '');
+        if (!/^https?:\/\//.test(base)) base = 'http://' + base;
+        var opts = options || {};
+        opts.headers = Object.assign({
+          Authorization: 'Basic ' + btoa(o.user + ':' + o.pass)
+        }, opts.headers || {});
+        return fetch(base + path, opts).then(function (r) {
+          if (r.status === 401) throw new Error(t('mDenied'));
+          return r.text().then(function (body) {
+            return { ok: r.ok, status: r.status, body: body };
+          });
+        }, function () {
+          throw new Error(t('mOffline', base));
+        });
+      }
+
+      function refresh() {
+        setBusy(true);
+        call('/api/status').then(function (r) {
+          var data = null;
+          try { data = JSON.parse(r.body); } catch (e) { data = null; }
+          if (!data) throw new Error(t('mOffline', o.host));
+          setStatus(data);
+          // Clears an old complaint, but not what the machine was just told to
+          // do: the instructions after a send are still worth reading.
+          setNote(function (prev) { return prev && prev.kind === 'ok' ? prev : null; });
+        }).catch(function (e) {
+          setStatus(null);
+          setNote({ kind: 'err', text: e.message });
+        }).then(function () { setBusy(false); });
+      }
+
+      function send() {
+        if (!gcode) return;
+        setBusy(true);
+        call('/api/job?name=string-art.gcode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: gcode
+        }).then(function (r) {
+          if (!r.ok) throw new Error(t('mRefused', r.body));
+          setNote({ kind: 'ok', text: t('mSent', seq.length, seq[0]) });
+          refresh();
+        }).catch(function (e) {
+          setNote({ kind: 'err', text: e.message });
+          setBusy(false);
+        });
+      }
+
+      function command(path, body) {
+        setBusy(true);
+        call(path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: body || '' })
+          .then(function (r) {
+            if (!r.ok) throw new Error(t('mRefused', r.body));
+            refresh();
+          }).catch(function (e) {
+            setNote({ kind: 'err', text: e.message });
+            setBusy(false);
+          });
+      }
+
+      // Once the machine has answered once, keep asking, so the progress bar
+      // means something while it winds.
+      React.useEffect(function () {
+        if (!status) return;
+        var id = setInterval(refresh, 2000);
+        return function () { clearInterval(id); };
+      }, [status !== null, o.host, o.user, o.pass]);
+
+      function save() {
+        download(new Blob([gcode], { type: 'text/plain' }),
+          'string-art-' + points + 'x' + n1(radius / 10) + 'cm.gcode');
+      }
+
+      var crowded = job.faults.indexOf('crowded') >= 0;
+      var badOrbit = job.faults.indexOf('orbit') >= 0;
+      var tooFar = job.faults.indexOf('rail') >= 0;
+      var insecure = location.protocol === 'https:';
+      function stateLabel(s) {
+        if (s === 'running') return t('mStateRunning');
+        if (s === 'paused') return t('mStatePaused');
+        if (s === 'homing') return t('mStateHoming');
+        if (s === 'error') return t('mStateError');
+        return t('mStateIdle');
+      }
+      var pct = status && status.lines ? Math.round(status.line / status.lines * 100) : 0;
+
+      return h('div', { className: 'row' },
+        h('div', { className: 'col', style: { flex: '1 1 380px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('paramsTitle')),
+            h(Field, { label: t('points'), hint: t('pointsHint') },
+              h(NumberInput, { value: props.points, min: 3, max: 2000, onChange: props.setPoints })),
+            h(Field, { label: t('radiusCm'), hint: t('radiusHint') },
+              h(NumberInput, { value: props.radiusCm, min: 1, max: 200, step: 0.1, onChange: props.setRadiusCm })),
+            seq && points !== props.points
+              ? h('div', { className: 'alert warn' }, t('mWarnPoints', points)) : null
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('mJobTitle')),
+            h('div', { className: 'hint', style: { marginBottom: '10px' } },
+              !seq ? t('mNoSequence')
+                : loaded ? t('mLoaded', seq.length, loaded.name)
+                  : t('mFromGenerator', seq.length)),
+            h('div', { className: 'controls' },
+              h('label', { className: 'btn secondary' }, t('mLoadSequence'),
+                h('input', {
+                  type: 'file', accept: '.txt,text/plain', style: { display: 'none' },
+                  onChange: function (e) { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ''; }
+                })),
+              loaded && props.sequence ? h('button', {
+                className: 'btn secondary', onClick: function () { setLoaded(null); }
+              }, t('mUseGenerator')) : null)
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('mMachineTitle')),
+            h('div', { className: 'grid2' },
+              h(Field, { label: t('mWrapHeight'), hint: t('mWrapHeightHint') },
+                h(NumberInput, { value: o.height, min: 1, max: 40, step: 0.5, onChange: function (v) { set('height', v); } })),
+              h(Field, { label: t('nailDiameter'), hint: t('nailDiameterHint') },
+                h(NumberInput, { value: o.nailD, min: 0.8, max: 12, step: 0.1, onChange: function (v) { set('nailD', v); } })),
+              h(Field, { label: t('mEyelet'), hint: t('mEyeletHint') },
+                h(NumberInput, { value: o.eyeletR, min: 0.3, max: 6, step: 0.1, onChange: function (v) { set('eyeletR', v); } })),
+              h(Field, { label: t('mReach'), hint: t('mReachHint') },
+                h(NumberInput, { value: o.reach, min: 50, max: 1000, step: 5, onChange: function (v) { set('reach', v); } }))
+            ),
+            h(Check, {
+              id: 'machine-orbit-auto', checked: o.orbitAuto, label: t('mOrbitAuto'),
+              onChange: function (v) { setO(Object.assign({}, o, { orbitAuto: v, orbit: n2(job.orbit) })); }
+            }),
+            h('div', { className: 'grid2' },
+              o.orbitAuto ? null : h(Field, { label: t('mOrbit'), hint: t('mOrbitHint') },
+                h(NumberInput, { value: o.orbit, min: 0.5, max: 20, step: 0.1, onChange: function (v) { set('orbit', v); } })),
+              h(Field, { label: t('mPhase'), hint: t('mPhaseHint') },
+                h(NumberInput, { value: o.phase, min: -360, max: 360, step: 0.5, onChange: function (v) { set('phase', v); } })),
+              h(Field, { label: t('mFeedTravel') },
+                h(NumberInput, { value: o.feedTravel, min: 60, max: 20000, step: 60, onChange: function (v) { set('feedTravel', v); } })),
+              h(Field, { label: t('mFeedOrbit') },
+                h(NumberInput, { value: o.feedOrbit, min: 60, max: 20000, step: 60, onChange: function (v) { set('feedOrbit', v); } }))
+            )
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('summaryTitle')),
+            h('div', { className: 'stat' }, h('span', null, t('points')), h('b', null, String(points))),
+            h('div', { className: 'stat' }, h('span', null, t('sSpacing')), h('b', null, n2(job.spacing) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('mSOrbit')),
+              h('b', null, crowded ? '—' : n2(job.orbit) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('mSWraps')), h('b', null, seq ? String(seq.length) : '—')),
+            sums ? h('div', { className: 'stat' }, h('span', null, t('mSPath')),
+              h('b', null, n1((sums.travelMm + sums.orbitMm) / 1000) + ' m')) : null,
+            sums ? h('div', { className: 'stat' }, h('span', null, t('mSTime')),
+              h('b', null, hoursMinutes(sums.seconds))) : null,
+            gcode ? h('div', { className: 'stat' }, h('span', null, t('mSSize')),
+              h('b', null, n1(gcode.length / 1024) + ' kB')) : null
+          )
+        ),
+
+        h('div', { className: 'col', style: { flex: '2 1 520px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('mSendTitle')),
+            crowded ? h('div', { className: 'alert err' },
+              t('mWarnCrowded', points, n2(job.spacing), n2(num(o.eyeletR, 1.1) * 2))) : null,
+            badOrbit ? h('div', { className: 'alert err' },
+              t('mWarnOrbit', n2(job.minOrbit), n2(job.maxOrbit))) : null,
+            tooFar ? h('div', { className: 'alert err' },
+              t('mWarnReach', n1(radius + job.orbit + num(o.eyeletR, 1.1)), n1(num(o.reach, 300)))) : null,
+            insecure ? h('div', { className: 'alert warn' }, t('mInsecure')) : null,
+            note ? h('div', { className: 'alert ' + (note.kind === 'ok' ? 'ok' : 'err') }, note.text) : null,
+
+            h('div', { className: 'grid2' },
+              h(Field, { label: t('mHost'), hint: t('mHostHint') },
+                h('input', {
+                  type: 'text', value: o.host,
+                  onChange: function (e) { set('host', e.target.value); }
+                })),
+              h('div', { className: 'grid2' },
+                h(Field, { label: t('mUser') },
+                  h('input', {
+                    type: 'text', value: o.user, autoComplete: 'username',
+                    onChange: function (e) { set('user', e.target.value); }
+                  })),
+                h(Field, { label: t('mPass') },
+                  h('input', {
+                    type: 'password', value: o.pass, autoComplete: 'current-password',
+                    onChange: function (e) { set('pass', e.target.value); }
+                  })))
+            ),
+
+            h('div', { className: 'controls', style: { marginTop: '4px' } },
+              h('button', { className: 'btn', onClick: save, disabled: !gcode }, t('mDownloadGcode')),
+              h('button', { className: 'btn', onClick: send, disabled: !gcode || busy }, t('mSend')),
+              h('button', { className: 'btn secondary', onClick: refresh, disabled: busy }, t('mRefresh'))),
+
+            status ? h('div', { style: { marginTop: '16px' } },
+              h('div', { className: 'stat' },
+                h('span', null, status.name),
+                h('b', null, stateLabel(status.state))),
+              status.lines ? h('div', { style: { marginTop: '8px' } },
+                h('div', { className: 'progress' }, h('div', { style: { width: pct + '%' } }, pct > 8 ? pct + '%' : '')),
+                h('div', { className: 'hint', style: { marginTop: '6px' } },
+                  t('mProgress', status.line, status.lines))) : null,
+              status.error ? h('div', { className: 'alert err', style: { marginTop: '10px' } }, status.error) : null,
+              h('div', { className: 'controls', style: { marginTop: '12px' } },
+                h('button', {
+                  className: 'btn', disabled: busy || status.state === 'running',
+                  onClick: function () { command('/api/job/start'); }
+                }, t('mStart')),
+                status.state === 'paused'
+                  ? h('button', {
+                    className: 'btn secondary', disabled: busy,
+                    onClick: function () { command('/api/job/pause', '{"on":false}'); }
+                  }, t('mResume'))
+                  : h('button', {
+                    className: 'btn secondary', disabled: busy || status.state !== 'running',
+                    onClick: function () { command('/api/job/pause', '{"on":true}'); }
+                  }, t('mPause')),
+                h('button', {
+                  className: 'btn secondary', disabled: busy,
+                  onClick: function () { command('/api/job/stop'); }
+                }, t('mStop')))
+            ) : null
+          )
+        )
+      );
+    }
+
+    function hoursMinutes(seconds) {
+      var m = Math.round(seconds / 60);
+      var hh = Math.floor(m / 60);
+      return hh ? hh + ' h ' + (m % 60) + ' min' : m + ' min';
+    }
+
+    // -------------------------------------------------------------
     function App() {
       var t = useLang();
       var stTab = React.useState('generator'); var tab = stTab[0], setTab = stTab[1];
       var stPts = React.useState(288); var points = stPts[0], setPoints = stPts[1];
       var stR = React.useState(28); var radiusCm = stR[0], setRadiusCm = stR[1];
+      // The sequence is kept up here because the generator tab is thrown away
+      // when another one is opened, and the machine tab needs what it made.
+      var stSeq = React.useState(null); var sequence = stSeq[0], setSequence = stSeq[1];
 
       var nPoints = Math.max(3, Math.min(2000, parseInt(points, 10) || 3));
       var nRadius = Math.max(1, Math.min(200, parseFloat(radiusCm) || 1));
@@ -3284,13 +4039,16 @@
         h('div', { className: 'tabs' },
           h('button', { className: 'tab' + (tab === 'generator' ? ' active' : ''), onClick: function () { setTab('generator'); } }, t('tabGenerator')),
           h('button', { className: 'tab' + (tab === 'template' ? ' active' : ''), onClick: function () { setTab('template'); } }, t('tabTemplate')),
-          h('button', { className: 'tab' + (tab === 'ring' ? ' active' : ''), onClick: function () { setTab('ring'); } }, t('tabRing'))
+          h('button', { className: 'tab' + (tab === 'ring' ? ' active' : ''), onClick: function () { setTab('ring'); } }, t('tabRing')),
+          h('button', { className: 'tab' + (tab === 'machine' ? ' active' : ''), onClick: function () { setTab('machine'); } }, t('tabMachine'))
         ),
         tab === 'template'
           ? h(TemplatePanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm })
           : tab === 'ring'
             ? h(RingPanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm })
-            : h(GeneratorPanel, { t: t, points: nPoints, radiusCm: nRadius }),
+            : tab === 'machine'
+              ? h(MachinePanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm, sequence: sequence })
+              : h(GeneratorPanel, { t: t, points: nPoints, radiusCm: nRadius, onSequence: setSequence }),
         h('footer', null, t('footerText'))
       );
     }

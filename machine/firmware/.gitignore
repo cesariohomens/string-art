@@ -1,0 +1,5 @@
+# PlatformIO's build tree, and the packed copy of the app: both are made from
+# what is committed, and the app in data/ carries several hundred kilobytes of
+# other people's libraries.
+.pio/
+data/
