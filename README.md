@@ -94,9 +94,21 @@ The numbers are set in Times and rotated to read radially outwards, matching the
 
 ## Template STL
 
-Instead of drilling a board you can print the circle. This tab builds a flat band with a nail standing on every point and exports it as a **binary STL in millimetres**, which any slicer opens at the right size.
+Instead of drilling a board you can print the circle. This tab builds either a
+flat **ring** (a band with a nail on every point), a solid **square board**, or a
+solid **circular board**, and exports it as a **binary STL in millimetres**,
+which any slicer opens at the right size.
 
-It reads the same **number of points** and **circle radius** as the template tab, so the printed ring and the printed template describe the same circle. The band straddles the point circle rather than sitting inside or outside it, so the thread still runs at exactly the requested radius.
+It reads the same **number of points** and **circle radius** as the template tab,
+so the printed part and the printed template describe the same circle. Choose a
+ring alone, or a square / circular board with that same nail ring raised on top
+as relief. The band straddles the point circle, so the thread still runs at
+exactly the requested radius.
+
+**Numbered arrow ring** adds a slim second ring around that nail circle with one
+inward pointer per nail — the same path for ring, square, or round bases. It
+comes as its own STL in the download (a ZIP whenever more than one file is
+needed), so you can fit it for numbering and take it off again.
 
 | Input | Default | Meaning |
 | --- | --- | --- |
@@ -107,7 +119,7 @@ It reads the same **number of points** and **circle radius** as the template tab
 | Ring thickness | 4 mm | Height of the band itself |
 | Ring segments | 1 | How many arcs to cut the ring into |
 | Joint clearance | 0.25 mm | Play left between a tab and its slot |
-| Numbered snap-off tags | off | A numbered pointer at every nail |
+| Numbered arrow ring | off | Separate outer ring with one numbered pointer per nail |
 
 ### How the nails end
 
@@ -117,7 +129,7 @@ Thread wraps the outer face of a nail and is pulled towards the centre of the ci
 - **Shrimp curl** climbs about two thirds of the height and then turns 100° outwards, ending in a tip that hangs over the shaft — roughly 5 mm past the nail axis at the default size — with the thread caught in the crook. The turn tapers to 72% of the shaft, which is what gives it the shrimp outline. It reaches its full height at the crown of the bend rather than at the tip, so a curl stands exactly as tall as the straight nail it replaces, and it takes no extra room between neighbours because it bends radially rather than along the ring. It does overhang, so print it with supports.
 - **Tapered 30% wider** grows steadily from the base to a tip 30% thicker, a cone the loop cannot ride up. It prints without supports, since the flare is only a few tenths of a millimetre off vertical, but the wide end is what the neighbouring nails have to make room for: the reported gap between nails is measured there, and on a crowded ring the tips will merge before the bases would.
 
-The gap between nails, and the warning that goes with it, always refer to the widest end of whichever tip is chosen, and the summary adds the tip diameter for a cone or the overhang for a curl. All three shapes work on a ring that is cut into arcs and carries numbered tags.
+The gap between nails, and the warning that goes with it, always refer to the widest end of whichever tip is chosen, and the summary adds the tip diameter for a cone or the overhang for a curl. All three shapes work on a ring that is cut into arcs and on a mould that carries a numbered arrow ring.
 
 ### Cutting the ring into arcs
 

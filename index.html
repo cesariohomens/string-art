@@ -272,9 +272,14 @@
       warnNoFit: "The drawing ({0} mm) does not fit the selected page ({1} mm). Increase the page size or reduce the radius.",
       warnDense: "With {0} points the spacing is only {1} mm. The numbers may overlap — consider raising \"Number every N points\".",
 
-      ringTitle: "Nails & ring",
+      ringTitle: "Nails & base",
+      baseShape: "Base",
+      baseRing: "Circular ring",
+      baseSquare: "Square board",
+      baseRound: "Circular board",
+      baseShapeHint: "Ring alone, or a square / circular board with the same nail ring raised on top as relief.",
       nailHeight: "Nail height (mm)",
-      nailHeightHint: "How far each nail stands above the ring.",
+      nailHeightHint: "How far each nail stands above the base.",
       nailDiameter: "Nail diameter (mm)",
       nailDiameterHint: "Thicker nails are sturdier but take up more of the gap.",
       nailShape: "Nail tip",
@@ -284,12 +289,15 @@
       nailShapeHint: "A straight nail is quickest to print. A curl hooks outwards over the thread and a tapered tip ends 30% thicker than its base, both of which stop finished loops riding off the top. The curl overhangs, so print it with supports.",
       ringWidth: "Ring width (mm)",
       ringWidthHint: "Radial width of the band the nails stand on.",
-      ringThickness: "Ring thickness (mm)",
-      ringThicknessHint: "Height of the band itself.",
+      boardMargin: "Margin past nails (mm)",
+      boardMarginHint: "How far the board extends past the nail circle on every side.",
+      ringThickness: "Base thickness (mm)",
+      ringThicknessHint: "Height of the ring band or of the board itself.",
       partColor: "Filament colour",
       downloadStl: "Download STL",
       ringPreviewHint: "Drag to turn, Shift-drag to move, scroll to get closer. The model is in millimetres, ready to slice.",
       sOuterDiameter: "Outer diameter",
+      sBoardSize: "Board size",
       sPartHeight: "Total height",
       sNailGap: "Gap between nails",
       sTipDiameter: "Tip diameter",
@@ -298,18 +306,18 @@
       warnNailsTouch: "With {0} points only {1} mm is left between nails, so they would merge. Reduce the nail diameter or the number of points.",
       splitTitle: "Cutting and numbering",
       segments: "Ring segments",
-      segmentsHint: "1 prints the ring whole. More cuts it into that many arcs, held together by a puzzle tab and slot.",
+      segmentsHint: "1 prints the ring whole. More cuts it into that many arcs, held together by a puzzle tab and slot. Solid boards always print in one piece.",
       jointGap: "Joint clearance (mm)",
       jointGapHint: "Play left between tab and slot. 0.25 suits most printers; raise it if the parts refuse to go together.",
-      arrows: "Numbered snap-off tags",
-      arrowsHint: "Puts a pointer at every nail with its number raised on it, held by a stub you snap or cut off once the picture is finished.",
+      arrows: "Numbered arrow ring",
+      arrowsHint: "Adds a slim second ring around the mould with one inward pointer per nail and its number raised on it. Downloaded as its own STL so you can fit it for numbering and take it off again.",
       sParts: "Parts",
       sLargest: "Largest part",
       sJoint: "Joint length",
       downloadZip: "Download ZIP",
       warnJointTight: "With {0} points the gap between nails leaves no room for a joint, so the arcs are cut square and will need gluing. Reduce the points, widen the radius, or print the ring whole.",
       warnTagsTiny: "At {0} points the tag digits are only {1} mm tall, too small to read or to print. Reduce the points or turn the tags off.",
-      warnBedSize: "The largest part measures {0} × {1} cm and will not fit a typical 25 cm print bed — raise the number of ring segments.",
+      warnBedSize: "The largest part measures {0} × {1} cm and will not fit a typical 25 cm print bed — raise the number of ring segments, or print a smaller board.",
 
       genTitle: "Source image",
       selectImage: "Select an image",
@@ -477,9 +485,14 @@
       warnNoFit: "O desenho ({0} mm) não cabe na página escolhida ({1} mm). Aumenta a página ou reduz o raio.",
       warnDense: "Com {0} pontos o espaçamento é de apenas {1} mm. Os números podem sobrepor-se — considera aumentar \"Numerar a cada N pontos\".",
 
-      ringTitle: "Pregos e aro",
+      ringTitle: "Pregos e base",
+      baseShape: "Base",
+      baseRing: "Aro circular",
+      baseSquare: "Placa quadrada",
+      baseRound: "Placa circular",
+      baseShapeHint: "Só o aro, ou uma placa quadrada / circular com o mesmo aro dos pregos em relevo por cima.",
       nailHeight: "Altura do prego (mm)",
-      nailHeightHint: "Quanto cada prego sobressai do aro.",
+      nailHeightHint: "Quanto cada prego sobressai da base.",
       nailDiameter: "Diâmetro do prego (mm)",
       nailDiameterHint: "Pregos mais grossos são mais robustos mas ocupam mais espaço.",
       nailShape: "Ponta do prego",
@@ -489,12 +502,15 @@
       nailShapeHint: "A ponta reta é a mais rápida de imprimir. A curva em camarão dobra para fora sobre o fio e a cónica acaba 30% mais grossa do que a base, impedindo ambas que as voltas já dadas saltem por cima do prego. A curva fica em consola, por isso imprime-a com suportes.",
       ringWidth: "Largura do aro (mm)",
       ringWidthHint: "Largura radial da faixa onde os pregos assentam.",
-      ringThickness: "Espessura do aro (mm)",
-      ringThicknessHint: "Altura da própria faixa.",
+      boardMargin: "Margem além dos pregos (mm)",
+      boardMarginHint: "Quanto a placa ultrapassa o círculo dos pregos em cada lado.",
+      ringThickness: "Espessura da base (mm)",
+      ringThicknessHint: "Altura do aro ou da própria placa.",
       partColor: "Cor do filamento",
       downloadStl: "Descarregar STL",
       ringPreviewHint: "Arrasta para rodar, Shift-arrasta para mover, e usa a roda do rato para aproximar. O modelo está em milímetros, pronto a fatiar.",
       sOuterDiameter: "Diâmetro exterior",
+      sBoardSize: "Tamanho da placa",
       sPartHeight: "Altura total",
       sNailGap: "Folga entre pregos",
       sTipDiameter: "Diâmetro da ponta",
@@ -503,18 +519,18 @@
       warnNailsTouch: "Com {0} pontos sobra apenas {1} mm entre pregos, pelo que ficariam colados. Reduz o diâmetro dos pregos ou o número de pontos.",
       splitTitle: "Cortar e numerar",
       segments: "Partes do aro",
-      segmentsHint: "1 imprime o aro inteiro. Mais corta-o nesse número de arcos, unidos por encaixe macho e fêmea em puzzle.",
+      segmentsHint: "1 imprime o aro inteiro. Mais corta-o nesse número de arcos, unidos por encaixe macho e fêmea em puzzle. As placas sólidas imprimem-se sempre de uma só peça.",
       jointGap: "Folga do encaixe (mm)",
       jointGapHint: "Espaço deixado entre macho e fêmea. 0,25 serve na maioria das impressoras; aumenta se as peças não entrarem.",
-      arrows: "Setas numeradas destacáveis",
-      arrowsHint: "Coloca em cada prego uma seta com o número em relevo, presa por um pescoço que arrancas ou cortas quando o quadro estiver pronto.",
+      arrows: "Aro de setas numeradas",
+      arrowsHint: "Acrescenta um aro fino à volta do molde, com uma seta de fora para dentro em cada prego e o número em relevo. Sai num STL à parte para encaixar na numeração e voltar a tirar.",
       sParts: "Peças",
       sLargest: "Maior peça",
       sJoint: "Comprimento do encaixe",
       downloadZip: "Descarregar ZIP",
       warnJointTight: "Com {0} pontos a folga entre pregos não deixa espaço para o encaixe, pelo que os arcos são cortados a direito e terão de ser colados. Reduz os pontos, aumenta o raio ou imprime o aro inteiro.",
       warnTagsTiny: "Com {0} pontos os dígitos das setas ficam com apenas {1} mm, pequenos demais para ler ou imprimir. Reduz os pontos ou desliga as setas.",
-      warnBedSize: "A maior peça mede {0} × {1} cm e não cabe numa base de impressão comum de 25 cm — aumenta o número de partes do aro.",
+      warnBedSize: "A maior peça mede {0} × {1} cm e não cabe numa base de impressão comum de 25 cm — aumenta o número de partes do aro, ou imprime uma placa mais pequena.",
 
       genTitle: "Imagem de origem",
       selectImage: "Escolher imagem",
@@ -683,9 +699,14 @@
       warnNoFit: "Le dessin ({0} mm) ne tient pas sur la page choisie ({1} mm). Agrandissez la page ou réduisez le rayon.",
       warnDense: "Avec {0} points l'espacement n'est que de {1} mm. Les numéros risquent de se chevaucher — augmentez « Numéroter tous les N points ».",
 
-      ringTitle: "Clous et anneau",
+      ringTitle: "Clous et base",
+      baseShape: "Base",
+      baseRing: "Anneau circulaire",
+      baseSquare: "Planche carrée",
+      baseRound: "Planche ronde",
+      baseShapeHint: "Anneau seul, ou planche carrée / ronde avec le même anneau de clous en relief par-dessus.",
       nailHeight: "Hauteur du clou (mm)",
-      nailHeightHint: "De combien chaque clou dépasse de l'anneau.",
+      nailHeightHint: "De combien chaque clou dépasse de la base.",
       nailDiameter: "Diamètre du clou (mm)",
       nailDiameterHint: "Des clous plus épais sont plus solides mais laissent moins d'espace.",
       nailShape: "Bout du clou",
@@ -695,12 +716,15 @@
       nailShapeHint: "Le bout droit s'imprime le plus vite. La courbe en crevette se recourbe vers l'extérieur au-dessus du fil et le bout conique finit 30% plus épais que sa base, ce qui empêche les tours déjà passés de sauter par-dessus le clou. La courbe est en porte-à-faux : imprimez-la avec des supports.",
       ringWidth: "Largeur de l'anneau (mm)",
       ringWidthHint: "Largeur radiale de la bande qui porte les clous.",
-      ringThickness: "Épaisseur de l'anneau (mm)",
-      ringThicknessHint: "Hauteur de la bande elle-même.",
+      boardMargin: "Marge au-delà des clous (mm)",
+      boardMarginHint: "De combien la planche dépasse le cercle des clous de chaque côté.",
+      ringThickness: "Épaisseur de la base (mm)",
+      ringThicknessHint: "Hauteur de la bande ou de la planche elle-même.",
       partColor: "Couleur du filament",
       downloadStl: "Télécharger le STL",
       ringPreviewHint: "Faites glisser pour tourner, Shift-glisser pour déplacer, molette pour vous rapprocher. Le modèle est en millimètres, prêt à trancher.",
       sOuterDiameter: "Diamètre extérieur",
+      sBoardSize: "Taille de la planche",
       sPartHeight: "Hauteur totale",
       sNailGap: "Espace entre les clous",
       sTipDiameter: "Diamètre du bout",
@@ -709,18 +733,18 @@
       warnNailsTouch: "Avec {0} points il ne reste que {1} mm entre les clous, ils se toucheraient. Réduisez le diamètre des clous ou le nombre de points.",
       splitTitle: "Découpe et numérotation",
       segments: "Parties de l'anneau",
-      segmentsHint: "1 imprime l'anneau d'une seule pièce. Au-delà, il est coupé en autant d'arcs, tenus par un tenon et une mortaise en puzzle.",
+      segmentsHint: "1 imprime l'anneau d'une seule pièce. Au-delà, il est coupé en autant d'arcs, tenus par un tenon et une mortaise en puzzle. Les planches pleines s'impriment toujours d'une seule pièce.",
       jointGap: "Jeu de l'assemblage (mm)",
       jointGapHint: "Jeu laissé entre tenon et mortaise. 0,25 convient à la plupart des imprimantes ; augmentez-le si les pièces refusent d'entrer.",
-      arrows: "Étiquettes numérotées détachables",
-      arrowsHint: "Ajoute à chaque clou une flèche portant son numéro en relief, tenue par une amorce que vous cassez ou coupez une fois le tableau terminé.",
+      arrows: "Anneau de flèches numérotées",
+      arrowsHint: "Ajoute un anneau mince autour du moule, avec une flèche vers l'intérieur à chaque clou et son numéro en relief. Téléchargé en STL séparé pour le poser le temps de numéroter, puis le retirer.",
       sParts: "Pièces",
       sLargest: "Plus grande pièce",
       sJoint: "Longueur de l'assemblage",
       downloadZip: "Télécharger le ZIP",
       warnJointTight: "Avec {0} points, l'espace entre les clous ne laisse pas de place à l'assemblage : les arcs sont coupés droit et devront être collés. Réduisez les points, agrandissez le rayon ou imprimez l'anneau entier.",
       warnTagsTiny: "À {0} points, les chiffres des flèches ne font que {1} mm de haut, trop petits pour être lus ou imprimés. Réduisez les points ou désactivez les flèches.",
-      warnBedSize: "La plus grande pièce mesure {0} × {1} cm et n'entre pas sur un plateau courant de 25 cm — augmentez le nombre de parties.",
+      warnBedSize: "La plus grande pièce mesure {0} × {1} cm et n'entre pas sur un plateau courant de 25 cm — augmentez le nombre de parties, ou imprimez une planche plus petite.",
 
       genTitle: "Image source",
       selectImage: "Choisir une image",
@@ -888,9 +912,14 @@
       warnNoFit: "El dibujo ({0} mm) no cabe en la página elegida ({1} mm). Aumenta la página o reduce el radio.",
       warnDense: "Con {0} puntos la separación es de solo {1} mm. Los números pueden solaparse — aumenta «Numerar cada N puntos».",
 
-      ringTitle: "Clavos y aro",
+      ringTitle: "Clavos y base",
+      baseShape: "Base",
+      baseRing: "Aro circular",
+      baseSquare: "Placa cuadrada",
+      baseRound: "Placa circular",
+      baseShapeHint: "Solo el aro, o una placa cuadrada / circular con el mismo aro de clavos en relieve encima.",
       nailHeight: "Altura del clavo (mm)",
-      nailHeightHint: "Cuánto sobresale cada clavo del aro.",
+      nailHeightHint: "Cuánto sobresale cada clavo de la base.",
       nailDiameter: "Diámetro del clavo (mm)",
       nailDiameterHint: "Los clavos más gruesos son más resistentes pero dejan menos hueco.",
       nailShape: "Punta del clavo",
@@ -900,12 +929,15 @@
       nailShapeHint: "La punta recta es la más rápida de imprimir. La curva en gamba se dobla hacia fuera por encima del hilo y la cónica acaba un 30% más gruesa que su base, y ambas evitan que las vueltas ya dadas se salgan por arriba. La curva queda en voladizo, así que imprímela con soportes.",
       ringWidth: "Anchura del aro (mm)",
       ringWidthHint: "Anchura radial de la banda sobre la que se apoyan los clavos.",
-      ringThickness: "Espesor del aro (mm)",
-      ringThicknessHint: "Altura de la propia banda.",
+      boardMargin: "Margen más allá de los clavos (mm)",
+      boardMarginHint: "Cuánto se extiende la placa más allá del círculo de clavos a cada lado.",
+      ringThickness: "Espesor de la base (mm)",
+      ringThicknessHint: "Altura del aro o de la propia placa.",
       partColor: "Color del filamento",
       downloadStl: "Descargar STL",
       ringPreviewHint: "Arrastra para girar, Shift-arrastra para mover, rueda para acercarte. El modelo está en milímetros, listo para laminar.",
       sOuterDiameter: "Diámetro exterior",
+      sBoardSize: "Tamaño de la placa",
       sPartHeight: "Altura total",
       sNailGap: "Hueco entre clavos",
       sTipDiameter: "Diámetro de la punta",
@@ -914,18 +946,18 @@
       warnNailsTouch: "Con {0} puntos solo quedan {1} mm entre clavos, así que se juntarían. Reduce el diámetro de los clavos o el número de puntos.",
       splitTitle: "Corte y numeración",
       segments: "Partes del aro",
-      segmentsHint: "1 imprime el aro de una pieza. Más lo corta en tantos arcos, sujetos por un encaje macho y hembra tipo puzle.",
+      segmentsHint: "1 imprime el aro de una pieza. Más lo corta en tantos arcos, sujetos por un encaje macho y hembra tipo puzle. Las placas macizas se imprimen siempre de una sola pieza.",
       jointGap: "Holgura del encaje (mm)",
       jointGapHint: "Juego que queda entre macho y hembra. 0,25 vale para casi cualquier impresora; súbelo si las piezas no entran.",
-      arrows: "Etiquetas numeradas desprendibles",
-      arrowsHint: "Pone en cada clavo una flecha con su número en relieve, sujeta por un cuello que arrancas o cortas cuando el cuadro esté acabado.",
+      arrows: "Aro de flechas numeradas",
+      arrowsHint: "Añade un aro fino alrededor del molde, con una flecha de fuera hacia adentro en cada clavo y su número en relieve. Se descarga en un STL aparte para encajarlo al numerar y volver a quitarlo.",
       sParts: "Piezas",
       sLargest: "Pieza mayor",
       sJoint: "Longitud del encaje",
       downloadZip: "Descargar ZIP",
       warnJointTight: "Con {0} puntos el hueco entre clavos no deja sitio para el encaje, así que los arcos se cortan a escuadra y habrá que pegarlos. Reduce los puntos, amplía el radio o imprime el aro entero.",
       warnTagsTiny: "Con {0} puntos los dígitos de las flechas miden solo {1} mm, demasiado pequeños para leerse o imprimirse. Reduce los puntos o desactiva las flechas.",
-      warnBedSize: "La pieza mayor mide {0} × {1} cm y no cabe en una cama de impresión normal de 25 cm: aumenta el número de partes del aro.",
+      warnBedSize: "La pieza mayor mide {0} × {1} cm y no cabe en una cama de impresión normal de 25 cm: aumenta el número de partes del aro, o imprime una placa más pequeña.",
 
       genTitle: "Imagen de origen",
       selectImage: "Elegir imagen",
@@ -1093,9 +1125,14 @@
       warnNoFit: "Il disegno ({0} mm) non entra nella pagina scelta ({1} mm). Aumenta la pagina o riduci il raggio.",
       warnDense: "Con {0} punti la distanza è di soli {1} mm. I numeri possono sovrapporsi — aumenta «Numerare ogni N punti».",
 
-      ringTitle: "Chiodi e anello",
+      ringTitle: "Chiodi e base",
+      baseShape: "Base",
+      baseRing: "Anello circolare",
+      baseSquare: "Tavola quadrata",
+      baseRound: "Tavola rotonda",
+      baseShapeHint: "Solo l'anello, oppure una tavola quadrata / rotonda con lo stesso anello dei chiodi in rilievo sopra.",
       nailHeight: "Altezza del chiodo (mm)",
-      nailHeightHint: "Quanto ogni chiodo sporge dall'anello.",
+      nailHeightHint: "Quanto ogni chiodo sporge dalla base.",
       nailDiameter: "Diametro del chiodo (mm)",
       nailDiameterHint: "Chiodi più spessi sono più robusti ma lasciano meno spazio.",
       nailShape: "Punta del chiodo",
@@ -1105,12 +1142,15 @@
       nailShapeHint: "La punta diritta è la più rapida da stampare. La curva a gambero si piega in fuori sopra il filo e quella conica finisce il 30% più spessa della base: entrambe impediscono ai giri già fatti di scivolare oltre il chiodo. La curva è a sbalzo, quindi stampala con i supporti.",
       ringWidth: "Larghezza dell'anello (mm)",
       ringWidthHint: "Larghezza radiale della fascia su cui poggiano i chiodi.",
-      ringThickness: "Spessore dell'anello (mm)",
-      ringThicknessHint: "Altezza della fascia stessa.",
+      boardMargin: "Margine oltre i chiodi (mm)",
+      boardMarginHint: "Di quanto la tavola supera il cerchio dei chiodi su ogni lato.",
+      ringThickness: "Spessore della base (mm)",
+      ringThicknessHint: "Altezza dell'anello o della tavola stessa.",
       partColor: "Colore del filamento",
       downloadStl: "Scarica STL",
       ringPreviewHint: "Trascina per ruotare, Shift-trascina per spostare, rotella per avvicinarti. Il modello è in millimetri, pronto per lo slicing.",
       sOuterDiameter: "Diametro esterno",
+      sBoardSize: "Dimensione della tavola",
       sPartHeight: "Altezza totale",
       sNailGap: "Spazio tra i chiodi",
       sTipDiameter: "Diametro della punta",
@@ -1119,18 +1159,18 @@
       warnNailsTouch: "Con {0} punti restano solo {1} mm tra i chiodi, che finirebbero attaccati. Riduci il diametro dei chiodi o il numero di punti.",
       splitTitle: "Taglio e numerazione",
       segments: "Parti dell'anello",
-      segmentsHint: "1 stampa l'anello in un pezzo solo. Di più lo taglia in altrettanti archi, tenuti da un incastro maschio e femmina a puzzle.",
+      segmentsHint: "1 stampa l'anello in un pezzo solo. Di più lo taglia in altrettanti archi, tenuti da un incastro maschio e femmina a puzzle. Le tavole piene si stampano sempre in un pezzo solo.",
       jointGap: "Gioco dell'incastro (mm)",
       jointGapHint: "Gioco lasciato tra maschio e femmina. 0,25 va bene su quasi tutte le stampanti; aumentalo se i pezzi non entrano.",
-      arrows: "Targhette numerate a strappo",
-      arrowsHint: "Mette a ogni chiodo una freccia con il suo numero in rilievo, tenuta da un collo che stacchi o tagli a quadro finito.",
+      arrows: "Anello di frecce numerate",
+      arrowsHint: "Aggiunge un anello sottile intorno allo stampo, con una freccia dall'esterno verso l'interno a ogni chiodo e il numero in rilievo. Scaricato come STL a parte per infilarlo in numerazione e toglierlo di nuovo.",
       sParts: "Pezzi",
       sLargest: "Pezzo più grande",
       sJoint: "Lunghezza dell'incastro",
       downloadZip: "Scarica lo ZIP",
       warnJointTight: "Con {0} punti lo spazio tra i chiodi non lascia posto all'incastro, quindi gli archi vengono tagliati di netto e andranno incollati. Riduci i punti, allarga il raggio o stampa l'anello intero.",
       warnTagsTiny: "Con {0} punti le cifre delle frecce sono alte solo {1} mm, troppo piccole da leggere o da stampare. Riduci i punti o disattiva le frecce.",
-      warnBedSize: "Il pezzo più grande misura {0} × {1} cm e non entra su un piano di stampa da 25 cm: aumenta il numero di parti dell'anello.",
+      warnBedSize: "Il pezzo più grande misura {0} × {1} cm e non entra su un piano di stampa da 25 cm: aumenta il numero di parti dell'anello, o stampa una tavola più piccola.",
 
       genTitle: "Immagine sorgente",
       selectImage: "Scegli un'immagine",
@@ -1298,9 +1338,14 @@
       warnNoFit: "Die Zeichnung ({0} mm) passt nicht auf die gewählte Seite ({1} mm). Vergrößere die Seite oder verkleinere den Radius.",
       warnDense: "Bei {0} Punkten beträgt der Abstand nur {1} mm. Die Zahlen können sich überlappen — erhöhe „Jeden N-ten Punkt nummerieren“.",
 
-      ringTitle: "Nägel und Ring",
+      ringTitle: "Nägel und Basis",
+      baseShape: "Basis",
+      baseRing: "Runder Ring",
+      baseSquare: "Quadratische Platte",
+      baseRound: "Runde Platte",
+      baseShapeHint: "Nur der Ring, oder eine quadratische / runde Platte mit demselben Nagelring als Relief obenauf.",
       nailHeight: "Nagelhöhe (mm)",
-      nailHeightHint: "Wie weit jeder Nagel über den Ring hinausragt.",
+      nailHeightHint: "Wie weit jeder Nagel über die Basis hinausragt.",
       nailDiameter: "Nageldurchmesser (mm)",
       nailDiameterHint: "Dickere Nägel sind stabiler, lassen aber weniger Platz.",
       nailShape: "Nagelspitze",
@@ -1310,12 +1355,15 @@
       nailShapeHint: "Die gerade Spitze druckt am schnellsten. Der Garnelenbogen krümmt sich nach außen über den Faden, und die konische Spitze endet 30% dicker als ihr Fuß; beide verhindern, dass fertige Schlingen oben abrutschen. Der Bogen kragt aus, drucke ihn also mit Stützen.",
       ringWidth: "Ringbreite (mm)",
       ringWidthHint: "Radiale Breite des Bands, auf dem die Nägel stehen.",
-      ringThickness: "Ringdicke (mm)",
-      ringThicknessHint: "Höhe des Bands selbst.",
+      boardMargin: "Rand über die Nägel hinaus (mm)",
+      boardMarginHint: "Wie weit die Platte auf jeder Seite über den Nagelkreis hinausragt.",
+      ringThickness: "Basisdicke (mm)",
+      ringThicknessHint: "Höhe des Ringbands oder der Platte selbst.",
       partColor: "Filamentfarbe",
       downloadStl: "STL herunterladen",
       ringPreviewHint: "Ziehen dreht, Shift-Ziehen verschiebt, Scrollen holt näher. Das Modell ist in Millimetern und direkt slicebar.",
       sOuterDiameter: "Außendurchmesser",
+      sBoardSize: "Plattenmaß",
       sPartHeight: "Gesamthöhe",
       sNailGap: "Abstand zwischen den Nägeln",
       sTipDiameter: "Spitzendurchmesser",
@@ -1324,18 +1372,18 @@
       warnNailsTouch: "Bei {0} Punkten bleiben nur {1} mm zwischen den Nägeln, sie würden verschmelzen. Verringere den Nageldurchmesser oder die Punktzahl.",
       splitTitle: "Teilen und nummerieren",
       segments: "Ringteile",
-      segmentsHint: "1 druckt den Ring in einem Stück. Mehr teilt ihn in so viele Bögen, gehalten von Zapfen und Nut im Puzzleformat.",
+      segmentsHint: "1 druckt den Ring in einem Stück. Mehr teilt ihn in so viele Bögen, gehalten von Zapfen und Nut im Puzzleformat. Massive Platten werden immer in einem Stück gedruckt.",
       jointGap: "Spiel der Verbindung (mm)",
       jointGapHint: "Spiel zwischen Zapfen und Nut. 0,25 passt für die meisten Drucker; erhöhe es, wenn die Teile nicht zusammengehen.",
-      arrows: "Nummerierte Abreißfähnchen",
-      arrowsHint: "Setzt an jeden Nagel einen Pfeil mit erhabener Nummer, gehalten von einem Stegchen, das du nach dem Fädeln abbrichst oder abschneidest.",
+      arrows: "Nummerierter Pfeilring",
+      arrowsHint: "Fügt einen schmalen Ring um die Form hinzu, mit einem von außen nach innen zeigenden Pfeil pro Nagel und erhabener Nummer. Als eigenes STL, zum Aufstecken beim Nummerieren und wieder Abnehmen.",
       sParts: "Teile",
       sLargest: "Größtes Teil",
       sJoint: "Länge der Verbindung",
       downloadZip: "ZIP herunterladen",
       warnJointTight: "Bei {0} Punkten lässt der Abstand zwischen den Nägeln keinen Platz für die Verbindung, die Bögen werden gerade abgeschnitten und müssen geklebt werden. Verringere die Punktzahl, vergrößere den Radius oder drucke den Ring ganz.",
       warnTagsTiny: "Bei {0} Punkten sind die Ziffern der Fähnchen nur {1} mm hoch, zu klein zum Lesen und Drucken. Verringere die Punktzahl oder schalte die Fähnchen ab.",
-      warnBedSize: "Das größte Teil misst {0} × {1} cm und passt nicht auf ein übliches 25-cm-Druckbett – erhöhe die Zahl der Ringteile.",
+      warnBedSize: "Das größte Teil misst {0} × {1} cm und passt nicht auf ein übliches 25-cm-Druckbett – erhöhe die Zahl der Ringteile, oder drucke eine kleinere Platte.",
 
       genTitle: "Quellbild",
       selectImage: "Bild auswählen",
@@ -1667,9 +1715,10 @@
     // Printable nail ring
     //
     // The part that replaces a drilled board: a flat band centred on the point
-    // circle carrying one cylindrical nail per point. A ring too wide for the
-    // print bed can be cut into arcs that clip together with puzzle joints, and
-    // every point can carry a snap-off tag stamped with its number.
+    // circle carrying the nails, optionally with a square or circular board
+    // filling its middle. A ring too wide for the print bed can be cut into arcs
+    // that clip together with puzzle joints. Numbered pointers live on a second
+    // ring around the outside, downloaded as a part of its own.
     //
     // Everything is emitted as a plain triangle soup in millimetres, so the STL
     // writer and the 3D preview read the same numbers and never drift apart.
@@ -1677,6 +1726,7 @@
     (function (root) {
       var D = {
         nailH: 12, nailD: 3, ringW: 10, ringH: 4,
+        baseShape: 'ring', // ring | square | round
         segments: 1, clearance: 0.25,
         nailShape: 'straight',
         nailSides: 12,     // faces around a nail
@@ -1713,15 +1763,24 @@
         var nailD = Math.max(0.4, num(o.nailD, D.nailD));
         var nailH = Math.max(1, num(o.nailH, D.nailH));
         var shape = o.nailShape === 'curl' || o.nailShape === 'cone' ? o.nailShape : 'straight';
+        var base = o.baseShape === 'square' || o.baseShape === 'round' ? o.baseShape : 'ring';
+        // A solid board has nothing to clip together, so it always prints whole.
         // Never more arcs than points, or an arc would come out with no nail on
         // it and no band to speak of.
-        var segments = Math.round(clamp(num(o.segments, D.segments), 1, Math.min(24, points)));
+        var segments = base === 'ring'
+          ? Math.round(clamp(num(o.segments, D.segments), 1, Math.min(24, points)))
+          : 1;
         var clearance = clamp(num(o.clearance, D.clearance), 0.05, 1);
         var arrows = !!o.arrows;
 
         // The band straddles the point circle, so the thread still runs at
-        // exactly the radius the drilling template is built for.
+        // exactly the radius the drilling template is built for. A square or
+        // round board is the full plate under that circle; the nail ring sits
+        // on top of it as a raised relief, same annulus as the ring-only base.
         var ri = Math.max(0.5, R - ringW / 2), ro = R + ringW / 2;
+        var half = ro;
+        var relief = base === 'ring' ? 0 : Math.min(3, Math.max(1.8, ringH * 0.5));
+        var bandTop = ringH + relief;
         var spacing = 2 * Math.PI * R / points;
 
         // A finished loop escapes over the tip, so both shaped nails make the
@@ -1774,6 +1833,7 @@
 
         return {
           points: points, R: R, ri: ri, ro: ro,
+          baseShape: base, halfW: half, halfH: half,
           ringW: ringW, ringH: ringH, nailD: nailD, nailH: nailH,
           segments: segments, clearance: clearance, arrows: arrows,
           nailShape: shape, tipD: tipD, curl: curl,
@@ -1781,7 +1841,8 @@
           steps: Math.min(1440, Math.max(180, Math.round(2 * Math.PI * R / D.facet))),
           spacing: spacing,
           gap: spacing - wide,
-          height: ringH + nailH,
+          relief: relief, bandTop: bandTop,
+          height: bandTop + nailH,
           jointLen: jointLen, headHalf: headHalf, neckHalf: neckHalf,
           jointFits: jointFits,
           // How much band each arc gives up at a cut, measured along the ring.
@@ -1933,7 +1994,8 @@
       // into the band so a slicer reads nail and band as a single body.
       function nail(s, P, cx, cy, w) {
         var r = P.nailD / 2, tip = P.tipD / 2;
-        var z0 = P.ringH - Math.min(0.8, P.ringH / 2), z1 = P.ringH + P.nailH;
+        var top = P.bandTop;
+        var z0 = top - Math.min(0.8, P.ringH / 2), z1 = top + P.nailH;
         // Outwards and along the ring: the curl bends in the plane the first
         // one spans, and every cross-section is drawn on both.
         var u = [cx / P.R, cy / P.R, 0], v = [-u[1], u[0], 0], up = [0, 0, 1];
@@ -1941,13 +2003,13 @@
         if (P.nailShape !== 'curl') {
           tube(s, [
             { p: [cx, cy, z0], r: r, e1: u, e2: v },
-            { p: [cx, cy, P.ringH], r: r, e1: u, e2: v },
+            { p: [cx, cy, top], r: r, e1: u, e2: v },
             { p: [cx, cy, z1], r: tip, e1: u, e2: v }
           ], w);
           return;
         }
 
-        var C = P.curl, bendZ = P.ringH + C.rise, sections = [];
+        var C = P.curl, bendZ = top + C.rise, sections = [];
         sections.push({ p: [cx, cy, z0], r: r, e1: u, e2: v });
         sections.push({ p: [cx, cy, bendZ], r: r, e1: u, e2: v });
         // Turning about a centre one radius outwards, so the arc leaves the
@@ -2037,26 +2099,35 @@
         s.sweep(inner, 0, P.ringH, false);
       }
 
-      // A pointer aimed at its nail, stamped with the point number and joined to
-      // the band by a stub thin enough to snap or cut off afterwards.
-      function tag(s, P, angle, label) {
+      // A pointer aimed at its nail, stamped with the point number. dir is +1
+      // when the tag grows outwards from attachR (the old snap-off tags) and -1
+      // when it grows inwards from an outer label ring toward the nail.
+      function tag(s, P, angle, label, attachR, dir) {
         var T = P.tag;
         var c = Math.cos(angle), si = Math.sin(angle);
         function at(u, w) { return [c * u - si * w, si * u + c * w]; }
+        dir = dir < 0 ? -1 : 1;
+        var rootR = attachR;
 
         var root = Math.min(D.tagRoot, T.w * 0.5) / 2;
-        var head = P.ro + T.headLen, tip = P.ro + T.len;
+        var head = rootR + dir * T.headLen, tip = rootR + dir * T.len;
         var z1 = T.plate;
+        // The stub reaches a little past the wall it hangs off, so the two
+        // solids cross instead of sharing a face.
+        var stub = rootR - dir * D.weld;
 
-        s.plate([at(P.ro - D.weld, -root), at(head, -T.w / 2), at(head, T.w / 2), at(P.ro - D.weld, root)], 0, z1);
-        s.plate([at(head - 0.4, -T.shaft / 2), at(tip, -T.shaft / 2), at(tip, T.shaft / 2), at(head - 0.4, T.shaft / 2)], 0, z1);
+        s.plate([at(stub, -root), at(head, -T.w / 2), at(head, T.w / 2), at(stub, root)], 0, z1);
+        s.plate([at(head - dir * 0.4, -T.shaft / 2), at(tip, -T.shaft / 2),
+                 at(tip, T.shaft / 2), at(head - dir * 0.4, T.shaft / 2)], 0, z1);
 
         var text = String(label);
         var wide = text.length * T.digitW + (text.length - 1) * T.digitW * 0.3;
-        var u0 = head + 0.6 + (T.text - wide) / 2;
+        // First digit sits nearer the ring the tag hangs off; later ones walk
+        // toward the tip, so the pointer still reads from the base outwards.
+        var u0 = head + dir * (0.6 + (T.text - wide) / 2);
         for (var d = 0; d < text.length; d++) {
           var segs = DIGITS[text.charCodeAt(d) - 48];
-          var bu = u0 + d * T.digitW * 1.3;
+          var bu = u0 + dir * d * T.digitW * 1.3;
           for (var q = 0; q < segs.length; q++) {
             var r = segRect(segs.charAt(q), T.digitW, T.digitH, T.stroke);
             s.plate([
@@ -2119,6 +2190,8 @@
         var s = soup(), step = 2 * Math.PI / P.points, i;
         var nailWheel = wheel(P.sides);
 
+        // Ring-only: just the nail band. Square / round: the full board first,
+        // then the same circular nail ring raised on top as relief.
         if (split) {
           // Cuts fall halfway between two nails, and each arc carries a tab at
           // its leading end and the matching slot at the other.
@@ -2131,6 +2204,13 @@
             tab(s, P, high, half);
             slot(s, P, low, half);
           }
+        } else if (P.baseShape === 'square') {
+          var hw = P.halfW, hh = P.halfH;
+          s.plate([[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]], 0, P.ringH);
+          s.sweep(loop(wheel(P.steps), P.ri, P.ro), P.ringH, P.bandTop, true);
+        } else if (P.baseShape === 'round') {
+          s.sweep(loop(wheel(P.steps), 0, P.ro), 0, P.ringH, true);
+          s.sweep(loop(wheel(P.steps), P.ri, P.ro), P.ringH, P.bandTop, true);
         } else {
           s.sweep(loop(wheel(P.steps), P.ri, P.ro), 0, P.ringH, true);
         }
@@ -2138,24 +2218,91 @@
         for (i = n0; i < n1; i++) {
           var a = i * step;
           nail(s, P, P.R * Math.cos(a), P.R * Math.sin(a), nailWheel);
-          if (P.arrows) tag(s, P, a, i);
         }
 
         var v = s.done();
         var place = frame(v, split ? ((n0 + n1) / 2 - 0.5) * step : 0);
-        return { v: v, place: place, box: place.box, volume: volumeOf(v) };
+        return { v: v, place: place, box: place.box, volume: volumeOf(v), role: 'body' };
+      }
+
+      // Numbered pointer hung off the outer rim of the label ring. Every arrow
+      // uses the same radial length (sized for the widest label); only the
+      // digits change. The tip sinks into the band so the two solids fuse when
+      // printed; the rest hangs outside and points inward.
+      function edgeArrow(s, P, angle, label, ari, aro) {
+        var T = P.tag;
+        var c = Math.cos(angle), si = Math.sin(angle);
+        function at(u, w) { return [c * u - si * w, si * u + c * w]; }
+        var z1 = T.plate;
+        var half = T.w / 2;
+        var text = String(label);
+        var wide = text.length * T.digitW + (text.length - 1) * T.digitW * 0.3;
+        // Fixed envelope so "0" and "287" occupy the same outline.
+        var headLen = T.headLen;
+        var pad = headLen + T.text + 1.2;
+        // Pull the whole arrow a few millimetres into the band so the tip and
+        // the start of the shaft are solidly overlapped with it.
+        var embed = Math.min(2.6, Math.max(1.6, (aro - ari) * 0.55));
+        var tip = Math.max(ari + 0.25, aro - embed);
+        var head = tip + headLen;
+        var end = tip + pad;
+
+        // Triangular tip, pointing in toward the nails.
+        s.plate([
+          at(head, -half), at(head, half), at(tip, 0)
+        ], 0, z1);
+        // Same-length shaft; starts inside the band, digits sit outside.
+        s.plate([
+          at(Math.min(head, aro) - D.weld, -T.shaft / 2), at(end, -T.shaft / 2),
+          at(end, T.shaft / 2), at(Math.min(head, aro) - D.weld, T.shaft / 2)
+        ], 0, z1);
+
+        var u0 = head + 0.5 + (T.text - wide) / 2;
+        for (var d = 0; d < text.length; d++) {
+          var segs = DIGITS[text.charCodeAt(d) - 48];
+          var bu = u0 + d * T.digitW * 1.3;
+          for (var q = 0; q < segs.length; q++) {
+            var r = segRect(segs.charAt(q), T.digitW, T.digitH, T.stroke);
+            s.plate([
+              at(bu + r[0], r[1] - T.digitH / 2), at(bu + r[2], r[1] - T.digitH / 2),
+              at(bu + r[2], r[3] - T.digitH / 2), at(bu + r[0], r[3] - T.digitH / 2)
+            ], z1 - 0.3, z1 + D.tagEmboss);
+          }
+        }
+      }
+
+      // A second ring that sits outside the nail ring, carrying one inward
+      // pointer per nail. It is a part of its own so it can be printed, fitted
+      // around the mould for numbering, and taken off again.
+      function buildArrowRing(P) {
+        var s = soup(), step = 2 * Math.PI / P.points, i;
+        var gap = Math.max(1.0, P.clearance * 2);
+        // Always around the nail circle — same path as the ring-only base, even
+        // when the middle is filled with a square or round board.
+        var outer = P.ro;
+        // Slim band — only enough to hold the stubs, not a copy of the nail ring.
+        var band = Math.max(3.2, Math.min(5.5, P.tag.w * 0.32));
+        var ari = outer + gap;
+        var aro = ari + band;
+        s.sweep(loop(wheel(P.steps), ari, aro), 0, Math.max(P.tag.plate, Math.min(P.ringH, 2.4)), true);
+        for (i = 0; i < P.points; i++) edgeArrow(s, P, i * step, i, ari, aro);
+        var v = s.done();
+        var place = frame(v, 0);
+        return { v: v, place: place, box: place.box, volume: volumeOf(v), role: 'arrows' };
       }
 
       // Parts come back in ring coordinates, so the preview can just show them
-      // all at once; `placed` is what goes into a file.
+      // all at once; `placed` is what goes into a file. The label ring, when
+      // asked for, is always last and always whole.
       function toParts(P) {
         var out = [], k;
-        if (P.segments < 2) return [build(P, 0, P.points, false)];
-        for (k = 0; k < P.segments; k++) {
+        if (P.segments < 2) out.push(build(P, 0, P.points, false));
+        else for (k = 0; k < P.segments; k++) {
           out.push(build(P,
             Math.round(k * P.points / P.segments),
             Math.round((k + 1) * P.points / P.segments), true));
         }
+        if (P.arrows) out.push(buildArrowRing(P));
         return out;
       }
 
@@ -2178,7 +2325,7 @@
 
         // Anything but a leading "solid", which would make readers parse the
         // file as ASCII.
-        var label = 'String art nail ring (mm)';
+        var label = 'String art nail template (mm)';
         for (var c = 0; c < label.length; c++) dv.setUint8(c, label.charCodeAt(c));
         dv.setUint32(80, n, true);
 
@@ -2724,7 +2871,7 @@
       var t = props.t;
       var st = React.useState({
         nailH: RE.DEFAULTS.nailH, nailD: RE.DEFAULTS.nailD,
-        nailShape: RE.DEFAULTS.nailShape,
+        nailShape: RE.DEFAULTS.nailShape, baseShape: RE.DEFAULTS.baseShape,
         ringW: RE.DEFAULTS.ringW, ringH: RE.DEFAULTS.ringH,
         segments: RE.DEFAULTS.segments, clearance: RE.DEFAULTS.clearance, arrows: false
       });
@@ -2732,6 +2879,7 @@
       function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
 
       var stColor = React.useState('#6b7280'); var color = stColor[0], setColor = stColor[1];
+      var isRing = o.baseShape === 'ring';
 
       var part = React.useMemo(function () {
         return RE.computePart(Object.assign({}, o, { points: props.points, radiusCm: props.radiusCm }));
@@ -2748,13 +2896,23 @@
       // darker on screen.
       function paint() {
         var mats = matsRef.current, base = new THREE.Color(color), n = mats.length;
-        for (var i = 0; i < n; i++) {
+        var bodies = 0, i;
+        for (i = 0; i < n; i++) if (!parts[i] || parts[i].role !== 'arrows') bodies++;
+        var at = 0;
+        for (i = 0; i < n; i++) {
           mats[i].color.copy(base);
-          var shade = i % 2 ? 0.45 : 1;
+          if (parts[i] && parts[i].role === 'arrows') {
+            // The label ring is told apart by a warmer shade, so it reads as a
+            // piece of its own even when the mould under it is one colour.
+            mats[i].color.offsetHSL(0.02, 0.15, 0.08);
+            continue;
+          }
+          var shade = at % 2 ? 0.45 : 1;
           // An odd count would otherwise put the same shade on both sides of the
           // seam where the ring closes.
-          if (n % 2 && i === n - 1) shade = 0.68;
+          if (bodies % 2 && at === bodies - 1) shade = 0.68;
           if (shade !== 1) mats[i].color.multiplyScalar(shade);
+          at++;
         }
       }
 
@@ -2777,7 +2935,7 @@
           // point circle of radius 1, with the top of the band at height zero.
           m.rotation.x = -Math.PI / 2;
           m.scale.setScalar(1 / part.R);
-          m.position.y = -part.ringH / part.R;
+          m.position.y = -part.bandTop / part.R;
           s.scene.add(m);
           made.push(m); mats.push(mat);
         });
@@ -2793,27 +2951,38 @@
       function pad(n) { return (n < 10 ? '0' : '') + n; }
 
       function save() {
-        var base = 'string-art-nail-ring-' + part.points + 'pts-r' + n1(part.R / 10) + 'cm';
-        if (parts.length < 2) {
-          download(new Blob([RE.toStl(RE.placed(parts[0]))], { type: 'model/stl' }), base + '.stl');
+        var kind = part.baseShape === 'ring' ? 'ring' : (part.baseShape === 'square' ? 'square' : 'round');
+        var base = 'string-art-nail-' + kind + '-' + part.points + 'pts-r' + n1(part.R / 10) + 'cm';
+        var body = parts.filter(function (p) { return p.role !== 'arrows'; });
+        var labels = parts.filter(function (p) { return p.role === 'arrows'; });
+        if (body.length === 1 && !labels.length) {
+          download(new Blob([RE.toStl(RE.placed(body[0]))], { type: 'model/stl' }), base + '.stl');
           return;
         }
-        download(RE.toZip(parts.map(function (p, i) {
+        var files = body.map(function (p, i) {
           return {
-            name: base + '-PART_' + pad(i + 1) + '_OF_' + pad(parts.length) + '.stl',
+            name: body.length === 1
+              ? base + '.stl'
+              : base + '-PART_' + pad(i + 1) + '_OF_' + pad(body.length) + '.stl',
             data: RE.toStl(RE.placed(p))
           };
-        })), base + '-' + parts.length + 'parts.zip');
+        });
+        labels.forEach(function (p) {
+          files.push({ name: base + '-ARROWS.stl', data: RE.toStl(RE.placed(p)) });
+        });
+        download(RE.toZip(files), base + (labels.length || body.length > 1 ? '-' + files.length + 'parts.zip' : '.zip'));
       }
 
       var outer = part.ro * 2;
-      var split = parts.length > 1;
+      var bodyParts = parts.filter(function (p) { return p.role !== 'arrows'; });
+      var split = bodyParts.length > 1;
       var volume = 0, biggest = parts[0];
       parts.forEach(function (p) {
         volume += p.volume;
         if (Math.max(p.box[0], p.box[1]) > Math.max(biggest.box[0], biggest.box[1])) biggest = p;
       });
       var footprint = Math.max(biggest.box[0], biggest.box[1]);
+      var needZip = parts.length > 1;
 
       return h('div', { className: 'row' },
         h('div', { className: 'col', style: { flex: '1 1 380px' } },
@@ -2827,6 +2996,20 @@
 
           h('div', { className: 'card' },
             h('h2', null, t('ringTitle')),
+            h(Field, { label: t('baseShape'), hint: t('baseShapeHint') },
+              h('div', { className: 'segmented' },
+                h('button', {
+                  type: 'button', className: o.baseShape === 'ring' ? 'on' : '',
+                  onClick: function () { set('baseShape', 'ring'); }
+                }, t('baseRing')),
+                h('button', {
+                  type: 'button', className: o.baseShape === 'square' ? 'on' : '',
+                  onClick: function () { set('baseShape', 'square'); }
+                }, t('baseSquare')),
+                h('button', {
+                  type: 'button', className: o.baseShape === 'round' ? 'on' : '',
+                  onClick: function () { set('baseShape', 'round'); }
+                }, t('baseRound')))),
             h('div', { className: 'grid2' },
               h(Field, { label: t('nailHeight'), hint: t('nailHeightHint') },
                 h(NumberInput, { value: o.nailH, min: 2, max: 60, step: 0.5, onChange: function (v) { set('nailH', v); } })),
@@ -2855,12 +3038,12 @@
 
           h('div', { className: 'card' },
             h('h2', null, t('splitTitle')),
-            h('div', { className: 'grid2' },
+            isRing ? h('div', { className: 'grid2' },
               h(Field, { label: t('segments'), hint: t('segmentsHint') },
                 h(NumberInput, { value: o.segments, min: 1, max: 24, onChange: function (v) { set('segments', v); } })),
               split ? h(Field, { label: t('jointGap'), hint: t('jointGapHint') },
                 h(NumberInput, { value: o.clearance, min: 0.05, max: 1, step: 0.05, onChange: function (v) { set('clearance', v); } })) : null
-            ),
+            ) : null,
             h(Check, {
               id: 'ring-arrows', checked: o.arrows, label: t('arrows'),
               onChange: function (v) { set('arrows', v); }
@@ -2870,7 +3053,12 @@
 
           h('div', { className: 'card' },
             h('h2', null, t('summaryTitle')),
-            h('div', { className: 'stat' }, h('span', null, t('sOuterDiameter')), h('b', null, n1(outer / 10) + ' cm')),
+            isRing
+              ? h('div', { className: 'stat' }, h('span', null, t('sOuterDiameter')), h('b', null, n1(outer / 10) + ' cm'))
+              : h('div', { className: 'stat' }, h('span', null, t(part.baseShape === 'square' ? 'sBoardSize' : 'sOuterDiameter')),
+                  h('b', null, part.baseShape === 'square'
+                    ? (n1(part.halfW * 2 / 10) + ' × ' + n1(part.halfH * 2 / 10) + ' cm')
+                    : (n1(outer / 10) + ' cm'))),
             h('div', { className: 'stat' }, h('span', null, t('sPartHeight')), h('b', null, n1(part.height) + ' mm')),
             h('div', { className: 'stat' }, h('span', null, t('sSpacing')), h('b', null, n2(part.spacing) + ' mm')),
             h('div', { className: 'stat' }, h('span', null, t('sNailGap')), h('b', null, n2(part.gap) + ' mm')),
@@ -2906,7 +3094,7 @@
                 h(Field, { label: t('partColor') }, h(Swatch, { value: color, onChange: setColor })))
             ),
             h('div', { className: 'controls', style: { marginTop: '14px' } },
-              h('button', { className: 'btn', onClick: save }, split ? t('downloadZip') : t('downloadStl')))
+              h('button', { className: 'btn', onClick: save }, needZip ? t('downloadZip') : t('downloadStl')))
           )
         )
       );
