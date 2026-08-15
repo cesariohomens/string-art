@@ -6,10 +6,13 @@
 #   ./animate.sh                        the stock ring, a film in three shots
 #   ./animate.sh --shot close           one camera, the whole job
 #   ./animate.sh --seq mine.txt         a sequence saved from the app
+#   ./animate.sh --gcode job.gcode      a job already written, from the app or elsewhere
+#   ./animate.sh --out anim/mine.mp4    somewhere other than anim/machine.mp4
 #   ./animate.sh --nails 96 --radius 200 --passes 1 --seconds 12
 #
-# The ring:      --nails N  --radius MM  --seq FILE
+# The job:       --nails N  --radius MM  --seq FILE
 #                --passes N  --step N  --wraps N     for the made-up sequence
+#                --gcode FILE                       a finished job instead of any of that
 # The film:      --seconds N  --fps N  --shot all|wide|close|high
 #                --close-speed N        machine seconds per video second, near shot
 # The file:      --size WxH  --super N  --out FILE  --keep  --jobs N
@@ -41,6 +44,7 @@ passes=2            # how many envelopes the made-up sequence draws
 wraps=0             # cut the sequence short, 0 for all of it
 step=0              # nails to skip per leg, 0 to choose one
 seq_file=""         # a sequence saved from the app instead
+gcode_file=""       # a finished job instead of building one
 seconds=30          # how long the video runs
 close_speed=1.5     # machine seconds per video second in the near shot
 fps=30
@@ -60,6 +64,7 @@ while [ $# -gt 0 ]; do
         --wraps)   wraps="$2"; shift 2 ;;
         --step)    step="$2"; shift 2 ;;
         --seq)     seq_file="$2"; shift 2 ;;
+        --gcode)   gcode_file="$2"; shift 2 ;;
         --seconds) seconds="$2"; shift 2 ;;
         --close-speed) close_speed="$2"; shift 2 ;;
         --fps)     fps="$2"; shift 2 ;;
@@ -69,10 +74,19 @@ while [ $# -gt 0 ]; do
         --out)     out="$2"; shift 2 ;;
         --jobs)    jobs="$2"; shift 2 ;;
         --keep)    keep=1; shift ;;
-        -h|--help) sed -n '2,27p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "$0: no such option: $1" >&2; exit 1 ;;
     esac
 done
+
+if [ -n "$gcode_file" ] && [ -n "$seq_file" ]; then
+    echo "$0: --gcode and --seq are different jobs; pick one" >&2
+    exit 1
+fi
+if [ -n "$gcode_file" ] && [ ! -f "$gcode_file" ]; then
+    echo "$0: no such g-code file: $gcode_file" >&2
+    exit 1
+fi
 
 case "$shot" in all|wide|close|high) ;; *) echo "$0: no such shot: $shot" >&2; exit 1 ;; esac
 
@@ -110,72 +124,84 @@ for n in z_zero x_max; do
 done
 
 # The orbit the app would pick, and whether this ring fits this machine at all.
-orbit=$(awk -v r="$radius" -v n="$nails" -v reach="$x_max" 'BEGIN {
-    low = 3 / 2 + 1.1
-    high = 2 * 3.14159265 * r / n - 3 / 2 - 1.1
-    if (high < low) { print "crowded"; exit }
-    want = low + 0.4
-    o = (want > high) ? (low + high) / 2 : want
-    if (r + o + 1.1 > reach) { print "far"; exit }
-    printf "%.2f\n", o
-}')
-case "$orbit" in
-    crowded) echo "$0: $nails nails on a $radius mm circle leaves the guide no room" >&2; exit 1 ;;
-    far)     echo "$0: a $radius mm ring is past a machine that reaches $x_max mm" >&2; exit 1 ;;
-esac
-
-# ---------------------------------------------------------------------------
-# The sequence, then the job the app would send for it.
-# ---------------------------------------------------------------------------
-if [ -n "$seq_file" ]; then
-    order=$(tr -cs '0-9' '\n' < "$seq_file" | sed '/^$/d')
-    if [ -z "$order" ]; then echo "$0: no nail numbers in $seq_file" >&2; exit 1; fi
-    # A saved sequence carries no nail count of its own, so it comes from the
-    # highest number in it, exactly as the app does it.
-    biggest=$(printf '%s\n' "$order" | sort -n | tail -1)
-    if [ "$biggest" -ge "$nails" ]; then nails=$((biggest + 1)); fi
-else
-    # A leg that skips a fixed number of nails draws the envelope of a circle,
-    # which is the plainest thing that looks like string art. Skipping a count
-    # that shares no factor with the ring visits every nail and closes up, so
-    # each pass is one whole envelope, and successive passes step in.
-    order=$(awk -v n="$nails" -v passes="$passes" -v fixed="$step" '
-        function gcd(a, b) { while (b) { t = a % b; a = b; b = t } return a }
-        BEGIN {
-            split("0.381966 0.236068 0.145898 0.090170", ratio, " ")
-            if (passes > 4) passes = 4
-            if (passes < 1) passes = 1
-            at = 0
-            for (p = 1; p <= passes; p++) {
-                s = fixed > 0 ? fixed : int(n * ratio[p])
-                if (s < 1) s = 1
-                while (gcd(n, s) != 1 && s < n) s++
-                if (s >= n) s = 1
-                for (i = 0; i < n; i++) { at = (at + s) % n; print at }
-            }
-        }')
+# A finished job already carries its own orbit in M701, so this only runs when
+# the script is the one writing the job.
+if [ -z "$gcode_file" ]; then
+    orbit=$(awk -v r="$radius" -v n="$nails" -v reach="$x_max" 'BEGIN {
+        low = 3 / 2 + 1.1
+        high = 2 * 3.14159265 * r / n - 3 / 2 - 1.1
+        if (high < low) { print "crowded"; exit }
+        want = low + 0.4
+        o = (want > high) ? (low + high) / 2 : want
+        if (r + o + 1.1 > reach) { print "far"; exit }
+        printf "%.2f\n", o
+    }')
+    case "$orbit" in
+        crowded) echo "$0: $nails nails on a $radius mm circle leaves the guide no room" >&2; exit 1 ;;
+        far)     echo "$0: a $radius mm ring is past a machine that reaches $x_max mm" >&2; exit 1 ;;
+    esac
 fi
 
-if [ "$wraps" -gt 0 ]; then order=$(printf '%s\n' "$order" | head -n "$wraps"); fi
-count=$(printf '%s\n' "$order" | wc -l)
-
-# The same lines the app's Send button puts on the wire.
+# ---------------------------------------------------------------------------
+# The job: either one already written, or a sequence then the lines the app
+# would send for it.
+# ---------------------------------------------------------------------------
 job="$work/job.gcode"
-{
-    echo "; string art winding job"
-    printf '; %s nails on a %.1f mm circle, %s wraps\n' "$nails" "$radius" "$count"
-    echo "M115"
-    echo "G28"
-    printf 'M701 R%.2f N%s H6.00 D3.00 O%s P0.00\n' "$radius" "$nails" "$orbit"
-    echo "M702 F4200 S1200"
-    echo "G92 A0"
-    echo "M17"
-    echo "G0 Z6.00"
-    printf 'M700 P%s\n' $order
-    echo "M400"
-    echo "G0 Z20.00"
-    echo "M18"
-} > "$job"
+if [ -n "$gcode_file" ]; then
+    # Resolve it now: the work directory is not where the user was standing.
+    case "$gcode_file" in
+        /*) job="$gcode_file" ;;
+        *)  job="$(cd "$(dirname "$gcode_file")" && pwd)/$(basename "$gcode_file")" ;;
+    esac
+else
+    if [ -n "$seq_file" ]; then
+        order=$(tr -cs '0-9' '\n' < "$seq_file" | sed '/^$/d')
+        if [ -z "$order" ]; then echo "$0: no nail numbers in $seq_file" >&2; exit 1; fi
+        # A saved sequence carries no nail count of its own, so it comes from the
+        # highest number in it, exactly as the app does it.
+        biggest=$(printf '%s\n' "$order" | sort -n | tail -1)
+        if [ "$biggest" -ge "$nails" ]; then nails=$((biggest + 1)); fi
+    else
+        # A leg that skips a fixed number of nails draws the envelope of a circle,
+        # which is the plainest thing that looks like string art. Skipping a count
+        # that shares no factor with the ring visits every nail and closes up, so
+        # each pass is one whole envelope, and successive passes step in.
+        order=$(awk -v n="$nails" -v passes="$passes" -v fixed="$step" '
+            function gcd(a, b) { while (b) { t = a % b; a = b; b = t } return a }
+            BEGIN {
+                split("0.381966 0.236068 0.145898 0.090170", ratio, " ")
+                if (passes > 4) passes = 4
+                if (passes < 1) passes = 1
+                at = 0
+                for (p = 1; p <= passes; p++) {
+                    s = fixed > 0 ? fixed : int(n * ratio[p])
+                    if (s < 1) s = 1
+                    while (gcd(n, s) != 1 && s < n) s++
+                    if (s >= n) s = 1
+                    for (i = 0; i < n; i++) { at = (at + s) % n; print at }
+                }
+            }')
+    fi
+
+    if [ "$wraps" -gt 0 ]; then order=$(printf '%s\n' "$order" | head -n "$wraps"); fi
+    count=$(printf '%s\n' "$order" | wc -l)
+
+    {
+        echo "; string art winding job"
+        printf '; %s nails on a %.1f mm circle, %s wraps\n' "$nails" "$radius" "$count"
+        echo "M115"
+        echo "G28"
+        printf 'M701 R%.2f N%s H6.00 D3.00 O%s P0.00\n' "$radius" "$nails" "$orbit"
+        echo "M702 F4200 S1200"
+        echo "G92 A0"
+        echo "M17"
+        echo "G0 Z6.00"
+        printf 'M700 P%s\n' $order
+        echo "M400"
+        echo "G0 Z20.00"
+        echo "M18"
+    } > "$job"
+fi
 
 # ---------------------------------------------------------------------------
 # The path, sampled one row per frame.
@@ -192,6 +218,15 @@ header=$("$walk" < "$job")
 read -r job_secs job_wraps job_first <<< "$(sed -n 's/^# job //p' <<< "$header")"
 seq_list="[$(sed -n 's/^# seq //p' <<< "$header" | tr ' ' ',')]"
 
+# A finished job says what ring it is for; that is what the model has to draw,
+# not whatever --nails / --radius were left at.
+if [ -n "$gcode_file" ]; then
+    read -r radius nails _ <<< "$(sed -n 's/^# ring //p' <<< "$header")"
+    if [ -z "$radius" ] || [ -z "$nails" ]; then
+        echo "$0: $gcode_file never says what ring it is for" >&2
+        exit 1
+    fi
+fi
 # A shot is a name, how far through it the frame is, and where the machine is.
 # Sections of the film get their own window of machine time, which is what lets
 # the near shot run slowly enough to see a nail being wrapped while the wide one

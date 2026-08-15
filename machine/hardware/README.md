@@ -89,6 +89,8 @@ file, so the two cannot drift apart.
 ./animate.sh                            # anim/machine.mp4, 30 seconds, 1080p
 ./animate.sh --shot close --seconds 12  # one camera instead of three
 ./animate.sh --seq mine.txt             # a sequence saved from the app
+./animate.sh --gcode job.gcode          # a job already written, from the app or elsewhere
+./animate.sh --out anim/mine.mp4        # somewhere other than anim/machine.mp4
 ./animate.sh --nails 96 --radius 200 --passes 1
 ```
 
@@ -101,6 +103,10 @@ go, laps what the machine would lap, and takes as long as the machine would take
 app shows. What comes out is one row per frame: the three axes, and how many
 nails have been wrapped by then. `machine.scad` draws the rest.
 
+`--gcode` skips writing a job and uses yours instead: the ring comes out of its
+`M701`, and `--nails` / `--radius` / `--seq` / `--passes` do not apply. `--out`
+puts the video somewhere other than `anim/machine.mp4`.
+
 The default is a film in three shots, in the order the machine does them: a near
 shot held on the point where the rail crosses the ring, which is the only place a
 lap ever happens, running slowly enough to see one; the whole job from the side,
@@ -108,10 +114,10 @@ sped up until it fits; and the finished picture from above. Each shot gets its o
 window of machine time, which is why the near one can crawl while the wide one
 covers an hour.
 
-Without `--seq` the sequence is made up rather than solved from an image: each
-leg skips a fixed number of nails, which draws the envelope of a circle, and the
-number skipped shares no factor with the ring so a pass visits every nail and
-closes. `--passes` stacks more envelopes inside each other.
+Without `--seq` or `--gcode` the sequence is made up rather than solved from an
+image: each leg skips a fixed number of nails, which draws the envelope of a
+circle, and the number skipped shares no factor with the ring so a pass visits
+every nail and closes. `--passes` stacks more envelopes inside each other.
 
 Rendering is the preview renderer, one process per core, at twice the output size
 and scaled back down, because OpenSCAD does not anti-alias and a 0.9 mm thread on
