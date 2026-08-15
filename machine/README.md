@@ -22,6 +22,7 @@ machine works the rest out.
 | --- | --- |
 | `PROTOCOL.md` | The contract: axes, the g-code the machine speaks, the HTTP API, the wiring, and the numbers the firmware needs |
 | `BOM.md` | Everything to buy |
+| `index.html` | The assembly walkthrough: tick a piece off and watch it go on |
 | `hardware/` | The machine itself, parametric, in OpenSCAD |
 | `firmware/` | The ESP32 firmware, and the packer that puts the app on the machine |
 
@@ -66,7 +67,14 @@ machine cannot notice a loop that has slipped.
 1. **Print the parts.** `hardware/README.md` has the list, the quantities and
    which way up each one goes. Run `hardware/export.sh` to get the STLs.
 2. **Build the frame**, then the turntable, then the rail and its carriage, then
-   the lift and the guide. The assembly order is in the same file.
+   the lift and the guide. The assembly order is in the same file, and
+   `index.html` walks through it a piece at a time with the machine building up
+   in front of you:
+
+```bash
+cd hardware && ./export-assembly.sh && cd ..
+python3 -m http.server 8000    # then open http://localhost:8000/
+```
 3. **Wire it** to the table in `PROTOCOL.md`. Set the drivers' current before
    anything is bolted down: the turntable wants about 1.2 A, the other two 0.8 A.
 4. **Flash it**:

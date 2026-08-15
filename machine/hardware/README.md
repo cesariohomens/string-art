@@ -14,10 +14,17 @@ sectors by arithmetic, not by hand.
 | `config.scad` | Every dimension, grouped and commented |
 | `lib/` | Mock-ups and cutters: `nema17`, `gt2`, `bearing`, `rail`, `hardware` (screws, nuts, inserts), `shapes` |
 | `*.scad` in the root | One printed part each |
+| `assembly.scad` | Every piece of the machine, in the order it goes on and where it ends up |
 | `machine.scad` | The assembly, bought parts included, for looking at |
 | `parts.scad` | The catalogue: what is printed, how many, and which way up |
-| `export.sh` | Writes every part to `stl/` |
+| `export.sh` | Writes every part to `stl/`, laid out to print |
+| `export-assembly.sh` | Writes every piece to `stl/assembly/`, placed, for `../index.html` |
 | `animate.sh` | Films the machine winding a picture, into `anim/` |
+
+`parts.scad` and `assembly.scad` answer different questions about the same
+pieces: one says how a part is turned to print, the other where it belongs and
+what has to be there already. `machine.scad` draws `assembly.scad`, so there is
+one place a piece can be in the wrong spot.
 
 Looking at the machine:
 
@@ -41,6 +48,40 @@ Exporting:
 ```
 
 A full run takes a couple of minutes. Warnings are treated as failures.
+
+## The walkthrough
+
+[`../index.html`](../index.html) builds the machine in front of you a piece at a
+time. Tick a piece off and it appears where it goes, with the one before it in
+red and the one after it as a ghost, so you can see what you are reaching for
+before you pick it up. Nothing can be ticked until everything it rests on has
+been, and there is a switch at the top between the printed pieces on their own
+and every piece there is.
+
+It reads one mesh per piece out of `stl/assembly/`, which is built rather than
+kept:
+
+```bash
+./export-assembly.sh              # one mesh per piece and a manifest, a minute
+./export-assembly.sh frame        # just the ones whose name contains "frame"
+./export-assembly.sh --manifest   # only the manifest, when the prose has moved
+```
+
+These meshes are for looking at, not for printing: they are placed rather than
+laid flat, written binary, and drawn with `$fn=16`. Raise it with `FN=32` if you
+want them smoother.
+
+The page then has to be served, because a browser will not read files off
+`file://`:
+
+```bash
+cd .. && python3 -m http.server 8000
+```
+
+and open `http://localhost:8000/`.
+
+What each step says is lifted out of the assembly order at the bottom of this
+file, so the two cannot drift apart.
 
 ## The video
 
@@ -260,6 +301,13 @@ That is 3200 microsteps per motor turn × 910 rack teeth ÷ (20 pinion teeth ×
     thread from the spool over the arm, up over the beam and down the tube.
 11. **Electronics.** Box wherever it will sit, drivers in, then the wiring in
     `../PROTOCOL.md`.
+12. **Board.** Plywood down onto the spigot, keyed so it cannot creep, and the
+    ring of nails in it. This is the workpiece rather than the machine, and it
+    comes off again between jobs.
+
+`../index.html` walks through all of this a piece at a time, with the machine
+building up in front of you as you tick them off. Run `./export-assembly.sh`
+first, to write the meshes it reads.
 
 Then home the machine — Z lifts to its switch first, then X comes in to the
 middle — line nail 0 up with the guide by hand, `G92 A0`, and it knows where it

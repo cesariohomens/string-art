@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>String Art Machine — Assembly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6.5' fill='none' stroke='%23111' stroke-width='1.4'/><path d='M3 6.5 13 9.5M4 10.5 12 5.5' stroke='%23e11d1d' stroke-width='.9'/></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo:wght@100;300;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <!-- three.js: last release with a plain global build, so no bundler is needed -->
+  <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+
+  <style>
+    :root { --bg:#f6f7f9; --ink:#111; --muted:#666; --card:#fff; --border:#a1a4aa; --accent:#e11d1d; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.45 'Exo', system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial; font-weight:300; }
+    header { padding:16px 20px; background:#111; color:#fff; display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    header h1 { margin:0; font-size:20px; font-weight:600; letter-spacing:.5px; }
+    header .hint { color:#c9ccd1; font-size:12px; }
+    header a { color:#c9ccd1; }
+
+    main { padding:16px 20px 28px; max-width:1600px; margin:0 auto; display:grid; gap:16px; grid-template-columns:minmax(340px, 460px) 1fr; align-items:start; }
+    @media (max-width:1000px) { main { grid-template-columns:1fr; } }
+
+    .card { background:var(--card); border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:16px; border:1px solid var(--border); }
+    .card h2 { margin:0 0 12px; font-size:15px; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+    .hint { font-size:12px; color:#555; font-weight:300; }
+    .btn { padding:9px 15px; border:1px solid #111; border-radius:10px; background:#111; color:#fff; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; }
+    .btn:hover:not(:disabled) { background:#333; }
+    .btn.secondary { background:#fff; color:#111; }
+    .btn.secondary:hover:not(:disabled) { background:#f0f0f0; }
+    .btn:disabled { opacity:.4; cursor:not-allowed; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+    .tabs { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+    .tab { padding:9px 16px; border:1px solid var(--border); border-radius:999px; background:#fff; color:#111; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; }
+    .tab.active { background:#111; color:#fff; border-color:#111; }
+
+    .bar { height:8px; border-radius:999px; background:#e6e8ec; overflow:hidden; margin:10px 0 6px; }
+    .bar > div { height:100%; background:#111; transition:width .18s; }
+    .tally { display:flex; justify-content:space-between; font-size:12px; color:#555; margin-bottom:12px; }
+
+    .steps { max-height:calc(100vh - 340px); min-height:280px; overflow:auto; margin-top:14px; padding-right:4px; }
+    .step { border-top:1px solid #e3e5e8; padding:10px 0 4px; }
+    .step:first-child { border-top:none; }
+    .step-head { display:flex; align-items:baseline; gap:8px; }
+    .step-no { font-weight:600; font-size:12px; color:#8b9099; min-width:20px; }
+    .step-name { font-weight:600; font-size:14px; }
+    .step.done .step-name, .step.done .step-no { color:#8b9099; }
+    .step-note { font-size:12px; color:#555; margin:6px 0 8px 28px; }
+    .step-fill { margin:0 0 8px 28px; }
+
+    .piece { display:flex; align-items:center; gap:10px; padding:5px 6px 5px 28px; border-radius:8px; font-size:13px; }
+    .piece.next { background:#fdf1f1; outline:1px solid #f0c9c9; }
+    .piece.pending { color:#9aa0a6; }
+    .piece input { width:16px; height:16px; flex-shrink:0; accent-color:#111; }
+    .piece input:disabled { cursor:not-allowed; }
+    .piece label { flex:1; min-width:0; cursor:pointer; }
+    .piece.pending label { cursor:not-allowed; }
+    .dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; border:1px solid rgba(0,0,0,.22); }
+    .of { font-size:11px; color:#8b9099; font-variant-numeric:tabular-nums; }
+
+    .stagecol { position:sticky; top:16px; }
+    .stageBox { position:relative; }
+    .stage3d { position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#eef0f3; height:calc(100vh - 190px); min-height:420px; touch-action:none; cursor:grab; }
+    .stage3d:active { cursor:grabbing; }
+    .stage3d canvas { display:block; width:100%; height:100%; }
+    .stage3d.max { position:fixed; inset:2vh 2vw; height:auto; z-index:1001; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.35); }
+    .stageBackdrop { position:fixed; inset:0; background:rgba(17,17,17,.45); z-index:1000; }
+    .expand { position:absolute; top:10px; right:10px; width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:50%; background:rgba(255,255,255,.92); color:#111; cursor:pointer; }
+    .expand:hover { background:#fff; }
+    .expand svg { width:17px; height:17px; }
+
+    .legend { display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:10px; font-size:12px; color:#555; }
+    .legend span { display:flex; align-items:center; gap:6px; }
+    .stagebar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
+    .checkline { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; }
+    .checkline input { width:15px; height:15px; accent-color:#111; }
+
+    .alert { padding:12px 14px; border-radius:10px; font-size:13px; border:1px solid; font-weight:300; }
+    .alert.err { background:#fdecec; border-color:#e79a9a; color:#8d1c1c; }
+    .alert b { font-weight:600; }
+    .alert code, code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; background:rgba(0,0,0,.06); padding:1px 5px; border-radius:5px; }
+    pre { background:#f2f4f7; border:1px solid #e3e5e8; border-radius:10px; padding:10px 12px; overflow:auto; margin:10px 0; }
+    pre code { background:none; padding:0; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var h = React.createElement;
+
+  // The meshes and the manifest that export-assembly.sh writes. Each mesh is
+  // already sitting where it belongs, so there is nothing to place here.
+  var ASSETS = 'hardware/stl/assembly/';
+  var ACCENT = '#e11d1d';
+  var STORE = 'string-art-machine-assembly';
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+  // ------------------------------------------------------------ binary STL
+  // Fifty bytes a triangle: a normal nobody has to recompute, three corners,
+  // and a short that OpenSCAD leaves at zero.
+  function readSTL(buf) {
+    if (buf.byteLength < 84) throw new Error('too short to be an STL');
+    var dv = new DataView(buf);
+    var n = dv.getUint32(80, true);
+    if (84 + n * 50 !== buf.byteLength)
+      throw new Error('not a binary STL — re-run export-assembly.sh');
+
+    var pos = new Float32Array(n * 9), nor = new Float32Array(n * 9);
+    var o = 84, p = 0;
+    for (var i = 0; i < n; i++) {
+      var nx = dv.getFloat32(o, true),
+          ny = dv.getFloat32(o + 4, true),
+          nz = dv.getFloat32(o + 8, true);
+      o += 12;
+      for (var v = 0; v < 3; v++) {
+        pos[p] = dv.getFloat32(o, true);
+        pos[p + 1] = dv.getFloat32(o + 4, true);
+        pos[p + 2] = dv.getFloat32(o + 8, true);
+        nor[p] = nx; nor[p + 1] = ny; nor[p + 2] = nz;
+        o += 12; p += 3;
+      }
+      o += 2;
+    }
+
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+    g.computeBoundingBox();
+    return g;
+  }
+
+  // A few at a time: a hundred parallel requests only make the browser queue
+  // them anyway, and this way the count climbs steadily.
+  function fetchAll(pieces, width, onOne) {
+    var next = 0;
+    function worker() {
+      if (next >= pieces.length) return Promise.resolve();
+      var piece = pieces[next++];
+      return fetch(ASSETS + piece.id + '.stl')
+        .then(function (r) {
+          if (!r.ok) throw new Error(piece.id + '.stl: ' + r.status);
+          return r.arrayBuffer();
+        })
+        .then(function (buf) { onOne(piece, readSTL(buf)); })
+        .then(worker);
+    }
+    var running = [];
+    for (var i = 0; i < Math.min(width, pieces.length); i++) running.push(worker());
+    return Promise.all(running);
+  }
+
+  // ------------------------------------------------------------- the stage
+  function useStage() {
+    // A callback ref rather than a plain one: the stage only appears once the
+    // manifest has arrived, so the setup has to wait for the element instead of
+    // running on mount and finding nothing.
+    var hs = React.useState(null), host = hs[0], setHost = hs[1];
+    var hostRef = React.useCallback(function (node) { setHost(node); }, []);
+
+    var ref = React.useRef(null);
+    var dragRef = React.useRef(null);
+    var camRef = React.useRef({
+      azimuth: 0.72, polar: 1.02, distance: 1400, min: 120, max: 6000,
+      target: { x: 0, y: 0, z: 0 }
+    });
+    var st = React.useState(false), failed = st[0], setFailed = st[1];
+    var rd = React.useState(false), ready = rd[0], setReady = rd[1];
+    var mx = React.useState(false), maxed = mx[0], setMaxed = mx[1];
+
+    React.useEffect(function () {
+      if (!host) return;
+      if (!window.THREE) { setFailed(true); return; }
+
+      var renderer;
+      try { renderer = new THREE.WebGLRenderer({ antialias: true }); }
+      catch (e) { setFailed(true); return; }
+
+      THREE.ColorManagement.legacyMode = false;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      host.appendChild(renderer.domElement);
+
+      var scene = new THREE.Scene();
+      scene.background = new THREE.Color('#eef0f3');
+      var camera = new THREE.PerspectiveCamera(38, 1.6, 1, 40000);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      var key = new THREE.DirectionalLight(0xffffff, 0.82);
+      key.position.set(0.8, 1.4, 0.9); scene.add(key);
+      var fill = new THREE.DirectionalLight(0xffffff, 0.34);
+      fill.position.set(-1.1, 0.5, -1.0); scene.add(fill);
+
+      // The model is drawn Z up, the way OpenSCAD and the machine both think of
+      // it. One rotation here and everything else can be left alone.
+      var root = new THREE.Group();
+      root.rotation.x = -Math.PI / 2;
+      scene.add(root);
+
+      var s = { renderer: renderer, scene: scene, camera: camera, root: root, frame: 0 };
+
+      function draw() {
+        s.frame = 0;
+        var c = camRef.current, sp = Math.sin(c.polar), t = c.target;
+        camera.position.set(
+          t.x + c.distance * sp * Math.sin(c.azimuth),
+          t.y + c.distance * Math.cos(c.polar),
+          t.z + c.distance * sp * Math.cos(c.azimuth)
+        );
+        camera.lookAt(t.x, t.y, t.z);
+        renderer.render(scene, camera);
+      }
+      // Nothing moves on its own, so only draw when something actually changed.
+      s.request = function () { if (!s.frame) s.frame = requestAnimationFrame(draw); };
+      ref.current = s;
+      setReady(true);
+
+      function resize() {
+        var w = host.clientWidth, hh = host.clientHeight;
+        if (!w || !hh) return;
+        renderer.setSize(w, hh, false);
+        camera.aspect = w / hh;
+        camera.updateProjectionMatrix();
+        s.request();
+      }
+      var ro = new ResizeObserver(resize);
+      ro.observe(host);
+      resize();
+
+      function onWheel(e) {
+        e.preventDefault();
+        var c = camRef.current;
+        c.distance = clamp(c.distance * (e.deltaY < 0 ? 0.9 : 1 / 0.9), c.min, c.max);
+        s.request();
+      }
+      host.addEventListener('wheel', onWheel, { passive: false });
+
+      return function () {
+        ro.disconnect();
+        host.removeEventListener('wheel', onWheel);
+        if (s.frame) cancelAnimationFrame(s.frame);
+        scene.traverse(function (o) { if (o.geometry) o.geometry.dispose(); });
+        renderer.dispose();
+        if (renderer.domElement.parentNode)
+          renderer.domElement.parentNode.removeChild(renderer.domElement);
+        ref.current = null;
+        setReady(false);
+      };
+    }, [host]);
+
+    React.useEffect(function () {
+      if (!maxed) return;
+      var previous = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      function onKey(e) { if (e.key === 'Escape') setMaxed(false); }
+      document.addEventListener('keydown', onKey);
+      return function () {
+        document.body.style.overflow = previous;
+        document.removeEventListener('keydown', onKey);
+      };
+    }, [maxed]);
+
+    return {
+      ref: ref, hostRef: hostRef, cam: camRef, drag: dragRef,
+      failed: failed, ready: ready, maxed: maxed, setMaxed: setMaxed,
+      request: function () { if (ref.current) ref.current.request(); }
+    };
+  }
+
+  function Stage(p) {
+    var s = p.stage, maxed = s.maxed;
+
+    function onPointerDown(e) {
+      // Right and middle drag, or Shift with the primary button, slide the
+      // look-at point; a plain drag orbits.
+      e.currentTarget.setPointerCapture(e.pointerId);
+      s.drag.current = {
+        x: e.clientX, y: e.clientY,
+        pan: e.shiftKey || e.button === 1 || e.button === 2
+      };
+    }
+    function onPointerMove(e) {
+      var drag = s.drag.current;
+      if (!drag) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      drag.x = e.clientX; drag.y = e.clientY;
+      var c = s.cam.current;
+      if (drag.pan) {
+        var sx = Math.sin(c.polar), cx = Math.cos(c.polar);
+        var sy = Math.sin(c.azimuth), cy = Math.cos(c.azimuth);
+        var rx = cy, rz = -sy;
+        var ux = -cx * sy, uy = sx, uz = -cx * cy;
+        var k = c.distance * 0.0022;
+        // Grab feel: the machine follows the pointer.
+        c.target.x += (rx * dx - ux * dy) * k;
+        c.target.y += (-uy * dy) * k;
+        c.target.z += (rz * dx - uz * dy) * k;
+      } else {
+        c.azimuth -= dx * 0.008;
+        c.polar = clamp(c.polar - dy * 0.006, 0.06, 1.55);
+      }
+      s.request();
+    }
+    function onPointerUp(e) {
+      s.drag.current = null;
+      if (e.currentTarget.hasPointerCapture(e.pointerId))
+        e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+
+    return h(React.Fragment, null,
+      maxed ? h('div', { className: 'stageBackdrop', onClick: function () { s.setMaxed(false); } }) : null,
+      h('div', { className: 'stageBox' },
+        h('div', {
+          className: 'stage3d' + (maxed ? ' max' : ''), ref: s.hostRef,
+          onPointerDown: onPointerDown, onPointerMove: onPointerMove,
+          onPointerUp: onPointerUp, onPointerCancel: onPointerUp,
+          onContextMenu: function (e) { e.preventDefault(); }
+        },
+          h('button', {
+            type: 'button', className: 'expand',
+            title: maxed ? 'Minimise' : 'Maximise',
+            'aria-label': maxed ? 'Minimise' : 'Maximise',
+            onPointerDown: function (e) { e.stopPropagation(); },
+            onClick: function () { s.setMaxed(!maxed); }
+          },
+            h('svg', {
+              viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6,
+              strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true'
+            },
+              h('path', {
+                d: maxed
+                  ? 'M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25'
+                  : 'M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15'
+              })
+            )
+          )
+        )
+      )
+    );
+  }
+
+  // ------------------------------------------------------------------- app
+  function saved() {
+    try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { return {}; }
+  }
+
+  function App() {
+    var was = React.useRef(saved()).current;
+
+    var a = React.useState(null), data = a[0], setData = a[1];
+    var b = React.useState(null), error = b[0], setError = b[1];
+    var c = React.useState(0), loaded = c[0], setLoaded = c[1];
+    var d = React.useState(was.mode === 'printed' ? 'printed' : 'all'), mode = d[0], setMode = d[1];
+    var e = React.useState(was.done || []), doneIds = e[0], setDoneIds = e[1];
+    var f = React.useState(was.ghost !== false), ghost = f[0], setGhost = f[1];
+
+    var stage = useStage();
+    var meshes = React.useRef({}).current;
+    var mats = React.useRef({}).current;
+    var special = React.useRef(null);
+    var rowRef = React.useRef(null);
+
+    // ---------------------------------------------------------- the meshes
+    React.useEffect(function () {
+      var live = true;
+      fetch(ASSETS + 'manifest.json')
+        .then(function (r) {
+          if (!r.ok) throw new Error('manifest.json: ' + r.status);
+          return r.json();
+        })
+        .then(function (m) {
+          if (!live) return;
+          setData(m);
+          return fetchAll(m.pieces, 8, function (piece, geo) {
+            if (!live) return;
+            var mesh = new THREE.Mesh(geo, material(piece.colour));
+            mesh.visible = false;
+            meshes[piece.id] = mesh;
+            setLoaded(function (n) { return n + 1; });
+          });
+        })
+        .catch(function (err) { if (live) setError(err.message || String(err)); });
+      return function () { live = false; };
+    }, []);
+
+    // Meshes arrive and the stage appears in whichever order the network and
+    // the browser settle on, so parenting is done here rather than at either.
+    React.useEffect(function () {
+      var s = stage.ref.current;
+      if (!s) return;
+      Object.keys(meshes).forEach(function (id) {
+        if (!meshes[id].parent) s.root.add(meshes[id]);
+      });
+    }, [loaded, stage.ready]);
+
+    // Framed once, off everything the machine has, so that ticking a piece
+    // never moves the camera under your hand.
+    var framed = React.useRef(false);
+    React.useEffect(function () {
+      if (framed.current || !stage.ready || !data || loaded < data.pieces.length) return;
+      framed.current = true;
+      frameAll();
+    }, [loaded, stage.ready, data]);
+
+    function material(colour) {
+      if (!mats[colour])
+        mats[colour] = new THREE.MeshStandardMaterial({
+          color: colour, roughness: 0.62, metalness: 0.06
+        });
+      return mats[colour];
+    }
+    function specials() {
+      if (!special.current) special.current = {
+        // What just went on, so it is obvious which piece the tick added.
+        newest: new THREE.MeshStandardMaterial({ color: ACCENT, roughness: 0.45, metalness: 0.04 }),
+        // And what goes on next, shown through everything else.
+        ghost: new THREE.MeshStandardMaterial({
+          color: ACCENT, roughness: 0.6, transparent: true, opacity: 0.45, depthWrite: false
+        })
+      };
+      return special.current;
+    }
+
+    // Everything the machine ever has, so the view does not lurch about as
+    // pieces appear. Model coordinates are Z up; the stage turns them Y up.
+    function bounds(only) {
+      var box = new THREE.Box3();
+      Object.keys(meshes).forEach(function (id) {
+        if (only && only !== id) return;
+        var bb = meshes[id].geometry.boundingBox;
+        if (bb) box.union(bb);
+      });
+      return box.isEmpty() ? null : box;
+    }
+    function centreOf(box) {
+      var m = box.getCenter(new THREE.Vector3());
+      return { x: m.x, y: m.z, z: -m.y };
+    }
+    function frameAll() {
+      var s = stage.ref.current, box = bounds(null);
+      if (!s || !box) return;
+      var cam = stage.cam.current, at = centreOf(box);
+      cam.target.x = at.x; cam.target.y = at.y; cam.target.z = at.z;
+
+      // Fit the eight corners rather than a sphere drawn round them: the
+      // machine is a wide flat thing, and a sphere would leave half the view
+      // empty. The basis is the one draw() builds the camera from.
+      var sp = Math.sin(cam.polar), cp = Math.cos(cam.polar);
+      var sa = Math.sin(cam.azimuth), ca = Math.cos(cam.azimuth);
+      var fwd = [-sp * sa, -cp, -sp * ca];
+      var right = [ca, 0, -sa];
+      var up = [-cp * sa, sp, -cp * ca];
+      var vt = Math.tan(19 * Math.PI / 180);
+      var ht = vt * (s.camera.aspect || 1.6);
+
+      var need = 0;
+      for (var i = 0; i < 8; i++) {
+        var p = [
+          ((i & 1) ? box.max.x : box.min.x) - at.x,
+          ((i & 4) ? box.max.z : box.min.z) - at.y,
+          -((i & 2) ? box.max.y : box.min.y) - at.z
+        ];
+        var dr = p[0] * right[0] + p[1] * right[1] + p[2] * right[2];
+        var du = p[0] * up[0] + p[1] * up[1] + p[2] * up[2];
+        var df = p[0] * fwd[0] + p[1] * fwd[1] + p[2] * fwd[2];
+        need = Math.max(need, Math.abs(dr) / ht - df, Math.abs(du) / vt - df);
+      }
+
+      var r = box.getSize(new THREE.Vector3()).length() / 2;
+      cam.distance = need * 1.06;
+      cam.min = r * 0.05; cam.max = r * 10;
+      stage.request();
+    }
+
+    // ----------------------------------------------------------- the order
+    var list = React.useMemo(function () {
+      if (!data) return [];
+      return mode === 'printed'
+        ? data.pieces.filter(function (p) { return !p.bought; })
+        : data.pieces;
+    }, [data, mode]);
+
+    // How far along we are: the longest run from the start that is all ticked.
+    // Deriving it rather than storing it is what keeps a piece from going on
+    // before the ones it rests on, whichever way the list is filtered.
+    var done = React.useMemo(function () {
+      var set = {}, i;
+      for (i = 0; i < doneIds.length; i++) set[doneIds[i]] = true;
+      for (i = 0; i < list.length; i++) if (!set[list[i].id]) break;
+      return i;
+    }, [list, doneIds]);
+
+    React.useEffect(function () {
+      try {
+        localStorage.setItem(STORE, JSON.stringify({ mode: mode, done: doneIds, ghost: ghost }));
+      } catch (err) { /* private browsing, and nothing here is worth a fuss */ }
+    }, [mode, doneIds, ghost]);
+
+    function fillTo(i) {
+      var add = doneIds.slice();
+      for (var k = done; k <= i; k++) if (add.indexOf(list[k].id) < 0) add.push(list[k].id);
+      setDoneIds(add);
+    }
+    function undo() {
+      if (!done) return;
+      var id = list[done - 1].id;
+      setDoneIds(doneIds.filter(function (x) { return x !== id; }));
+    }
+
+    // --------------------------------------------------- what the view shows
+    React.useEffect(function () {
+      if (!stage.ref.current || !data) return;
+      var sp = specials(), shown = {};
+      list.forEach(function (p, i) {
+        var mesh = meshes[p.id];
+        if (!mesh) return;
+        shown[p.id] = true;
+        mesh.visible = i < done || (ghost && i === done);
+        mesh.material = i === done ? sp.ghost
+                      : i === done - 1 ? sp.newest
+                      : material(p.colour);
+      });
+      // Whatever the printed-only filter left out.
+      Object.keys(meshes).forEach(function (id) {
+        if (!shown[id]) meshes[id].visible = false;
+      });
+      stage.request();
+    }, [data, list, done, ghost, loaded]);
+
+    // Keep the piece you are on where you can see it.
+    React.useEffect(function () {
+      if (rowRef.current && rowRef.current.scrollIntoView)
+        rowRef.current.scrollIntoView({ block: 'nearest' });
+    }, [done, mode]);
+
+    React.useEffect(function () {
+      function onKey(ev) {
+        // The tick boxes take focus when they are clicked, and the arrows have
+        // to keep working after that; there is nothing on this page to type in.
+        var el = ev.target;
+        if (el && (el.isContentEditable || /^(TEXTAREA|SELECT)$/.test(el.tagName))) return;
+        if (ev.key === 'ArrowRight' && done < list.length) { fillTo(done); ev.preventDefault(); }
+        if (ev.key === 'ArrowLeft' && done > 0) { undo(); ev.preventDefault(); }
+      }
+      document.addEventListener('keydown', onKey);
+      return function () { document.removeEventListener('keydown', onKey); };
+    });
+
+    function lookAtNext() {
+      if (done >= list.length) return;
+      var box = bounds(list[done].id);
+      if (!box) return;
+      var cam = stage.cam.current, at = centreOf(box);
+      cam.target.x = at.x; cam.target.y = at.y; cam.target.z = at.z;
+      stage.request();
+    }
+
+    // ----------------------------------------------------------- rendering
+    if (error) return h(Missing, { error: error });
+    if (!data) return h(Shell, null, h('div', { className: 'card' }, 'Reading the piece list…'));
+
+    var next = done < list.length ? list[done] : null;
+    var ready = loaded >= data.pieces.length;
+    var groups = data.steps.map(function (s) {
+      return { step: s, items: [] };
+    });
+    list.forEach(function (p, i) {
+      var g = groups[p.step - 1];
+      if (g) g.items.push({ piece: p, i: i });
+    });
+    groups = groups.filter(function (g) { return g.items.length > 0; });
+
+    return h(Shell, { done: done, total: list.length },
+      h('div', { className: 'card' },
+        h('h2', null, 'What you are putting together'),
+        h('div', { className: 'tabs' },
+          h('button', {
+            type: 'button', className: 'tab' + (mode === 'all' ? ' active' : ''),
+            onClick: function () { setMode('all'); }
+          }, 'Printed and bought'),
+          h('button', {
+            type: 'button', className: 'tab' + (mode === 'printed' ? ' active' : ''),
+            onClick: function () { setMode('printed'); }
+          }, 'Printed parts only')
+        ),
+        h('div', { className: 'hint' },
+          mode === 'printed'
+            ? 'Only the pieces that come off your printer. Use this to check a print run is complete.'
+            : 'Every piece, printed and bought, in the order it goes on.'
+        ),
+
+        h('div', { className: 'bar' },
+          h('div', { style: { width: (list.length ? done / list.length * 100 : 0) + '%' } })
+        ),
+        h('div', { className: 'tally' },
+          h('span', null, done + ' of ' + list.length + ' pieces'),
+          h('span', null, ready ? '' : 'loading meshes ' + loaded + ' / ' + data.pieces.length)
+        ),
+
+        h('div', { className: 'controls' },
+          h('button', {
+            type: 'button', className: 'btn', disabled: !next,
+            onClick: function () { fillTo(done); }
+          }, next ? 'Fit ' + next.label + (next.of > 1 ? ' ' + next.n + '/' + next.of : '')
+                  : 'The machine is built'),
+          h('button', {
+            type: 'button', className: 'btn secondary', disabled: !done, onClick: undo
+          }, 'Take it off again'),
+          h('button', {
+            type: 'button', className: 'btn secondary', disabled: !done,
+            onClick: function () { setDoneIds([]); }
+          }, 'Start over')
+        ),
+
+        h('div', { className: 'steps' },
+          groups.map(function (g) {
+            var last = g.items[g.items.length - 1];
+            var stepDone = last.i < done;
+            var current = g.items[0].i <= done && done <= last.i;
+            return h('div', { className: 'step' + (stepDone ? ' done' : ''), key: g.step.n },
+              h('div', { className: 'step-head' },
+                h('span', { className: 'step-no' }, stepDone ? '\u2713' : g.step.n),
+                h('span', { className: 'step-name' }, g.step.name)
+              ),
+              current && g.step.note ? h('div', { className: 'step-note' }, g.step.note) : null,
+              current && g.items.length > 1 && last.i >= done
+                ? h('div', { className: 'step-fill' },
+                    h('button', {
+                      type: 'button', className: 'btn secondary',
+                      onClick: function () { fillTo(last.i); }
+                    }, 'Fit the rest of this step')
+                  )
+                : null,
+              g.items.map(function (it) {
+                var i = it.i, p = it.piece;
+                var state = i < done ? 'done' : i === done ? 'next' : 'pending';
+                return h('div', {
+                  className: 'piece ' + state, key: p.id,
+                  ref: i === done ? rowRef : null
+                },
+                  h('input', {
+                    // Only the piece that is next can go on, and only the last
+                    // one fitted can come off. That is the whole precedence
+                    // rule; the order of the list is the rest of it.
+                    type: 'checkbox', id: p.id, checked: i < done,
+                    disabled: i !== done && i !== done - 1,
+                    onChange: function () { if (i === done) fillTo(i); else undo(); }
+                  }),
+                  h('span', { className: 'dot', style: { background: p.colour } }),
+                  h('label', { htmlFor: p.id }, p.label),
+                  p.of > 1 ? h('span', { className: 'of' }, p.n + ' / ' + p.of) : null
+                );
+              })
+            );
+          })
+        )
+      ),
+
+      h('div', { className: 'stagecol' },
+        stage.failed
+          ? h('div', { className: 'alert err' },
+              h('b', null, 'No WebGL here. '),
+              'The list still works, but there is nothing to show you.')
+          : h(Stage, { stage: stage }),
+        h('div', { className: 'stagebar' },
+          h('label', { className: 'checkline' },
+            h('input', {
+              type: 'checkbox', checked: ghost,
+              onChange: function (ev) { setGhost(ev.target.checked); }
+            }),
+            'Show the next piece in place'
+          ),
+          h('button', {
+            type: 'button', className: 'btn secondary', disabled: !next, onClick: lookAtNext
+          }, 'Centre on it'),
+          h('button', { type: 'button', className: 'btn secondary', onClick: frameAll },
+            'Whole machine')
+        ),
+        h('div', { className: 'legend' },
+          h('span', null, h('span', { className: 'dot', style: { background: ACCENT } }), 'just fitted'),
+          h('span', null, h('span', { className: 'dot', style: { background: ACCENT, opacity: .35 } }), 'goes on next'),
+          h('span', null, h('span', { className: 'dot', style: { background: '#c8ccd0' } }), 'printed'),
+          h('span', null, h('span', { className: 'dot', style: { background: '#9aa0a6' } }), 'bought')
+        ),
+        h('div', { className: 'legend' },
+          h('span', null, 'Drag to turn, Shift-drag to move, wheel to zoom. Arrow keys step through the list.')
+        )
+      )
+    );
+  }
+
+  function Shell(p) {
+    return h(React.Fragment, null,
+      h('header', null,
+        h('div', null,
+          h('h1', null, 'Building the machine'),
+          h('div', { className: 'hint' },
+            'One piece at a time, in the order they go on. Tick a piece and it appears. ',
+            h('a', { href: 'hardware/README.md' }, 'hardware/README.md'),
+            ' has the detail.')
+        ),
+        p.total ? h('div', { className: 'hint' }, p.done + ' / ' + p.total) : null
+      ),
+      h('main', null, p.children)
+    );
+  }
+
+  function Missing(p) {
+    var isFile = location.protocol === 'file:';
+    return h(Shell, null,
+      h('div', { className: 'card' },
+        h('h2', null, 'The meshes are not there yet'),
+        h('div', { className: 'alert err' }, p.error),
+        h('p', null, 'This page reads one mesh per piece out of ',
+          h('code', null, 'hardware/stl/assembly/'), '. They are built from the model rather than kept in the repository, so:'),
+        h('pre', null, h('code', null, 'cd hardware && ./export-assembly.sh')),
+        isFile
+          ? h('p', null,
+              h('b', null, 'And it has to be served. '),
+              'A browser will not read files off ', h('code', null, 'file://'), '. From the ',
+              h('code', null, 'machine'), ' folder:',
+              h('pre', null, h('code', null, 'python3 -m http.server 8000')),
+              'then open ', h('code', null, 'http://localhost:8000/'), '.')
+          : null
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+})();
+</script>
+</body>
+</html>
