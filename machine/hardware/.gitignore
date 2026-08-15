@@ -1,4 +1,0 @@
-# Exported meshes are built from the model by export.sh, so they are not kept.
-stl/
-# Nor is the video, which animate.sh builds from the same model.
-anim/

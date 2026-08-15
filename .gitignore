@@ -1,0 +1,37 @@
+# OS and editors
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+# Local Cursor state; committed rules live under .cursor/rules if you add them
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+
+# Node, if a local harness or CDN vendoring is ever unpacked here
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Python helpers (http.server, one-off scripts)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OpenSCAD scratch left beside the model
+*.csg
+.probe.scad
+
+# PlatformIO build tree, and the packed web UI (vendored libraries, gzipped)
+machine/firmware/.pio/
+machine/firmware/data/
+
+# Meshes from export.sh / export-assembly.sh, and the film from animate.sh
+machine/hardware/stl/
+machine/hardware/anim/
