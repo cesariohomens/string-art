@@ -23,15 +23,3 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-
-# OpenSCAD scratch left beside the model
-*.csg
-.probe.scad
-
-# PlatformIO build tree, and the packed web UI (vendored libraries, gzipped)
-machine/firmware/.pio/
-machine/firmware/data/
-
-# Meshes from export.sh / export-assembly.sh, and the film from animate.sh
-machine/hardware/stl/
-machine/hardware/anim/

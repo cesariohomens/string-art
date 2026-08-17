@@ -1,9 +1,0 @@
-# The app is served off the machine, so the filesystem gets as much of the 4 MB
-# as the firmware can spare: 1.9 MB of program, no OTA slot, and 1.9 MB left for
-# index.html, the libraries it needs and the job being run.
-# Name,   Type, SubType, Offset,   Size
-nvs,      data, nvs,     0x9000,   0x5000
-otadata,  data, ota,     0xe000,   0x2000
-app0,     app,  ota_0,   0x10000,  0x1E0000
-spiffs,   data, spiffs,  0x1F0000, 0x200000
-coredump, data, coredump,0x3F0000, 0x10000
