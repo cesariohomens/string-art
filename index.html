@@ -312,6 +312,7 @@
     }
     .alert.warn { background:#fffaeb; border-color:#fedf89; color:#93370d; }
     .alert.err { background:#fef3f2; border-color:#fecdca; color:#b42318; }
+    .alert.ok { background:#ecfdf3; border-color:#abefc6; color:#067647; }
 
     .progress {
       height:20px; background:var(--surface-3); border:1px solid var(--line);
@@ -427,6 +428,7 @@
       tabTemplate: "Template PDF",
       tabGenerator: "String Art Generator",
       tabRing: "Template STL",
+      tabPrinter: "Printer G-code",
 
       paramsTitle: "Parameters",
       points: "Number of points",
@@ -518,6 +520,63 @@
       warnTagsTiny: "At {0} points the tag digits are only {1} mm tall, too small to read or to print. Reduce the points or turn the tags off.",
       warnBedSize: "The largest part measures {0} × {1} cm and will not fit a typical 25 cm print bed — raise the number of ring segments, or print a smaller board.",
 
+      gJobTitle: "What to wind",
+      gFromGenerator: "{0} wraps, from the generator tab.",
+      gLoaded: "{0} wraps, from {1}.",
+      gNoSequence: "Run the generator, or load a sequence you saved earlier.",
+      gLoadSequence: "Load .txt",
+      gUseGenerator: "Use the generator's run",
+      gWarnPoints: "This sequence was worked out with {0} points, and that is what the job uses.",
+
+      gBoardTitle: "Ring on the bed",
+      gRingThickness: "Ring thickness (mm)",
+      gRingThicknessHint: "The base thickness the mould was printed at, so the thread ends up at the right height above it.",
+      gWrapHeight: "Wrap height (mm)",
+      gWrapHeightHint: "Where the thread is laid on the nail, measured from the top of the ring.",
+      gPhase: "Angle of nail 0 (°)",
+      gPhaseHint: "Turn the ring in the drawing until nail 0 is where it really sits. 0° is to the right of centre.",
+      gWrapDir: "Way round each nail",
+      gWrapDirHint: "Either works, as long as the whole picture uses the same one.",
+      gMirror: "Nails numbered the other way round",
+      gCentreAuto: "Put the ring in the middle of what the guide can reach",
+      gCentreX: "Ring centre X (mm)",
+      gCentreY: "Ring centre Y (mm)",
+
+      gPrinterTitle: "Printer and guide",
+      gGuideHint: "The guide hangs to one side of the nozzle and below it, so every move is worked out for the guide and then written down for the nozzle. Measure the three offsets on your own machine: bring the nozzle down onto a mark on the bed, note where it is, then move until the guide is over the same mark.",
+      gOffsetX: "Guide offset X (mm)",
+      gOffsetY: "Guide offset Y (mm)",
+      gOffsetZ: "Guide below the nozzle (mm)",
+      gGuideR: "Guide tip radius (mm)",
+      gGuideRHint: "Half the width of whatever the thread runs down: 2 for the 4 mm PTFE tube the adapter takes. Something thinner leaves room for more nails.",
+      gBedX: "Bed width X (mm)",
+      gBedY: "Bed depth Y (mm)",
+      gFeedTravel: "Travel speed (mm/min)",
+      gFeedOrbit: "Wrapping speed (mm/min)",
+      gAccel: "Acceleration (mm/s²)",
+      gAccelHint: "Low on purpose: the bed carries the ring, and a ring that shifts ends the job.",
+      gSegments: "Straight moves per turn",
+      gSegmentsHint: "How finely each lap round a nail is chopped up. More is rounder and makes a bigger file.",
+      gPark: "Park height (mm)",
+      gParkHint: "Where the nozzle waits before the first nail and after the last.",
+      gHome: "Home X and Y at the start",
+      gHomeHint: "Home the machine before the ring goes on the bed: homing Z probes the bed and would drive into the nails.",
+      gTie: "Tie the thread to nail {0} and pass it down the guide before starting the job.",
+      gDownload: "Download .gcode",
+
+      gBedTitle: "On the bed",
+      gBedHint: "The dashed rectangle is where the guide can be put: the bed, less the offset between guide and nozzle. Both the ring and the wider circle the guide swings through have to sit inside it. Nail 0 is the red one.",
+      gSOrbit: "Orbit radius",
+      gSMaxNails: "Nails this radius has room for",
+      gSNozzleZ: "Nozzle height while winding",
+      gSWraps: "Wraps",
+      gSPath: "Distance travelled",
+      gSTime: "Estimated time",
+      gSSize: "File size",
+      gWarnCrowded: "{0} points leave {1} mm between nails and a {2} mm guide cannot pass. Come down to {3} points or fewer, or use a wider radius.",
+      gWarnOrbit: "The orbit has to be between {0} and {1} mm.",
+      gWarnBed: "The job needs {0} mm across and the guide only reaches {1} mm. Use a smaller ring, or bring the guide closer to the nozzle.",
+
       genTitle: "Source image",
       selectImage: "Select an image",
       imageHint: "Best results with high-contrast close-up portraits. The image is cropped to a square and masked to a circle.",
@@ -586,6 +645,7 @@
       tabTemplate: "PDF do molde",
       tabGenerator: "Gerador de String Art",
       tabRing: "STL do molde",
+      tabPrinter: "G-code da impressora",
 
       paramsTitle: "Parâmetros",
       points: "Número de pontos",
@@ -677,6 +737,63 @@
       warnTagsTiny: "Com {0} pontos os dígitos das setas ficam com apenas {1} mm, pequenos demais para ler ou imprimir. Reduz os pontos ou desliga as setas.",
       warnBedSize: "A maior peça mede {0} × {1} cm e não cabe numa base de impressão comum de 25 cm — aumenta o número de partes do aro, ou imprime uma placa mais pequena.",
 
+      gJobTitle: "O que enrolar",
+      gFromGenerator: "{0} voltas, vindas da aba do gerador.",
+      gLoaded: "{0} voltas, vindas de {1}.",
+      gNoSequence: "Corre o gerador, ou carrega uma sequência que tenhas guardado.",
+      gLoadSequence: "Carregar .txt",
+      gUseGenerator: "Usar a sequência do gerador",
+      gWarnPoints: "Esta sequência foi calculada com {0} pontos, e é com esses que o trabalho é feito.",
+
+      gBoardTitle: "Aro na base",
+      gRingThickness: "Espessura do aro (mm)",
+      gRingThicknessHint: "A espessura da base com que o molde foi impresso, para o fio ficar à altura certa acima dela.",
+      gWrapHeight: "Altura do fio (mm)",
+      gWrapHeightHint: "Onde o fio assenta no prego, medido a partir do topo do aro.",
+      gPhase: "Ângulo do prego 0 (°)",
+      gPhaseHint: "Roda o aro no desenho até o prego 0 ficar onde está de facto. 0° é à direita do centro.",
+      gWrapDir: "Sentido da volta ao prego",
+      gWrapDirHint: "Qualquer um serve, desde que seja o mesmo em todo o quadro.",
+      gMirror: "Pregos numerados no sentido contrário",
+      gCentreAuto: "Centrar o aro no que o guia consegue alcançar",
+      gCentreX: "Centro do aro em X (mm)",
+      gCentreY: "Centro do aro em Y (mm)",
+
+      gPrinterTitle: "Impressora e guia",
+      gGuideHint: "O guia fica ao lado do bico e abaixo dele, por isso cada movimento é calculado para o guia e depois escrito para o bico. Mede as três distâncias na tua máquina: desce o bico até uma marca na base, anota a posição, e depois move até o guia ficar sobre a mesma marca.",
+      gOffsetX: "Desvio do guia em X (mm)",
+      gOffsetY: "Desvio do guia em Y (mm)",
+      gOffsetZ: "Guia abaixo do bico (mm)",
+      gGuideR: "Raio da ponta do guia (mm)",
+      gGuideRHint: "Metade da largura daquilo por onde o fio corre: 2 para o tubo de PTFE de 4 mm que o adaptador leva. Algo mais fino deixa espaço para mais pregos.",
+      gBedX: "Largura da base em X (mm)",
+      gBedY: "Profundidade da base em Y (mm)",
+      gFeedTravel: "Velocidade entre pregos (mm/min)",
+      gFeedOrbit: "Velocidade da volta (mm/min)",
+      gAccel: "Aceleração (mm/s²)",
+      gAccelHint: "Baixa de propósito: é a base que leva o aro, e um aro que se desloca acaba com o trabalho.",
+      gSegments: "Movimentos por volta",
+      gSegmentsHint: "Em quantos segmentos retos cada volta ao prego é partida. Mais fica mais redondo e dá um ficheiro maior.",
+      gPark: "Altura de espera (mm)",
+      gParkHint: "Onde o bico espera antes do primeiro prego e depois do último.",
+      gHome: "Fazer home a X e Y no início",
+      gHomeHint: "Faz o home da máquina antes de pôr o aro na base: o home em Z sonda a base e ia contra os pregos.",
+      gTie: "Ata o fio ao prego {0} e passa-o pelo guia antes de arrancar com o trabalho.",
+      gDownload: "Descarregar .gcode",
+
+      gBedTitle: "Na base",
+      gBedHint: "O retângulo tracejado é onde o guia pode ser posto: a base, menos o desvio entre o guia e o bico. Tanto o aro como o círculo maior por onde o guia passa têm de caber lá dentro. O prego 0 é o vermelho.",
+      gSOrbit: "Raio da volta",
+      gSMaxNails: "Pregos que este raio comporta",
+      gSNozzleZ: "Altura do bico durante o trabalho",
+      gSWraps: "Voltas",
+      gSPath: "Distância percorrida",
+      gSTime: "Tempo estimado",
+      gSSize: "Tamanho do ficheiro",
+      gWarnCrowded: "{0} pontos deixam {1} mm entre pregos e um guia de {2} mm não passa. Desce para {3} pontos ou menos, ou usa um raio maior.",
+      gWarnOrbit: "A volta tem de ficar entre {0} e {1} mm.",
+      gWarnBed: "O trabalho precisa de {0} mm de lado a lado e o guia só alcança {1} mm. Usa um aro mais pequeno, ou aproxima o guia do bico.",
+
       genTitle: "Imagem de origem",
       selectImage: "Escolher imagem",
       imageHint: "Melhores resultados com retratos de grande plano e muito contraste. A imagem é cortada em quadrado e recortada em círculo.",
@@ -746,6 +863,7 @@
       tabTemplate: "PDF du gabarit",
       tabGenerator: "Générateur de String Art",
       tabRing: "STL du gabarit",
+      tabPrinter: "G-code imprimante",
 
       paramsTitle: "Paramètres",
       points: "Nombre de points",
@@ -837,6 +955,63 @@
       warnTagsTiny: "À {0} points, les chiffres des flèches ne font que {1} mm de haut, trop petits pour être lus ou imprimés. Réduisez les points ou désactivez les flèches.",
       warnBedSize: "La plus grande pièce mesure {0} × {1} cm et n'entre pas sur un plateau courant de 25 cm — augmentez le nombre de parties, ou imprimez une planche plus petite.",
 
+      gJobTitle: "Ce qu'il faut enrouler",
+      gFromGenerator: "{0} tours, venus de l'onglet du générateur.",
+      gLoaded: "{0} tours, venus de {1}.",
+      gNoSequence: "Lancez le générateur, ou chargez une séquence enregistrée plus tôt.",
+      gLoadSequence: "Charger un .txt",
+      gUseGenerator: "Utiliser la séquence du générateur",
+      gWarnPoints: "Cette séquence a été calculée avec {0} points, et c'est avec ceux-là que le travail se fait.",
+
+      gBoardTitle: "Gabarit sur le plateau",
+      gRingThickness: "Épaisseur du gabarit (mm)",
+      gRingThicknessHint: "L'épaisseur de base à laquelle le gabarit a été imprimé, pour que le fil se retrouve à la bonne hauteur au-dessus.",
+      gWrapHeight: "Hauteur du fil (mm)",
+      gWrapHeightHint: "Là où le fil se pose sur le clou, mesuré depuis le dessus du gabarit.",
+      gPhase: "Angle du clou 0 (°)",
+      gPhaseHint: "Tournez le gabarit sur le dessin jusqu'à ce que le clou 0 soit là où il est vraiment. 0° est à droite du centre.",
+      gWrapDir: "Sens du tour autour du clou",
+      gWrapDirHint: "N'importe lequel convient, du moment que tout le tableau garde le même.",
+      gMirror: "Clous numérotés dans l'autre sens",
+      gCentreAuto: "Centrer le gabarit sur ce que le guide peut atteindre",
+      gCentreX: "Centre du gabarit en X (mm)",
+      gCentreY: "Centre du gabarit en Y (mm)",
+
+      gPrinterTitle: "Imprimante et guide",
+      gGuideHint: "Le guide se trouve à côté de la buse et plus bas qu'elle, donc chaque mouvement est calculé pour le guide puis écrit pour la buse. Mesurez les trois écarts sur votre machine : descendez la buse sur un repère du plateau, notez la position, puis déplacez-vous jusqu'à ce que le guide soit sur le même repère.",
+      gOffsetX: "Écart du guide en X (mm)",
+      gOffsetY: "Écart du guide en Y (mm)",
+      gOffsetZ: "Guide sous la buse (mm)",
+      gGuideR: "Rayon du bout du guide (mm)",
+      gGuideRHint: "La moitié de la largeur de ce dans quoi le fil passe : 2 pour le tube PTFE de 4 mm que prend l'adaptateur. Plus fin laisse la place à plus de clous.",
+      gBedX: "Largeur du plateau en X (mm)",
+      gBedY: "Profondeur du plateau en Y (mm)",
+      gFeedTravel: "Vitesse entre clous (mm/min)",
+      gFeedOrbit: "Vitesse du tour (mm/min)",
+      gAccel: "Accélération (mm/s²)",
+      gAccelHint: "Basse volontairement : c'est le plateau qui porte le gabarit, et un gabarit qui bouge met fin au travail.",
+      gSegments: "Mouvements par tour",
+      gSegmentsHint: "En combien de segments droits chaque tour de clou est découpé. Plus, c'est plus rond et un fichier plus gros.",
+      gPark: "Hauteur d'attente (mm)",
+      gParkHint: "Où la buse attend avant le premier clou et après le dernier.",
+      gHome: "Faire l'origine X et Y au départ",
+      gHomeHint: "Faites l'origine de la machine avant de poser le gabarit : l'origine Z palpe le plateau et irait dans les clous.",
+      gTie: "Nouez le fil au clou {0} et passez-le dans le guide avant de lancer le travail.",
+      gDownload: "Télécharger le .gcode",
+
+      gBedTitle: "Sur le plateau",
+      gBedHint: "Le rectangle en pointillés est là où le guide peut aller : le plateau, moins l'écart entre le guide et la buse. Le gabarit et le cercle plus large que le guide décrit doivent tous deux tenir dedans. Le clou 0 est le rouge.",
+      gSOrbit: "Rayon du tour",
+      gSMaxNails: "Clous que ce rayon permet",
+      gSNozzleZ: "Hauteur de la buse pendant le travail",
+      gSWraps: "Tours",
+      gSPath: "Distance parcourue",
+      gSTime: "Temps estimé",
+      gSSize: "Taille du fichier",
+      gWarnCrowded: "{0} points laissent {1} mm entre les clous et un guide de {2} mm ne passe pas. Descendez à {3} points ou moins, ou prenez un rayon plus grand.",
+      gWarnOrbit: "Le tour doit être entre {0} et {1} mm.",
+      gWarnBed: "Le travail demande {0} mm de large et le guide n'atteint que {1} mm. Prenez un gabarit plus petit, ou rapprochez le guide de la buse.",
+
       genTitle: "Image source",
       selectImage: "Choisir une image",
       imageHint: "Meilleurs résultats avec des portraits rapprochés très contrastés. L'image est recadrée en carré puis en cercle.",
@@ -905,6 +1080,7 @@
       tabTemplate: "PDF de la plantilla",
       tabGenerator: "Generador de String Art",
       tabRing: "STL de la plantilla",
+      tabPrinter: "G-code de la impresora",
 
       paramsTitle: "Parámetros",
       points: "Número de puntos",
@@ -996,6 +1172,63 @@
       warnTagsTiny: "Con {0} puntos los dígitos de las flechas miden solo {1} mm, demasiado pequeños para leerse o imprimirse. Reduce los puntos o desactiva las flechas.",
       warnBedSize: "La pieza mayor mide {0} × {1} cm y no cabe en una cama de impresión normal de 25 cm: aumenta el número de partes del aro, o imprime una placa más pequeña.",
 
+      gJobTitle: "Qué enrollar",
+      gFromGenerator: "{0} vueltas, venidas de la pestaña del generador.",
+      gLoaded: "{0} vueltas, venidas de {1}.",
+      gNoSequence: "Ejecuta el generador, o carga una secuencia que hayas guardado antes.",
+      gLoadSequence: "Cargar .txt",
+      gUseGenerator: "Usar la secuencia del generador",
+      gWarnPoints: "Esta secuencia se calculó con {0} puntos, y con esos se hace el trabajo.",
+
+      gBoardTitle: "Aro sobre la cama",
+      gRingThickness: "Espesor del aro (mm)",
+      gRingThicknessHint: "El espesor de base con el que se imprimió la plantilla, para que el hilo quede a la altura correcta sobre ella.",
+      gWrapHeight: "Altura del hilo (mm)",
+      gWrapHeightHint: "Donde el hilo se apoya en el clavo, medido desde la cara superior del aro.",
+      gPhase: "Ángulo del clavo 0 (°)",
+      gPhaseHint: "Gira el aro en el dibujo hasta que el clavo 0 quede donde está de verdad. 0° es a la derecha del centro.",
+      gWrapDir: "Sentido de la vuelta al clavo",
+      gWrapDirHint: "Cualquiera sirve, mientras todo el cuadro use el mismo.",
+      gMirror: "Clavos numerados al contrario",
+      gCentreAuto: "Centrar el aro en lo que el guía alcanza",
+      gCentreX: "Centro del aro en X (mm)",
+      gCentreY: "Centro del aro en Y (mm)",
+
+      gPrinterTitle: "Impresora y guía",
+      gGuideHint: "El guía queda al lado de la boquilla y por debajo de ella, así que cada movimiento se calcula para el guía y luego se escribe para la boquilla. Mide las tres distancias en tu máquina: baja la boquilla sobre una marca de la cama, apunta la posición, y luego muévete hasta que el guía quede sobre la misma marca.",
+      gOffsetX: "Desvío del guía en X (mm)",
+      gOffsetY: "Desvío del guía en Y (mm)",
+      gOffsetZ: "Guía por debajo de la boquilla (mm)",
+      gGuideR: "Radio de la punta del guía (mm)",
+      gGuideRHint: "La mitad del ancho de aquello por donde corre el hilo: 2 para el tubo de PTFE de 4 mm que lleva el adaptador. Algo más fino deja sitio para más clavos.",
+      gBedX: "Ancho de la cama en X (mm)",
+      gBedY: "Fondo de la cama en Y (mm)",
+      gFeedTravel: "Velocidad entre clavos (mm/min)",
+      gFeedOrbit: "Velocidad de la vuelta (mm/min)",
+      gAccel: "Aceleración (mm/s²)",
+      gAccelHint: "Baja a propósito: es la cama la que lleva el aro, y un aro que se mueve acaba con el trabajo.",
+      gSegments: "Movimientos por vuelta",
+      gSegmentsHint: "En cuántos tramos rectos se parte cada vuelta al clavo. Más queda más redondo y da un archivo mayor.",
+      gPark: "Altura de espera (mm)",
+      gParkHint: "Donde espera la boquilla antes del primer clavo y después del último.",
+      gHome: "Hacer home de X e Y al empezar",
+      gHomeHint: "Haz el home de la máquina antes de poner el aro en la cama: el home de Z palpa la cama e iría contra los clavos.",
+      gTie: "Ata el hilo al clavo {0} y pásalo por el guía antes de arrancar el trabajo.",
+      gDownload: "Descargar .gcode",
+
+      gBedTitle: "Sobre la cama",
+      gBedHint: "El rectángulo de trazos es donde puede ponerse el guía: la cama, menos el desvío entre el guía y la boquilla. Tanto el aro como el círculo mayor que el guía recorre tienen que caber dentro. El clavo 0 es el rojo.",
+      gSOrbit: "Radio de la vuelta",
+      gSMaxNails: "Clavos que admite este radio",
+      gSNozzleZ: "Altura de la boquilla durante el trabajo",
+      gSWraps: "Vueltas",
+      gSPath: "Distancia recorrida",
+      gSTime: "Tiempo estimado",
+      gSSize: "Tamaño del archivo",
+      gWarnCrowded: "{0} puntos dejan {1} mm entre clavos y un guía de {2} mm no pasa. Baja a {3} puntos o menos, o usa un radio mayor.",
+      gWarnOrbit: "La vuelta tiene que quedar entre {0} y {1} mm.",
+      gWarnBed: "El trabajo necesita {0} mm de lado a lado y el guía solo alcanza {1} mm. Usa un aro más pequeño, o acerca el guía a la boquilla.",
+
       genTitle: "Imagen de origen",
       selectImage: "Elegir imagen",
       imageHint: "Mejores resultados con retratos de primer plano y mucho contraste. La imagen se recorta en cuadrado y luego en círculo.",
@@ -1064,6 +1297,7 @@
       tabTemplate: "PDF della dima",
       tabGenerator: "Generatore di String Art",
       tabRing: "STL della dima",
+      tabPrinter: "G-code della stampante",
 
       paramsTitle: "Parametri",
       points: "Numero di punti",
@@ -1155,6 +1389,63 @@
       warnTagsTiny: "Con {0} punti le cifre delle frecce sono alte solo {1} mm, troppo piccole da leggere o da stampare. Riduci i punti o disattiva le frecce.",
       warnBedSize: "Il pezzo più grande misura {0} × {1} cm e non entra su un piano di stampa da 25 cm: aumenta il numero di parti dell'anello, o stampa una tavola più piccola.",
 
+      gJobTitle: "Cosa avvolgere",
+      gFromGenerator: "{0} giri, arrivati dalla scheda del generatore.",
+      gLoaded: "{0} giri, arrivati da {1}.",
+      gNoSequence: "Lancia il generatore, o carica una sequenza salvata prima.",
+      gLoadSequence: "Carica un .txt",
+      gUseGenerator: "Usa la sequenza del generatore",
+      gWarnPoints: "Questa sequenza è stata calcolata con {0} punti, ed è con quelli che il lavoro viene fatto.",
+
+      gBoardTitle: "Anello sul piano",
+      gRingThickness: "Spessore dell'anello (mm)",
+      gRingThicknessHint: "Lo spessore di base con cui la dima è stata stampata, così il filo finisce all'altezza giusta sopra di essa.",
+      gWrapHeight: "Altezza del filo (mm)",
+      gWrapHeightHint: "Dove il filo appoggia sul chiodo, misurato dalla faccia superiore dell'anello.",
+      gPhase: "Angolo del chiodo 0 (°)",
+      gPhaseHint: "Ruota l'anello nel disegno finché il chiodo 0 non è dov'è davvero. 0° è a destra del centro.",
+      gWrapDir: "Verso del giro attorno al chiodo",
+      gWrapDirHint: "Va bene uno qualsiasi, purché tutto il quadro usi lo stesso.",
+      gMirror: "Chiodi numerati nel verso opposto",
+      gCentreAuto: "Centra l'anello su ciò che la guida raggiunge",
+      gCentreX: "Centro dell'anello in X (mm)",
+      gCentreY: "Centro dell'anello in Y (mm)",
+
+      gPrinterTitle: "Stampante e guida",
+      gGuideHint: "La guida sta di lato all'ugello e più in basso, quindi ogni movimento è calcolato per la guida e poi scritto per l'ugello. Misura le tre distanze sulla tua macchina: porta l'ugello su un segno del piano, annota la posizione, poi muoviti finché la guida non è sullo stesso segno.",
+      gOffsetX: "Scarto della guida in X (mm)",
+      gOffsetY: "Scarto della guida in Y (mm)",
+      gOffsetZ: "Guida sotto l'ugello (mm)",
+      gGuideR: "Raggio della punta della guida (mm)",
+      gGuideRHint: "Metà della larghezza di ciò in cui scorre il filo: 2 per il tubo in PTFE da 4 mm che l'adattatore ospita. Qualcosa di più sottile lascia spazio a più chiodi.",
+      gBedX: "Larghezza del piano in X (mm)",
+      gBedY: "Profondità del piano in Y (mm)",
+      gFeedTravel: "Velocità fra i chiodi (mm/min)",
+      gFeedOrbit: "Velocità del giro (mm/min)",
+      gAccel: "Accelerazione (mm/s²)",
+      gAccelHint: "Bassa di proposito: è il piano che porta l'anello, e un anello che si sposta chiude il lavoro.",
+      gSegments: "Movimenti per giro",
+      gSegmentsHint: "In quanti tratti rettilinei viene spezzato ogni giro attorno al chiodo. Più tratti danno un giro più tondo e un file più grande.",
+      gPark: "Altezza di attesa (mm)",
+      gParkHint: "Dove l'ugello aspetta prima del primo chiodo e dopo l'ultimo.",
+      gHome: "Azzera X e Y all'inizio",
+      gHomeHint: "Azzera la macchina prima di mettere l'anello sul piano: l'azzeramento di Z tasta il piano e andrebbe addosso ai chiodi.",
+      gTie: "Lega il filo al chiodo {0} e fallo passare nella guida prima di avviare il lavoro.",
+      gDownload: "Scarica il .gcode",
+
+      gBedTitle: "Sul piano",
+      gBedHint: "Il rettangolo tratteggiato è dove la guida può essere messa: il piano, meno lo scarto fra guida e ugello. Sia l'anello sia il cerchio più ampio percorso dalla guida devono starci dentro. Il chiodo 0 è quello rosso.",
+      gSOrbit: "Raggio del giro",
+      gSMaxNails: "Chiodi che questo raggio consente",
+      gSNozzleZ: "Altezza dell'ugello durante il lavoro",
+      gSWraps: "Giri",
+      gSPath: "Distanza percorsa",
+      gSTime: "Tempo stimato",
+      gSSize: "Dimensione del file",
+      gWarnCrowded: "{0} punti lasciano {1} mm fra i chiodi e una guida da {2} mm non passa. Scendi a {3} punti o meno, oppure usa un raggio più grande.",
+      gWarnOrbit: "Il giro deve stare fra {0} e {1} mm.",
+      gWarnBed: "Il lavoro richiede {0} mm di larghezza e la guida arriva solo a {1} mm. Usa un anello più piccolo, o avvicina la guida all'ugello.",
+
       genTitle: "Immagine sorgente",
       selectImage: "Scegli un'immagine",
       imageHint: "Risultati migliori con ritratti ravvicinati e molto contrastati. L'immagine viene ritagliata in quadrato e poi in cerchio.",
@@ -1223,6 +1514,7 @@
       tabTemplate: "Schablonen-PDF",
       tabGenerator: "String-Art-Generator",
       tabRing: "Schablonen-STL",
+      tabPrinter: "Drucker-G-Code",
 
       paramsTitle: "Parameter",
       points: "Anzahl der Punkte",
@@ -1313,6 +1605,63 @@
       warnJointTight: "Bei {0} Punkten lässt der Abstand zwischen den Nägeln keinen Platz für die Verbindung, die Bögen werden gerade abgeschnitten und müssen geklebt werden. Verringere die Punktzahl, vergrößere den Radius oder drucke den Ring ganz.",
       warnTagsTiny: "Bei {0} Punkten sind die Ziffern der Fähnchen nur {1} mm hoch, zu klein zum Lesen und Drucken. Verringere die Punktzahl oder schalte die Fähnchen ab.",
       warnBedSize: "Das größte Teil misst {0} × {1} cm und passt nicht auf ein übliches 25-cm-Druckbett – erhöhe die Zahl der Ringteile, oder drucke eine kleinere Platte.",
+
+      gJobTitle: "Was gewickelt wird",
+      gFromGenerator: "{0} Umschlingungen, aus dem Generator-Tab.",
+      gLoaded: "{0} Umschlingungen, aus {1}.",
+      gNoSequence: "Lass den Generator laufen, oder lade eine früher gespeicherte Reihenfolge.",
+      gLoadSequence: ".txt laden",
+      gUseGenerator: "Reihenfolge aus dem Generator nehmen",
+      gWarnPoints: "Diese Reihenfolge wurde mit {0} Punkten gerechnet, und damit läuft der Auftrag.",
+
+      gBoardTitle: "Ring auf dem Bett",
+      gRingThickness: "Ringdicke (mm)",
+      gRingThicknessHint: "Die Grunddicke, mit der die Schablone gedruckt wurde, damit der Faden in der richtigen Höhe darüber liegt.",
+      gWrapHeight: "Fadenhöhe (mm)",
+      gWrapHeightHint: "Wo der Faden am Nagel liegt, gemessen von der Oberseite des Rings.",
+      gPhase: "Winkel von Nagel 0 (°)",
+      gPhaseHint: "Dreh den Ring in der Zeichnung, bis Nagel 0 dort sitzt, wo er wirklich liegt. 0° ist rechts von der Mitte.",
+      gWrapDir: "Richtung um den Nagel",
+      gWrapDirHint: "Beide gehen, solange das ganze Bild dieselbe benutzt.",
+      gMirror: "Nägel andersherum numeriert",
+      gCentreAuto: "Ring in die Mitte dessen legen, was die Führung erreicht",
+      gCentreX: "Ringmitte X (mm)",
+      gCentreY: "Ringmitte Y (mm)",
+
+      gPrinterTitle: "Drucker und Führung",
+      gGuideHint: "Die Führung sitzt neben der Düse und tiefer als sie, deshalb wird jede Bewegung für die Führung gerechnet und dann für die Düse geschrieben. Miss die drei Abstände an deiner Maschine: fahr die Düse auf eine Marke am Bett, notiere die Position, dann fahre, bis die Führung über derselben Marke steht.",
+      gOffsetX: "Versatz der Führung in X (mm)",
+      gOffsetY: "Versatz der Führung in Y (mm)",
+      gOffsetZ: "Führung unter der Düse (mm)",
+      gGuideR: "Radius der Führungsspitze (mm)",
+      gGuideRHint: "Die halbe Breite dessen, worin der Faden läuft: 2 für das 4-mm-PTFE-Röhrchen, das der Adapter aufnimmt. Etwas Dünneres lässt Platz für mehr Nägel.",
+      gBedX: "Bettbreite X (mm)",
+      gBedY: "Betttiefe Y (mm)",
+      gFeedTravel: "Geschwindigkeit zwischen Nägeln (mm/min)",
+      gFeedOrbit: "Geschwindigkeit der Umschlingung (mm/min)",
+      gAccel: "Beschleunigung (mm/s²)",
+      gAccelHint: "Bewusst niedrig: das Bett trägt den Ring, und ein verrutschter Ring beendet den Auftrag.",
+      gSegments: "Bewegungen pro Umlauf",
+      gSegmentsHint: "In wie viele geraden Stücke jeder Umlauf um einen Nagel zerlegt wird. Mehr wird runder und macht die Datei größer.",
+      gPark: "Warthöhe (mm)",
+      gParkHint: "Wo die Düse vor dem ersten und nach dem letzten Nagel wartet.",
+      gHome: "X und Y am Anfang referenzieren",
+      gHomeHint: "Referenziere die Maschine, bevor der Ring aufs Bett kommt: die Z-Referenz tastet das Bett ab und würde in die Nägel fahren.",
+      gTie: "Knote den Faden an Nagel {0} und zieh ihn durch die Führung, bevor der Auftrag startet.",
+      gDownload: ".gcode herunterladen",
+
+      gBedTitle: "Auf dem Bett",
+      gBedHint: "Das gestrichelte Rechteck ist, wohin die Führung kann: das Bett, abzüglich des Versatzes zwischen Führung und Düse. Der Ring und der weitere Kreis, den die Führung beschreibt, müssen beide hineinpassen. Nagel 0 ist der rote.",
+      gSOrbit: "Umlaufradius",
+      gSMaxNails: "Nägel, die dieser Radius zulässt",
+      gSNozzleZ: "Düsenhöhe beim Wickeln",
+      gSWraps: "Umschlingungen",
+      gSPath: "Zurückgelegter Weg",
+      gSTime: "Geschätzte Dauer",
+      gSSize: "Dateigröße",
+      gWarnCrowded: "{0} Punkte lassen {1} mm zwischen den Nägeln, und eine {2} mm dicke Führung passt nicht durch. Geh auf {3} Punkte oder weniger, oder nimm einen größeren Radius.",
+      gWarnOrbit: "Der Umlauf muss zwischen {0} und {1} mm liegen.",
+      gWarnBed: "Der Auftrag braucht {0} mm in der Breite, und die Führung erreicht nur {1} mm. Nimm einen kleineren Ring, oder rück die Führung näher an die Düse.",
 
       genTitle: "Quellbild",
       selectImage: "Bild auswählen",
@@ -2366,6 +2715,238 @@
     })(typeof window !== 'undefined' ? window : this);
   </script>
 
+  <script>
+    // ---------------------------------------------------------------
+    // Jobs for a 3D printer
+    //
+    // The ring goes on the bed and the thread guide hangs off the print head on
+    // the adapter in adapter/, so the printer becomes an XY plotter that walks a
+    // thread round nails. Every wrap is a straight run to the next nail and then
+    // a full turn round it, written out as ordinary G1 moves: no arcs, because
+    // not every one of these machines has them, and no extruder or heater
+    // touched anywhere in the file.
+    //
+    // The guide sits to one side of the nozzle and below it, so what the printer
+    // is told is always the guide's target less that offset, and what limits the
+    // picture is not the bed but the overlap between the bed and where the guide
+    // can be put.
+    // ---------------------------------------------------------------
+    (function (root) {
+      var D = {
+        bedX: 220, bedY: 220,   // what the nozzle itself can reach
+        boardH: 4,              // the printed ring's own thickness
+        wrapZ: 6,               // where the thread is laid, above the ring
+        nailD: 3,               // matches the printed ring
+        guideR: 2,              // the PTFE stub the thread runs down, 4 mm across
+        dx: 37.2,               // guide, from the nozzle: across
+        dy: -42,                // forwards
+        dz: 30,                 // and down
+        phase: 0,               // where nail 0 sits, degrees
+        mirror: false,          // for a ring laid down the other way round
+        ccw: true,              // which way it goes round a nail
+        feedTravel: 3000,       // mm/min, at the guide
+        feedOrbit: 900,
+        accel: 800,             // mm/s², kept low: the bed carries the ring
+        park: 60,               // where it lifts to before and after the job
+        segments: 12,           // straight moves per full turn round a nail
+        home: true
+      };
+
+      function num(v, dflt) { var n = parseFloat(v); return isFinite(n) ? n : dflt; }
+
+      function spacingOf(radius, points) {
+        return points > 0 ? 2 * Math.PI * radius / points : 0;
+      }
+
+      // Too tight and the guide grinds along the nail it is going round; too wide
+      // and, on the far side of the lap, it reaches the next one along.
+      function limits(o) {
+        var spacing = spacingOf(o.radius, o.points);
+        return {
+          spacing: spacing,
+          low: o.nailD / 2 + o.guideR,
+          high: spacing - o.nailD / 2 - o.guideR
+        };
+      }
+
+      function orbitFor(o) {
+        var l = limits(o);
+        if (l.high < l.low) return 0;
+        // Hugging the nail keeps the loop tight, but not so close that the
+        // machine's own slop drags the guide along it.
+        var want = l.low + 0.4;
+        return want > l.high ? (l.low + l.high) / 2 : want;
+      }
+
+      // How many nails this radius has room for, which is the number to reach for
+      // when a job comes out crowded.
+      function maxNails(o) {
+        var room = 2 * (o.nailD / 2 + o.guideR);
+        return room > 0 ? Math.floor(2 * Math.PI * o.radius / room) : 0;
+      }
+
+      // Where the guide can be put: the nozzle has to stay on the bed, and the
+      // ring has to sit on the bed as well, so it is the overlap of the two.
+      function reach(o) {
+        return {
+          x0: Math.max(0, o.dx), x1: Math.min(o.bedX, o.bedX + o.dx),
+          y0: Math.max(0, o.dy), y1: Math.min(o.bedY, o.bedY + o.dy)
+        };
+      }
+
+      // The guide swings a whole orbit outside the nail circle, so that is the
+      // circle that has to fit, not the nail circle itself.
+      function outerR(o) { return o.radius + o.orbit + o.guideR; }
+
+      function faults(o) {
+        var l = limits(o), r = reach(o), out = [];
+        if (!(o.points >= 3) || !(o.radius > 1)) out.push('ring');
+        else if (l.high < l.low) out.push('crowded');
+        else if (o.orbit < l.low || o.orbit > l.high) out.push('orbit');
+        var R = outerR(o);
+        if (o.cx - R < r.x0 - 0.01 || o.cx + R > r.x1 + 0.01 ||
+            o.cy - R < r.y0 - 0.01 || o.cy + R > r.y1 + 0.01) out.push('bed');
+        return out;
+      }
+
+      function plan(opts) {
+        var o = Object.assign({}, D, opts);
+        o.radius = num(o.radius, 0);
+        o.points = Math.round(num(o.points, 0));
+        o.orbit = opts && opts.orbit > 0 ? num(opts.orbit, 0) : orbitFor(o);
+
+        var l = limits(o), r = reach(o);
+        o.spacing = l.spacing;
+        o.minOrbit = l.low;
+        o.maxOrbit = l.high;
+        o.maxNails = maxNails(o);
+        o.reach = r;
+        // Middle of the window it can reach, unless it is being placed by hand.
+        o.cx = opts && opts.cx != null ? num(opts.cx, 0) : (r.x0 + r.x1) / 2;
+        o.cy = opts && opts.cy != null ? num(opts.cy, 0) : (r.y0 + r.y1) / 2;
+        o.outerR = outerR(o);
+        // The guide has to end up at the wrap height, and it hangs below the
+        // nozzle, so the nozzle rides that much higher than the thread.
+        o.workZ = o.boardH + o.wrapZ + o.dz;
+        o.parkZ = Math.max(o.workZ, num(o.park, 60));
+        o.faults = faults(o);
+        return o;
+      }
+
+      // Where nail i is on the bed. The generator numbers its pins anticlockwise
+      // from the x axis; phase turns the ring under the head and mirror covers a
+      // ring that ended up face down.
+      function nailAt(o, i) {
+        var turn = o.mirror ? -1 : 1;
+        var a = (num(o.phase, 0) + turn * 360 * i / o.points) * Math.PI / 180;
+        return [o.cx + o.radius * Math.cos(a), o.cy + o.radius * Math.sin(a)];
+      }
+
+      function bearing(from, to) {
+        return Math.atan2(to[1] - from[1], to[0] - from[0]) * 180 / Math.PI;
+      }
+
+      function wrap360(a) { return ((a % 360) + 360) % 360; }
+
+      // One lap round a nail, as a list of guide positions. It comes in on the
+      // side the thread arrives from and leaves on the side the thread is going
+      // to, and in between it goes all the way round: a whole turn is what leaves
+      // a loop on the nail, and the extra bit to the exit costs nothing because
+      // it is on the way out anyway.
+      function lap(o, nail, from, to) {
+        var turn = o.ccw ? 1 : -1;
+        var enter = bearing(nail, from), leave = bearing(nail, to);
+        var sweep = 360 + wrap360(turn * (leave - enter));
+        var n = Math.max(6, Math.round(num(o.segments, 12) * sweep / 360));
+        var out = [];
+        for (var k = 0; k <= n; k++) {
+          var a = (enter + turn * sweep * k / n) * Math.PI / 180;
+          out.push([nail[0] + o.orbit * Math.cos(a), nail[1] + o.orbit * Math.sin(a)]);
+        }
+        return out;
+      }
+
+      // Straight runs between nails, plus a lap round each. Acceleration is not
+      // counted, so a real job takes rather longer than this.
+      function estimate(o, seq) {
+        var travel = 0, orbit = 0, moves = 0, at = null, i, k;
+        for (i = 0; i < seq.length; i++) {
+          var nail = nailAt(o, seq[i]);
+          var path = lap(o, nail, nailAt(o, seq[i > 0 ? i - 1 : Math.min(1, seq.length - 1)]),
+                         nailAt(o, seq[i < seq.length - 1 ? i + 1 : Math.max(0, i - 1)]));
+          if (at) travel += Math.hypot(path[0][0] - at[0], path[0][1] - at[1]);
+          for (k = 1; k < path.length; k++)
+            orbit += Math.hypot(path[k][0] - path[k - 1][0], path[k][1] - path[k - 1][1]);
+          moves += path.length;
+          at = path[path.length - 1];
+        }
+        return {
+          travelMm: travel, orbitMm: orbit, moves: moves,
+          seconds: travel / o.feedTravel * 60 + orbit / o.feedOrbit * 60,
+          // 21 characters is what a G1 X… Y… line comes to at this precision,
+          // once the comment on each nail is spread over its moves.
+          bytes: moves * 21 + 400
+        };
+      }
+
+      function toGcode(opts, seq) {
+        var o = plan(opts), out = [], i, k;
+        var f2 = function (v) { return v.toFixed(2); };
+        var f3 = function (v) { return v.toFixed(3); };
+        // What the printer is told, given the guide is not the nozzle.
+        var gx = function (x) { return f3(x - o.dx); };
+        var gy = function (y) { return f3(y - o.dy); };
+
+        out.push('; string art on a 3D printer, from String Art Studio');
+        out.push('; ' + o.points + ' nails on a ' + f2(o.radius) + ' mm circle at X' +
+                 f2(o.cx) + ' Y' + f2(o.cy) + ', ' + seq.length + ' wraps');
+        out.push('; guide ' + f2(o.dx) + ', ' + f2(o.dy) + ' from the nozzle and ' +
+                 f2(o.dz) + ' below it; orbit ' + f2(o.orbit) + ' mm');
+        out.push('; nothing here heats up or extrudes: home the printer, put the');
+        out.push('; ring on the bed, then tie the thread to nail ' + seq[0] + ' by hand');
+        out.push('G90');
+        out.push('M107');
+        out.push('M204 S' + Math.round(num(o.accel, 800)));
+        if (o.home) out.push('G28 X Y');
+        out.push('G0 Z' + f2(o.parkZ) + ' F1200');
+
+        var first = null, at = null;
+        for (i = 0; i < seq.length; i++) {
+          var nail = nailAt(o, seq[i]);
+          var prev = nailAt(o, seq[i > 0 ? i - 1 : Math.min(1, seq.length - 1)]);
+          var next = nailAt(o, seq[i < seq.length - 1 ? i + 1 : Math.max(0, i - 1)]);
+          var path = lap(o, nail, prev, next);
+
+          if (!first) {
+            first = path[0];
+            // Over the first nail before dropping to the thread's height, so the
+            // guide never comes down on top of a nail.
+            out.push('G0 X' + gx(first[0]) + ' Y' + gy(first[1]) + ' F' + Math.round(o.feedTravel));
+            out.push('G1 Z' + f2(o.workZ) + ' F600');
+          } else {
+            out.push('G1 X' + gx(path[0][0]) + ' Y' + gy(path[0][1]) +
+                     ' F' + Math.round(o.feedTravel));
+          }
+          out.push('; nail ' + seq[i]);
+          for (k = 1; k < path.length; k++)
+            out.push('G1 X' + gx(path[k][0]) + ' Y' + gy(path[k][1]) +
+                     (k === 1 ? ' F' + Math.round(o.feedOrbit) : ''));
+          at = path[path.length - 1];
+        }
+
+        if (at) out.push('G0 Z' + f2(o.parkZ) + ' F1200');
+        out.push('M84');
+        return out.join('\n') + '\n';
+      }
+
+      root.PrinterEngine = {
+        DEFAULTS: D,
+        plan: plan, orbitFor: orbitFor, nailAt: nailAt, lap: lap,
+        estimate: estimate, toGcode: toGcode
+      };
+    })(typeof window !== 'undefined' ? window : this);
+  </script>
+
   <script id="string-art-worker" type="javascript/worker">
     // ---------------------------------------------------------------
     // Greedy string art solver, run off the main thread.
@@ -2543,6 +3124,12 @@
 
     function n1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
     function n2(v) { return (Math.round(v * 100) / 100).toFixed(2); }
+
+    // Rounded up to the minute: a job this long is never predicted to the second.
+    function hoursMinutes(seconds) {
+      var m = Math.ceil(seconds / 60);
+      return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min';
+    }
 
     function download(blob, name) {
       var url = URL.createObjectURL(blob);
@@ -3560,6 +4147,12 @@
       var workerRef = React.useRef(null), drawRef = React.useRef({ pin: 0, coords: null });
       var dragRef = React.useRef(null);
 
+      // The G-code tab reads the sequence from the app rather than from here,
+      // because this panel is thrown away as soon as another tab is opened.
+      function publish(list, np) {
+        if (props.onSequence) props.onSequence(list ? { pins: list, points: np } : null);
+      }
+
       var pins = o.sync ? props.points : o.pins;
 
       React.useEffect(function () {
@@ -3608,7 +4201,7 @@
       function onFile(f) {
         var image = new Image();
         image.onload = function () {
-          setSeq(null);
+          setSeq(null); publish(null);
           setFileName(f.name);
           setView({ zoom: 1, panX: 0, panY: 0 });
           setImgEl(image);
@@ -3687,7 +4280,7 @@
         drawRef.current = { pin: 0, coords: coords };
 
         resetOutput();
-        setSeq(null); setRunning(true); setPct(0); setMsg(t('preparing'));
+        setSeq(null); publish(null); setRunning(true); setPct(0); setMsg(t('preparing'));
 
         var w = makeWorker();
         workerRef.current = w;
@@ -3708,7 +4301,8 @@
             setPct(Math.round(d.drawn / d.total * 100));
             setMsg(t('linesDrawn', d.drawn, Math.round(d.drawn / d.total * 100)));
           } else if (d.type === 'done') {
-            setSeq(d.sequence); setRunning(false); setPct(100); setMsg(t('done'));
+            setSeq(d.sequence); publish(d.sequence, np);
+            setRunning(false); setPct(100); setMsg(t('done'));
             w.terminate(); workerRef.current = null;
           } else if (d.type === 'error') {
             setRunning(false); setMsg('');
@@ -3890,6 +4484,278 @@
       );
     }
 
+    // -------------------------------------------------------------
+    // G-code for a 3D printer
+    // -------------------------------------------------------------
+    function PrinterPanel(props) {
+      var t = props.t;
+      var PE = window.PrinterEngine, P = PE.DEFAULTS;
+
+      var st = React.useState({
+        bedX: P.bedX, bedY: P.bedY,
+        dx: P.dx, dy: P.dy, dz: P.dz,
+        guideR: P.guideR, nailD: P.nailD,
+        boardH: P.boardH, wrapZ: P.wrapZ,
+        centreAuto: true, cx: 128, cy: 89,
+        phase: 0, mirror: false, ccw: true,
+        feedTravel: P.feedTravel, feedOrbit: P.feedOrbit, accel: P.accel,
+        park: P.park, segments: P.segments, home: true
+      });
+      var o = st[0], setO = st[1];
+      function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
+
+      // A sequence loaded from a file wins over the one in the generator tab,
+      // until it is put away again.
+      var stFile = React.useState(null); var loaded = stFile[0], setLoaded = stFile[1];
+
+      var source = loaded || props.sequence;
+      var seq = source ? source.pins : null;
+      var points = source ? source.points : props.points;
+      var radius = props.radiusCm * 10;
+
+      function num(v, dflt) { var n = parseFloat(v); return isFinite(n) ? n : dflt; }
+
+      var job = React.useMemo(function () {
+        return PE.plan({
+          points: points, radius: radius,
+          bedX: num(o.bedX, 220), bedY: num(o.bedY, 220),
+          dx: num(o.dx, P.dx), dy: num(o.dy, P.dy), dz: num(o.dz, P.dz),
+          guideR: num(o.guideR, P.guideR), nailD: num(o.nailD, P.nailD),
+          boardH: num(o.boardH, P.boardH), wrapZ: num(o.wrapZ, P.wrapZ),
+          cx: o.centreAuto ? null : num(o.cx, 110),
+          cy: o.centreAuto ? null : num(o.cy, 90),
+          phase: num(o.phase, 0), mirror: o.mirror, ccw: o.ccw,
+          feedTravel: num(o.feedTravel, P.feedTravel),
+          feedOrbit: num(o.feedOrbit, P.feedOrbit),
+          accel: num(o.accel, P.accel), park: num(o.park, P.park),
+          segments: Math.round(num(o.segments, P.segments)), home: o.home
+        });
+      }, [points, radius, o]);
+
+      var sums = React.useMemo(function () {
+        return seq && seq.length ? PE.estimate(job, seq) : null;
+      }, [job, seq]);
+
+      var ready = !!(seq && seq.length) && !job.faults.length;
+
+      function onFile(f) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var pins = String(reader.result).split(/[^0-9]+/)
+            .filter(function (s) { return s.length; })
+            .map(function (s) { return parseInt(s, 10); });
+          if (!pins.length) return;
+          var most = 0;
+          for (var i = 0; i < pins.length; i++) if (pins[i] > most) most = pins[i];
+          // A saved sequence carries no pin count of its own, so it is taken from
+          // the highest number in it, or from the field if that is bigger.
+          setLoaded({ pins: pins, points: Math.max(most + 1, props.points), name: f.name });
+        };
+        reader.readAsText(f);
+      }
+
+      // Built here rather than on every keystroke: a dense picture is megabytes
+      // of G1 moves, and the summary already knows how big it will be.
+      function save() {
+        if (!ready) return;
+        download(new Blob([PE.toGcode(job, seq)], { type: 'text/plain' }),
+          'string-art-' + points + 'x' + n1(radius / 10) + 'cm.gcode');
+      }
+
+      var crowded = job.faults.indexOf('crowded') >= 0;
+      var badOrbit = job.faults.indexOf('orbit') >= 0;
+      var offBed = job.faults.indexOf('bed') >= 0;
+      var window_ = Math.min(job.reach.x1 - job.reach.x0, job.reach.y1 - job.reach.y0);
+
+      return h('div', { className: 'row' },
+        h('div', { className: 'col', style: { flex: '1 1 380px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('paramsTitle')),
+            h(Field, { label: t('points'), hint: t('pointsHint') },
+              h(NumberInput, { value: props.points, min: 3, max: 2000, onChange: props.setPoints })),
+            h(Field, { label: t('radiusCm'), hint: t('radiusHint') },
+              h(NumberInput, { value: props.radiusCm, min: 1, max: 200, step: 0.1, onChange: props.setRadiusCm })),
+            seq && points !== props.points
+              ? h('div', { className: 'alert warn' }, t('gWarnPoints', points)) : null
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('gJobTitle')),
+            h('div', { className: 'hint', style: { marginBottom: '10px' } },
+              !seq ? t('gNoSequence')
+                : loaded ? t('gLoaded', seq.length, loaded.name)
+                  : t('gFromGenerator', seq.length)),
+            h('div', { className: 'controls' },
+              h('label', { className: 'btn secondary' }, t('gLoadSequence'),
+                h('input', {
+                  type: 'file', accept: '.txt,text/plain', style: { display: 'none' },
+                  onChange: function (e) { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ''; }
+                })),
+              loaded && props.sequence ? h('button', {
+                className: 'btn secondary', onClick: function () { setLoaded(null); }
+              }, t('gUseGenerator')) : null)
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('gBoardTitle')),
+            h('div', { className: 'grid2' },
+              h(Field, { label: t('gRingThickness'), hint: t('gRingThicknessHint') },
+                h(NumberInput, { value: o.boardH, min: 0, max: 60, step: 0.5, onChange: function (v) { set('boardH', v); } })),
+              h(Field, { label: t('gWrapHeight'), hint: t('gWrapHeightHint') },
+                h(NumberInput, { value: o.wrapZ, min: 1, max: 40, step: 0.5, onChange: function (v) { set('wrapZ', v); } })),
+              h(Field, { label: t('nailDiameter'), hint: t('nailDiameterHint') },
+                h(NumberInput, { value: o.nailD, min: 0.8, max: 12, step: 0.1, onChange: function (v) { set('nailD', v); } })),
+              h(Field, { label: t('gPhase'), hint: t('gPhaseHint') },
+                h(NumberInput, { value: o.phase, min: -360, max: 360, step: 0.5, onChange: function (v) { set('phase', v); } }))
+            ),
+            h(Field, { label: t('gWrapDir'), hint: t('gWrapDirHint') },
+              h(Select, {
+                value: o.ccw ? 'ccw' : 'cw',
+                options: [['ccw', t('counterClockwise')], ['cw', t('clockwise')]],
+                onChange: function (v) { set('ccw', v === 'ccw'); }
+              })),
+            h(Check, {
+              id: 'gcode-mirror', checked: o.mirror, label: t('gMirror'),
+              onChange: function (v) { set('mirror', v); }
+            }),
+            h(Check, {
+              id: 'gcode-centre', checked: o.centreAuto, label: t('gCentreAuto'),
+              onChange: function (v) { set('centreAuto', v); }
+            }),
+            o.centreAuto ? null : h('div', { className: 'grid2' },
+              h(Field, { label: t('gCentreX') },
+                h(NumberInput, { value: o.cx, min: 0, max: 500, step: 0.5, onChange: function (v) { set('cx', v); } })),
+              h(Field, { label: t('gCentreY') },
+                h(NumberInput, { value: o.cy, min: 0, max: 500, step: 0.5, onChange: function (v) { set('cy', v); } })))
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('summaryTitle')),
+            h('div', { className: 'stat' }, h('span', null, t('sSpacing')),
+              h('b', null, n2(job.spacing) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('gSOrbit')),
+              h('b', null, crowded ? '—' : n2(job.orbit) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('gSMaxNails')),
+              h('b', null, String(job.maxNails))),
+            h('div', { className: 'stat' }, h('span', null, t('gSNozzleZ')),
+              h('b', null, n1(job.workZ) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('gSWraps')),
+              h('b', null, seq ? String(seq.length) : '—')),
+            sums ? h('div', { className: 'stat' }, h('span', null, t('gSPath')),
+              h('b', null, n1((sums.travelMm + sums.orbitMm) / 1000) + ' m')) : null,
+            sums ? h('div', { className: 'stat' }, h('span', null, t('gSTime')),
+              h('b', null, hoursMinutes(sums.seconds))) : null,
+            sums ? h('div', { className: 'stat' }, h('span', null, t('gSSize')),
+              h('b', null, n1(sums.bytes / 1048576) + ' MB')) : null
+          )
+        ),
+
+        h('div', { className: 'col', style: { flex: '2 1 460px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('gBedTitle')),
+            crowded ? h('div', { className: 'alert err' },
+              t('gWarnCrowded', points, n2(job.spacing), n2(2 * job.guideR), job.maxNails)) : null,
+            badOrbit ? h('div', { className: 'alert err' },
+              t('gWarnOrbit', n2(job.minOrbit), n2(job.maxOrbit))) : null,
+            offBed ? h('div', { className: 'alert err' },
+              t('gWarnBed', n1(2 * job.outerR), n1(window_))) : null,
+            h(BedPlan, { job: job, seq: seq }),
+            h('div', { className: 'hint', style: { marginTop: '10px' } }, t('gBedHint'))
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('gPrinterTitle')),
+            h('div', { className: 'hint', style: { marginBottom: '12px' } }, t('gGuideHint')),
+            h('div', { className: 'grid2' },
+              h(Field, { label: t('gOffsetX') },
+                h(NumberInput, { value: o.dx, min: -300, max: 300, step: 0.1, onChange: function (v) { set('dx', v); } })),
+              h(Field, { label: t('gOffsetY') },
+                h(NumberInput, { value: o.dy, min: -300, max: 300, step: 0.1, onChange: function (v) { set('dy', v); } })),
+              h(Field, { label: t('gOffsetZ') },
+                h(NumberInput, { value: o.dz, min: 0, max: 200, step: 0.1, onChange: function (v) { set('dz', v); } })),
+              h(Field, { label: t('gGuideR'), hint: t('gGuideRHint') },
+                h(NumberInput, { value: o.guideR, min: 0.3, max: 10, step: 0.05, onChange: function (v) { set('guideR', v); } })),
+              h(Field, { label: t('gBedX') },
+                h(NumberInput, { value: o.bedX, min: 50, max: 1000, step: 1, onChange: function (v) { set('bedX', v); } })),
+              h(Field, { label: t('gBedY') },
+                h(NumberInput, { value: o.bedY, min: 50, max: 1000, step: 1, onChange: function (v) { set('bedY', v); } })),
+              h(Field, { label: t('gFeedTravel') },
+                h(NumberInput, { value: o.feedTravel, min: 60, max: 20000, step: 60, onChange: function (v) { set('feedTravel', v); } })),
+              h(Field, { label: t('gFeedOrbit') },
+                h(NumberInput, { value: o.feedOrbit, min: 60, max: 20000, step: 60, onChange: function (v) { set('feedOrbit', v); } })),
+              h(Field, { label: t('gAccel'), hint: t('gAccelHint') },
+                h(NumberInput, { value: o.accel, min: 50, max: 10000, step: 50, onChange: function (v) { set('accel', v); } })),
+              h(Field, { label: t('gSegments'), hint: t('gSegmentsHint') },
+                h(NumberInput, { value: o.segments, min: 6, max: 90, step: 1, onChange: function (v) { set('segments', v); } })),
+              h(Field, { label: t('gPark'), hint: t('gParkHint') },
+                h(NumberInput, { value: o.park, min: 5, max: 250, step: 1, onChange: function (v) { set('park', v); } }))
+            ),
+            h(Check, {
+              id: 'gcode-home', checked: o.home, label: t('gHome'),
+              onChange: function (v) { set('home', v); }
+            }),
+            h('div', { className: 'hint' }, t('gHomeHint')),
+            seq && ready ? h('div', { className: 'alert ok' }, t('gTie', seq[0])) : null,
+            h('div', { className: 'controls bar end' },
+              h('button', { className: 'btn', onClick: save, disabled: !ready }, t('gDownload')))
+          )
+        )
+      );
+    }
+
+    // The bed from above, with the window the guide can be put in and the ring
+    // inside it: the one drawing that answers "will this fit and where do I put
+    // the ring".
+    function BedPlan(p) {
+      var job = p.job, pad = 14;
+      var W = job.bedX, H = job.bedY;
+      var nails = [], i;
+      var many = job.points > 240;
+      if (job.points >= 3 && job.radius > 0 && !many)
+        for (i = 0; i < job.points; i++) nails.push(PrinterEngine.nailAt(job, i));
+
+      // The bed is drawn y-up, which is how the machine sees it, so the whole
+      // picture is flipped rather than every coordinate.
+      return h('div', { className: 'previewWrap' },
+        h('svg', {
+          viewBox: (-pad) + ' ' + (-pad) + ' ' + (W + 2 * pad) + ' ' + (H + 2 * pad),
+          style: { width: '100%', height: 'auto', display: 'block' }
+        },
+          h('g', { transform: 'translate(0,' + H + ') scale(1,-1)' },
+            h('rect', {
+              x: 0, y: 0, width: W, height: H, fill: '#f4f5f7',
+              stroke: '#c9cdd6', strokeWidth: 1.2
+            }),
+            h('rect', {
+              x: job.reach.x0, y: job.reach.y0,
+              width: Math.max(0, job.reach.x1 - job.reach.x0),
+              height: Math.max(0, job.reach.y1 - job.reach.y0),
+              fill: '#ffffff', stroke: '#8b93a1', strokeWidth: 1,
+              strokeDasharray: '5 4'
+            }),
+            job.radius > 0 ? h('circle', {
+              cx: job.cx, cy: job.cy, r: job.outerR,
+              fill: 'none', stroke: '#d92d20', strokeWidth: 0.8, strokeDasharray: '3 3'
+            }) : null,
+            job.radius > 0 ? h('circle', {
+              cx: job.cx, cy: job.cy, r: job.radius,
+              fill: 'none', stroke: '#1c1c1c', strokeWidth: 1.2
+            }) : null,
+            nails.map(function (n, k) {
+              return h('circle', {
+                key: k, cx: n[0], cy: n[1], r: Math.max(0.7, job.nailD / 2),
+                fill: k === 0 ? '#d92d20' : '#1c1c1c'
+              });
+            }),
+            many && job.radius > 0 ? h('circle', {
+              cx: PrinterEngine.nailAt(job, 0)[0], cy: PrinterEngine.nailAt(job, 0)[1],
+              r: 2.4, fill: '#d92d20'
+            }) : null
+          )
+        )
+      );
+    }
+
     // Line glyphs for the tab rail, all drawn in the same 24-unit box so they
     // sit at one weight and one size next to their labels.
     var TAB_GLYPHS = {
@@ -3907,6 +4773,13 @@
         ['circle', { cx: 12, cy: 12, r: 8.6 }],
         ['circle', { cx: 12, cy: 12, r: 4.2, opacity: 0.5 }],
         ['circle', { cx: 12, cy: 3.4, r: 1.1, fill: 'currentColor', stroke: 'none' }]
+      ],
+      printer: [
+        ['path', { d: 'M3.6 4.4h16.8' }],
+        ['path', { d: 'M9.2 4.4h5.6l-1.3 4.3h-3z' }],
+        ['path', { d: 'M12 8.7v2.6' }],
+        ['circle', { cx: 12, cy: 14.9, r: 3.1 }],
+        ['path', { d: 'M4.2 19.9h15.6', opacity: 0.45 }]
       ]
     };
 
@@ -3926,13 +4799,16 @@
       var stTab = React.useState('generator'); var tab = stTab[0], setTab = stTab[1];
       var stPts = React.useState(288); var points = stPts[0], setPoints = stPts[1];
       var stR = React.useState(28); var radiusCm = stR[0], setRadiusCm = stR[1];
+      // The run the generator last finished, kept up here so it survives moving
+      // to another tab.
+      var stSeq = React.useState(null); var sequence = stSeq[0], setSequence = stSeq[1];
 
       var nPoints = Math.max(3, Math.min(2000, parseInt(points, 10) || 3));
       var nRadius = Math.max(1, Math.min(200, parseFloat(radiusCm) || 1));
 
       var tabs = [
         ['generator', 'tabGenerator'], ['template', 'tabTemplate'],
-        ['ring', 'tabRing']
+        ['ring', 'tabRing'], ['printer', 'tabPrinter']
       ];
 
       return h(React.Fragment, null,
@@ -3952,7 +4828,12 @@
           ? h(TemplatePanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm })
           : tab === 'ring'
             ? h(RingPanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm })
-            : h(GeneratorPanel, { t: t, points: nPoints, radiusCm: nRadius }),
+            : tab === 'printer'
+              ? h(PrinterPanel, {
+                t: t, points: nPoints, setPoints: setPoints,
+                radiusCm: nRadius, setRadiusCm: setRadiusCm, sequence: sequence
+              })
+              : h(GeneratorPanel, { t: t, points: nPoints, radiusCm: nRadius, onSequence: setSequence }),
         h('footer', null, t('footerText'))
       );
     }

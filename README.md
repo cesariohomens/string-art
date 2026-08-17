@@ -1,10 +1,11 @@
 # String Art Studio
 
-A single-file, zero-build web app that does three things:
+A single-file, zero-build web app that does four things:
 
 1. **String art generator** — turns a photo into the sequence of pins the thread has to pass through, using a greedy chord-selection algorithm. This is the view the page opens on.
 2. **Template PDF** — draws the drilling/nailing template from just two numbers, the **number of points** and the **circle radius in cm**. The output is a print-at-100% PDF with a black circle, red points and a red number next to every point.
 3. **Template STL** — models a printable ring carrying one nail per point, from those same two numbers, cuts it into arcs that clip together if it is bigger than the print bed, and exports it as an STL or a ZIP of STLs.
+4. **Printer G-code** — writes the whole picture out as G-code for an ordinary 3D printer, so the machine winds the thread itself. It needs the adapter in [`adapter/`](adapter/) on the print head.
 
 Everything runs in the browser. Nothing is uploaded anywhere.
 
@@ -160,10 +161,59 @@ The 3D preview turns and zooms exactly like the one on the generator tab, includ
 - Seams close on exactly the same coordinates, so every mesh is watertight, every directed edge is used once, and every facet is wound outwards. The reported volume counts the overlaps twice and so runs about a percent over the truth.
 - The preview and the exported files are built from the same triangle lists, so what you turn around on screen is what gets sliced.
 
+## Printer G-code
+
+The last tab hands the picture to a 3D printer. The printed nail ring goes on the
+bed, a thread guide hangs off the print head on the adapter in
+[`adapter/`](adapter/), and the printer becomes an XY plotter that walks the
+thread round the nails. No heater and no extruder is touched anywhere in the file.
+
+It takes the sequence straight from the generator tab, or a `.txt` saved earlier,
+and reads the same **number of points** and **circle radius** as the other tabs.
+The parts and the fitting are described in [`adapter/README.md`](adapter/README.md);
+the tab itself needs three more numbers, measured once: how far the guide sits
+from the nozzle in X and Y, and how far below it.
+
+| Input | Default | Meaning |
+| --- | --- | --- |
+| Ring thickness | 4 mm | Base thickness the mould was printed at |
+| Wrap height | 6 mm | Where the thread is laid on the nail, above the ring |
+| Guide offset X / Y | 37.2, −42 mm | Where the guide is, from the nozzle |
+| Guide below the nozzle | 30 mm | How far it hangs down; the nails have to pass under the head |
+| Guide tip radius | 2 mm | Half the width of the 4 mm PTFE stub the thread runs down |
+| Travel / wrapping speed | 3000 / 900 mm/min | At the guide |
+| Acceleration | 800 mm/s² | Low on purpose: the bed carries the ring |
+| Straight moves per turn | 12 | How finely each lap round a nail is chopped up |
+
+### What the job looks like
+
+Each wrap is a straight run to the next nail and then a lap round it. The lap
+comes in on the side the thread arrives from, goes all the way round — a whole
+turn is what leaves a loop on the nail — and carries on to the side the thread is
+going to, so the exit costs nothing. The radius of that lap is the same
+compromise the winding machine used: far enough out that the guide is not
+grinding along the nail, close enough in that it does not catch the next one
+along. Everything is written as `G1` moves rather than `G2`/`G3`, because not
+every printer's firmware has arcs turned on.
+
+Because the guide is offset from the nozzle, every move is worked out for the
+guide and then written down for the nozzle, and what limits the picture is not
+the bed but the overlap between the bed and where the guide can be put — about
+180 mm across on a 220 mm bed. The drawing on the tab shows that window, the
+ring, and the wider circle the guide swings through, which is the quickest way to
+see whether a ring will fit and where to tape it down.
+
+The summary reports the point spacing, the orbit radius, **how many nails that
+radius has room for**, the nozzle height while winding, the distance travelled,
+an estimate of the time, and the size of the file. Warnings appear when the nails
+are too close for the guide to pass between them, and when the job needs more
+room than the guide can reach.
+
 ## Project layout
 
 ```
 index.html   the entire application
+adapter/     OpenSCAD sources and STLs for the print head adapter
 README.md    this file
 LICENSE
 ```
