@@ -45,7 +45,7 @@ Pressing **Generate** freezes that framing: the image is converted to greyscale,
 | Minimum pin distance | 20 | Blocks very short threads between neighbouring pins |
 | Working resolution | 500 px | Solver resolution; higher is slower and sharper. Read when you press Generate, so it can be changed between runs |
 
-The thread colour, wood colour and board shape belong to the 3D preview and survive regenerating, so you can try different parameters without losing them.
+The thread colour, wood colour, board shape and nail tip belong to the 3D preview and survive regenerating, so you can try different parameters without losing them.
 
 Before solving, the worker rasterises every chord once into a single flat buffer, so the search only has to add up bytes. A run of 3000 lines over 288 pins takes roughly a third of a second. That buffer grows with both the pin count and the working resolution, so extreme combinations (around 1000 pins at 1200 px) are refused up front with a message rather than exhausting the tab's memory.
 
@@ -53,7 +53,9 @@ Results can be exported as the raw pin sequence (`.txt`), a preview `.png`, or a
 
 ## 3D preview
 
-Once a sequence exists, a **3D preview** shows what the finished piece would look like on a board. Drag to turn it, scroll to move closer. The nails are black and always drawn as small tapered cylinders; you can pick the thread colour and the wood colour, and switch the support between a rectangular and a round board. Either way the board is slightly wider than the drawing, so the nail circle always sits inside it.
+Once a sequence exists, a **3D preview** shows what the finished piece would look like on a board. Drag to turn it, scroll to move closer. The nails are always black, but you can pick the thread colour and the wood colour, switch the support between a rectangular and a round board, and choose the **nail tip**. Either way the board is slightly wider than the drawing, so the nail circle always sits inside it.
+
+**Nail tip** offers the same three ends as the STL tab — a straight post, a shrimp curl, or a tip tapered 30% wider — built to the same proportions, so the preview shows the nails you are about to print rather than a stand-in. Each one is a tube through a few circular sections, like the printed nail, and every curl bends radially outwards, away from the middle of the board.
 
 The round button in the top-right corner of the view blows it up to fill almost the whole window, which is where the individual threads become readable. Press it again, hit `Escape`, or click outside the view to come back. The card keeps its height while the view is expanded, so nothing on the page shifts around.
 
