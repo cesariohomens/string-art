@@ -1,12 +1,13 @@
 # String Art Studio
 
-A single-file, zero-build web app that does three things:
+A single-file, zero-build web app that does four things:
 
 1. **String art generator** — turns a photo into the sequence of pins the thread has to pass through, using a greedy chord-selection algorithm. This is the view the page opens on.
 2. **Template PDF** — draws the drilling/nailing template from just two numbers, the **number of points** and the **circle radius in cm**. The output is a print-at-100% PDF with a black circle, red points and a red number next to every point.
 3. **Template STL** — models a printable ring carrying one nail per point, from those same two numbers, cuts it into arcs that clip together if it is bigger than the print bed, and exports it as an STL or a ZIP of STLs.
+4. **Winding machine** — writes the job for the machine in [`machine/`](machine/), which strings the picture itself. Download the `.gcode`, or send it straight to the machine and drive it from the same page.
 
-Everything runs in the browser. Nothing is uploaded anywhere.
+Everything runs in the browser. Nothing is uploaded anywhere, except to a machine you tell it to talk to.
 
 ## Running it
 
@@ -44,7 +45,7 @@ Pressing **Generate** freezes that framing: the image is converted to greyscale,
 | Minimum pin distance | 20 | Blocks very short threads between neighbouring pins |
 | Working resolution | 500 px | Solver resolution; higher is slower and sharper. Read when you press Generate, so it can be changed between runs |
 
-The thread colour, wood colour and board shape belong to the 3D preview and survive regenerating, so you can try different parameters without losing them.
+The thread colour, wood colour, board shape and nail tip belong to the 3D preview and survive regenerating, so you can try different parameters without losing them.
 
 Before solving, the worker rasterises every chord once into a single flat buffer, so the search only has to add up bytes. A run of 3000 lines over 288 pins takes roughly a third of a second. That buffer grows with both the pin count and the working resolution, so extreme combinations (around 1000 pins at 1200 px) are refused up front with a message rather than exhausting the tab's memory.
 
@@ -52,7 +53,9 @@ Results can be exported as the raw pin sequence (`.txt`), a preview `.png`, or a
 
 ## 3D preview
 
-Once a sequence exists, a **3D preview** shows what the finished piece would look like on a board. Drag to turn it, scroll to move closer. The nails are black and always drawn as small tapered cylinders; you can pick the thread colour and the wood colour, and switch the support between a rectangular and a round board. Either way the board is slightly wider than the drawing, so the nail circle always sits inside it.
+Once a sequence exists, a **3D preview** shows what the finished piece would look like on a board. Drag to turn it, scroll to move closer. The nails are always black, but you can pick the thread colour and the wood colour, switch the support between a rectangular and a round board, and choose the **nail tip**. Either way the board is slightly wider than the drawing, so the nail circle always sits inside it.
+
+**Nail tip** offers the same three ends as the STL tab — a straight post, a shrimp curl, or a tip tapered 30% wider — built to the same proportions, so the preview shows the nails you are about to print rather than a stand-in. Each one is a tube through a few circular sections, like the printed nail, and every curl bends radially outwards, away from the middle of the board.
 
 The round button in the top-right corner of the view blows it up to fill almost the whole window, which is where the individual threads become readable. Press it again, hit `Escape`, or click outside the view to come back. The card keeps its height while the view is expanded, so nothing on the page shifts around.
 
@@ -93,9 +96,21 @@ The numbers are set in Times and rotated to read radially outwards, matching the
 
 ## Template STL
 
-Instead of drilling a board you can print the circle. This tab builds a flat band with a nail standing on every point and exports it as a **binary STL in millimetres**, which any slicer opens at the right size.
+Instead of drilling a board you can print the circle. This tab builds either a
+flat **ring** (a band with a nail on every point), a solid **square board**, or a
+solid **circular board**, and exports it as a **binary STL in millimetres**,
+which any slicer opens at the right size.
 
-It reads the same **number of points** and **circle radius** as the template tab, so the printed ring and the printed template describe the same circle. The band straddles the point circle rather than sitting inside or outside it, so the thread still runs at exactly the requested radius.
+It reads the same **number of points** and **circle radius** as the template tab,
+so the printed part and the printed template describe the same circle. Choose a
+ring alone, or a square / circular board with that same nail ring raised on top
+as relief. The band straddles the point circle, so the thread still runs at
+exactly the requested radius.
+
+**Numbered arrow ring** adds a slim second ring around that nail circle with one
+inward pointer per nail — the same path for ring, square, or round bases. It
+comes as its own STL in the download (a ZIP whenever more than one file is
+needed), so you can fit it for numbering and take it off again.
 
 | Input | Default | Meaning |
 | --- | --- | --- |
@@ -106,7 +121,7 @@ It reads the same **number of points** and **circle radius** as the template tab
 | Ring thickness | 4 mm | Height of the band itself |
 | Ring segments | 1 | How many arcs to cut the ring into |
 | Joint clearance | 0.25 mm | Play left between a tab and its slot |
-| Numbered snap-off tags | off | A numbered pointer at every nail |
+| Numbered arrow ring | off | Separate outer ring with one numbered pointer per nail |
 
 ### How the nails end
 
@@ -116,7 +131,7 @@ Thread wraps the outer face of a nail and is pulled towards the centre of the ci
 - **Shrimp curl** climbs about two thirds of the height and then turns 100° outwards, ending in a tip that hangs over the shaft — roughly 5 mm past the nail axis at the default size — with the thread caught in the crook. The turn tapers to 72% of the shaft, which is what gives it the shrimp outline. It reaches its full height at the crown of the bend rather than at the tip, so a curl stands exactly as tall as the straight nail it replaces, and it takes no extra room between neighbours because it bends radially rather than along the ring. It does overhang, so print it with supports.
 - **Tapered 30% wider** grows steadily from the base to a tip 30% thicker, a cone the loop cannot ride up. It prints without supports, since the flare is only a few tenths of a millimetre off vertical, but the wide end is what the neighbouring nails have to make room for: the reported gap between nails is measured there, and on a crowded ring the tips will merge before the bases would.
 
-The gap between nails, and the warning that goes with it, always refer to the widest end of whichever tip is chosen, and the summary adds the tip diameter for a cone or the overhang for a curl. All three shapes work on a ring that is cut into arcs and carries numbered tags.
+The gap between nails, and the warning that goes with it, always refer to the widest end of whichever tip is chosen, and the summary adds the tip diameter for a cone or the overhang for a curl. All three shapes work on a ring that is cut into arcs and on a mould that carries a numbered arrow ring.
 
 ### Cutting the ring into arcs
 
@@ -146,10 +161,55 @@ The 3D preview turns and zooms exactly like the one on the generator tab, includ
 - Seams close on exactly the same coordinates, so every mesh is watertight, every directed edge is used once, and every facet is wound outwards. The reported volume counts the overlaps twice and so runs about a percent over the truth.
 - The preview and the exported files are built from the same triangle lists, so what you turn around on screen is what gets sliced.
 
+## Winding machine
+
+The fourth tab writes jobs for the machine in [`machine/`](machine/): a
+turntable that carries the board, a guide on a rail that reaches over it, and an
+ESP32 that runs the whole thing off a page it serves itself. The machine is
+described, down to its wiring and its g-code, in
+[`machine/PROTOCOL.md`](machine/PROTOCOL.md); how to build one is in
+[`machine/README.md`](machine/README.md).
+
+The tab takes the sequence from the generator — which is why the sequence now
+lives in the app rather than in the generator tab, and survives switching tabs —
+or a `.txt` saved from an earlier run. Alongside the usual number of points and
+radius it asks for the few things only the machine knows: the height the thread
+is laid at, the diameter of the nails, the radius of the guide's tip, and how
+far the guide can reach.
+
+| Input | Default | Meaning |
+| --- | --- | --- |
+| Wrap height | 6 mm | Where the thread is laid on the shank, measured from the board |
+| Nail diameter | 3 mm | The same nails the STL tab prints |
+| Guide tip radius | 1.1 mm | The outside of the eyelet, which has to pass between two nails |
+| Orbit radius | worked out | How far the eyelet stays from the nail while it goes round it |
+| Machine reach | 300 mm | How far the guide gets from the middle of the turntable |
+| Travel and wrap feeds | 4200 / 1200 mm/min | Measured at the eyelet, so a job runs at the same speed on any size of machine |
+
+The orbit is chosen for you: it has to clear the nail it is going round without
+reaching the next one along, which on a 288-point 28 cm ring leaves a window
+between 2.6 and 4.6 mm. When no radius satisfies both — nails closer than about
+5.5 mm — the tab refuses the job and says which of the three numbers to change,
+rather than letting the machine drive into the ring.
+
+A job is a header stating the ring and then one line per nail, so a
+3000-wrap picture is about 30 kB rather than several megabytes of arcs, and the
+same file runs on a machine of any size. **Download .gcode** saves it;
+**Send to the machine** posts it to `printer.local` (or whatever address you
+give it) with the user and password, after which the same card shows what the
+machine is doing and offers start, pause and stop. The summary estimates how
+long it will take, which for a dense picture is worth knowing before you press
+anything.
+
+Opened over `https`, a browser will not let the page talk to a machine that
+speaks `http`; the tab says so. Open the app over `http`, from a file, or from
+the machine itself, which serves this very page out of its own flash.
+
 ## Project layout
 
 ```
 index.html   the entire application
+machine/     the winding machine: protocol, bill of materials, hardware, firmware
 README.md    this file
 LICENSE
 ```

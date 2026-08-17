@@ -4,11 +4,13 @@
   <meta charset="utf-8" />
   <title>String Art Studio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#0c0e13" />
 
-  <!-- Google Fonts - Exo Thin -->
+  <!-- Google Fonts - Exo -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Exo:wght@100;300;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Exo:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- React 18 -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -21,143 +23,394 @@
   <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
 
   <style>
-    :root { --bg:#f6f7f9; --ink:#111; --muted:#666; --card:#fff; --border:#a1a4aa; --accent:#e11d1d; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.45 'Exo', system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial; font-weight:300; }
-    header { padding:16px 20px; background:#111; color:#fff; position:relative; display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-    .header-content { flex:1; display:flex; flex-direction:column; gap:4px; min-width:260px; }
-    header h1 { margin:0; font-size:20px; font-weight:600; letter-spacing:.5px; }
-    header .hint { color:#c9ccd1; font-size:12px; }
+    /* -------------------------------------------------------------
+       Design tokens. One neutral scale, one accent — the same red the
+       drilling template puts its points in — and a single elevation
+       ramp, so every surface in the app is built from the same handful
+       of numbers.
+       ------------------------------------------------------------- */
+    :root {
+      --ink:#101319; --ink-2:#454b57; --muted:#727a88;
+      --bg:#f4f5f7; --surface:#fff; --surface-2:#f8f9fb; --surface-3:#eef0f4;
+      --line:#e5e7ec; --line-strong:#d2d6de;
+      --accent:#dc2626; --accent-soft:#fef2f2;
+      --r-lg:18px; --r:12px; --r-sm:9px;
+      --sh-1:0 1px 2px rgba(16,24,40,.05);
+      --sh-2:0 1px 3px rgba(16,24,40,.07), 0 14px 30px -14px rgba(16,24,40,.22);
+      --sh-pop:0 32px 70px -18px rgba(16,24,40,.45);
+      --ring:0 0 0 3px rgba(16,19,25,.10);
+      --ring-strong:0 0 0 3px rgba(16,19,25,.24);
+      --gutter:22px;
+      --ease:cubic-bezier(.2,.7,.3,1);
+      /* Legacy aliases, so any rule still asking for the old names lands
+         on the new scale rather than nothing. */
+      --card:var(--surface); --border:var(--line);
+    }
+    * { box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; }
+    body {
+      margin:0; color:var(--ink); background:var(--bg);
+      background-image:radial-gradient(900px 380px at 50% -160px, #e9ecf1, transparent 70%);
+      font:400 14px/1.5 'Exo', system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection { background:var(--accent); color:#fff; }
+    * { scrollbar-width:thin; scrollbar-color:#c6ccd6 transparent; }
+    ::-webkit-scrollbar { width:11px; height:11px; }
+    ::-webkit-scrollbar-thumb {
+      background:#c6ccd6; border:3px solid transparent; border-radius:999px; background-clip:content-box;
+    }
+    ::-webkit-scrollbar-thumb:hover { background:#aeb6c2; background-clip:content-box; }
+
+    /* --- App bar ------------------------------------------------- */
+    header {
+      position:relative; color:#fff;
+      background:
+        radial-gradient(680px 240px at 10% -40%, rgba(220,38,38,.22), transparent 70%),
+        linear-gradient(140deg, #191d26 0%, #0c0e13 58%, #14181f 100%);
+    }
+    header::after {
+      content:''; position:absolute; left:0; right:0; bottom:0; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+    }
+    .appbar {
+      max-width:1400px; margin:0 auto; padding:18px var(--gutter);
+      display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    }
+    .brand { display:flex; align-items:center; gap:14px; flex:1 1 280px; min-width:0; }
+    .brand-mark {
+      width:46px; height:46px; flex-shrink:0; border-radius:14px; display:grid; place-items:center;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.14);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .brand-mark svg { width:28px; height:28px; }
+    .header-content { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    header h1 { margin:0; font-size:19px; font-weight:600; letter-spacing:.2px; }
+    header .hint { color:rgba(255,255,255,.58); font-size:12px; font-weight:300; }
     #language-selector { display:flex; align-items:center; gap:8px; flex-shrink:0; }
-    #language-selector > div > span { font-size:12px; color:#fff; }
+    #language-selector > div > span { font-size:12px; color:rgba(255,255,255,.55); font-weight:400; }
 
-    /* Customized dropdown */
-    .custom-select-wrapper { position:relative; width:160px; }
+    /* --- Language dropdown -------------------------------------- */
+    .custom-select-wrapper { position:relative; width:172px; }
     .custom-select-button {
-      width:100%; border:1px solid #d9dde3; border-radius:10px; padding:8px 12px;
-      background:#fff; color:#111 !important; display:flex; align-items:center;
-      justify-content:space-between; gap:8px; cursor:pointer; transition:background .15s;
-      font-family:'Exo', system-ui; font-weight:300; font-size:12px;
+      width:100%; border:1px solid rgba(255,255,255,.16); border-radius:var(--r); padding:9px 12px;
+      background:rgba(255,255,255,.07); color:#fff; display:flex; align-items:center;
+      justify-content:space-between; gap:8px; cursor:pointer;
+      transition:background .16s var(--ease), border-color .16s var(--ease);
+      font-family:inherit; font-weight:500; font-size:12.5px;
     }
-    .custom-select-button:hover { background:#f6f7f9; }
-    .custom-select-label { display:flex; align-items:center; gap:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#111 !important; }
-    .custom-select-arrow { width:16px; height:16px; opacity:.7; flex-shrink:0; }
-    .custom-select-menu {
-      position:absolute; z-index:2000; margin-top:4px; width:100%; max-height:260px; overflow:auto;
-      border-radius:10px; border:1px solid #d9dde3; background:#fff; box-shadow:0 6px 18px rgba(0,0,0,.1); display:none;
+    .custom-select-button:hover { background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.28); }
+    .custom-select-button:focus-visible { outline:none; box-shadow:0 0 0 3px rgba(255,255,255,.22); }
+    .custom-select-label { display:flex; align-items:center; gap:9px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .custom-select-arrow { width:15px; height:15px; opacity:.65; flex-shrink:0; }
+    /* The panel and its rows are shared with the in-page selects below, so a
+       list of languages and a list of page sizes read the same way. */
+    .custom-select-menu, .select-menu {
+      position:absolute; z-index:2000; margin-top:6px; width:100%; max-height:280px; overflow:auto;
+      border-radius:14px; border:1px solid var(--line); background:var(--surface);
+      box-shadow:var(--sh-2); display:none; padding:6px;
     }
-    .custom-select-menu.open { display:block; }
-    .custom-select-option {
-      width:100%; text-align:left; padding:8px 12px; cursor:pointer; transition:background .15s;
-      display:flex; align-items:center; gap:8px; font-size:12px; color:#111 !important;
-      border:none; background:none; font-family:inherit;
+    .custom-select-menu.open, .select-menu.open { display:block; }
+    .custom-select-option, .select-option {
+      width:100%; text-align:left; padding:9px 10px; cursor:pointer; border-radius:var(--r-sm);
+      display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink);
+      border:none; background:none; font-family:inherit; font-weight:500;
+      transition:background .14s var(--ease);
     }
-    .custom-select-option:hover { background:#f6f7f9; }
-    .custom-select-option.selected { background:#e9ecef; }
-    .flag-icon { width:24px; height:18px; object-fit:contain; display:inline-block; }
+    .custom-select-option:hover, .select-option:hover { background:var(--surface-2); }
+    .custom-select-option.selected, .select-option.selected { background:var(--ink); color:#fff; }
+    .flag-icon {
+      width:22px; height:16px; object-fit:cover; display:inline-block; border-radius:3px;
+      box-shadow:0 0 0 1px rgba(0,0,0,.12);
+    }
 
-    main { padding:16px 20px 32px; max-width:1400px; margin:0 auto; }
-    .card { background:var(--card); border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:16px; margin-bottom:16px; border:1px solid var(--border); }
-    .card h2 { margin:0 0 12px; font-size:15px; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
-    .row { display:flex; gap:16px; flex-wrap:wrap; }
+    main { padding:var(--gutter) var(--gutter) 40px; max-width:1400px; margin:0 auto; }
+
+    /* --- Tab rail: sticks to the top of the viewport while a panel
+           scrolls under it, so switching tabs never means scrolling up. */
+    .tabbar {
+      position:sticky; top:0; z-index:120;
+      margin:calc(var(--gutter) * -1) calc(var(--gutter) * -1) 20px;
+      padding:12px var(--gutter);
+      background:rgba(244,245,247,.86); backdrop-filter:blur(12px) saturate(1.4);
+      border-bottom:1px solid var(--line);
+    }
+    .tabs { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tab {
+      display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+      padding:10px 16px; border-radius:999px; border:1px solid transparent;
+      background:transparent; color:var(--ink-2); cursor:pointer;
+      font-family:inherit; font-size:13.5px; font-weight:600; letter-spacing:.01em;
+      transition:background .16s var(--ease), color .16s var(--ease), border-color .16s var(--ease), box-shadow .16s var(--ease);
+    }
+    .tab:hover:not(.active) { background:var(--surface); color:var(--ink); border-color:var(--line); box-shadow:var(--sh-1); }
+    .tab:focus-visible { outline:none; box-shadow:var(--ring-strong); }
+    .tab.active { background:var(--ink); color:#fff; border-color:var(--ink); box-shadow:0 8px 18px -8px rgba(16,19,25,.6); }
+    .tab-ico { width:16px; height:16px; flex-shrink:0; opacity:.9; }
+
+    /* --- Surfaces ------------------------------------------------ */
+    .card {
+      background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+      padding:20px; margin-bottom:18px; box-shadow:var(--sh-1);
+    }
+    .card h2 {
+      margin:0 0 16px; font-size:11.5px; font-weight:700; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--muted);
+      display:flex; align-items:center; gap:9px;
+    }
+    .card h2::before {
+      content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0;
+    }
+    .row { display:flex; gap:18px; flex-wrap:wrap; }
     .col { flex:1 1 320px; min-width:0; }
     .col-narrow { flex:1 1 180px; min-width:0; }
-    label { display:block; font-size:13px; margin-bottom:6px; color:#000; font-weight:600; }
-    input[type="text"], input[type="number"], select, textarea {
-      width:100%; padding:10px 12px; border:1px solid #d9dde3; border-radius:10px;
-      font-family:inherit; font-size:14px; background:#fff; color:#111;
+    .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:0 18px; }
+
+    /* --- Fields -------------------------------------------------- */
+    .field { margin-bottom:16px; }
+    .field:last-child { margin-bottom:0; }
+    label { display:block; font-size:12.5px; margin-bottom:7px; color:var(--ink-2); font-weight:600; }
+    input[type="text"], input[type="number"], input[type="password"], .select-button, textarea {
+      width:100%; padding:10px 12px; border:1px solid var(--line-strong); border-radius:var(--r);
+      font-family:inherit; font-size:14px; font-weight:400; background:var(--surface); color:var(--ink);
+      transition:border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease);
     }
+    input[type="number"] { font-variant-numeric:tabular-nums; }
+    input[type="text"]:hover, input[type="number"]:hover, input[type="password"]:hover,
+    .select-button:hover, textarea:hover { border-color:#bcc3ce; }
+    input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus,
+    .select-button:focus-visible, textarea:focus {
+      outline:none; border-color:var(--ink); box-shadow:var(--ring);
+    }
+    input:disabled, textarea:disabled {
+      background:var(--surface-2); color:var(--muted); cursor:not-allowed;
+    }
+    /* In-page dropdown: the browser's own select menu cannot be styled, so it
+       is built from the same pieces as the language picker in the app bar. */
+    .select-wrapper { position:relative; }
+    .select-button {
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      cursor:pointer; text-align:left; font-weight:500;
+    }
+    .select-wrapper.open .select-button { border-color:var(--ink); box-shadow:var(--ring); }
+    .select-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .select-arrow {
+      width:16px; height:16px; flex-shrink:0; color:var(--muted);
+      transition:transform .18s var(--ease);
+    }
+    .select-wrapper.open .select-arrow { transform:rotate(180deg); }
+    textarea {
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; line-height:1.6;
+      resize:vertical; background:var(--surface-2);
+    }
+    .hint { font-size:12px; color:var(--muted); font-weight:400; line-height:1.5; }
+    .caption {
+      font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:8px;
+    }
+
+    /* --- Drop zone ----------------------------------------------- */
     .dropzone {
-      width:100%; border:2px dashed #c7ccd3; border-radius:12px; background:#fbfcfd;
-      padding:22px 16px; cursor:pointer; font-family:inherit; color:inherit;
-      display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center;
-      transition:border-color .15s, background .15s, color .15s;
+      width:100%; border:1.5px dashed var(--line-strong); border-radius:16px; background:var(--surface-2);
+      padding:26px 18px; cursor:pointer; font-family:inherit; color:inherit;
+      display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center;
+      transition:border-color .16s var(--ease), background .16s var(--ease), box-shadow .16s var(--ease);
     }
-    .dropzone:hover, .dropzone:focus-visible { border-color:#111; background:#f2f4f7; outline:none; }
-    .dropzone.over { border-color:var(--accent); background:#fdf1f1; }
-    .dropzone svg { width:42px; height:42px; color:#8b9099; transition:color .15s; }
-    .dropzone:hover svg { color:#111; }
-    .dropzone.over svg { color:var(--accent); }
+    .dropzone:hover, .dropzone:focus-visible {
+      border-color:var(--ink); background:var(--surface); outline:none; box-shadow:var(--sh-1);
+    }
+    .dropzone.over { border-color:var(--accent); background:var(--accent-soft); }
+    .dropzone svg {
+      width:44px; height:44px; padding:9px; border-radius:13px; color:var(--ink-2);
+      background:var(--surface); border:1px solid var(--line); box-shadow:var(--sh-1);
+      transition:color .16s var(--ease), border-color .16s var(--ease);
+    }
+    .dropzone:hover svg { color:var(--ink); }
+    .dropzone.over svg { color:var(--accent); border-color:#f6bcbc; }
     .dz-title { font-size:14px; font-weight:600; }
-    .dz-sub { font-size:12px; color:#666; }
-    .dz-file { font-size:12px; font-weight:600; color:#111; word-break:break-all; }
-    textarea { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; resize:vertical; }
-    .field { margin-bottom:14px; }
-    .checkline { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13px; font-weight:600; }
-    .checkline input { width:16px; height:16px; }
-    .checkline label { margin:0; }
-    .controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-    .btn { padding:10px 16px; border:1px solid #111; border-radius:10px; background:#111; color:#fff; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; }
-    .btn:hover:not(:disabled) { background:#333; }
-    .btn.secondary { background:#fff; color:#111; }
-    .btn.secondary:hover:not(:disabled) { background:#f0f0f0; }
-    .btn.danger { background:var(--accent); border-color:var(--accent); }
-    .btn:disabled { opacity:.45; cursor:not-allowed; }
-    .hint { font-size:12px; color:#555; font-weight:300; }
-    .tabs { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
-    .tab { padding:10px 18px; border:1px solid var(--border); border-radius:999px; background:#fff; color:#111; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; }
-    .tab.active { background:#111; color:#fff; border-color:#111; }
-    .previewWrap { border:1px solid var(--border); border-radius:12px; background:#fff; padding:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .dz-sub { font-size:12px; color:var(--muted); }
+    .dz-file { font-size:12px; font-weight:600; color:var(--ink); word-break:break-all; }
+
+    /* --- Switches ------------------------------------------------ */
+    .checkline { display:flex; align-items:center; gap:11px; margin-bottom:14px; }
+    .checkline input[type="checkbox"] {
+      appearance:none; -webkit-appearance:none; margin:0; flex-shrink:0; position:relative;
+      width:40px; height:22px; border-radius:999px; border:none; background:#d6dae1; cursor:pointer;
+      transition:background .18s var(--ease);
+    }
+    .checkline input[type="checkbox"]::after {
+      content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%;
+      background:#fff; box-shadow:0 1px 3px rgba(16,24,40,.3); transition:transform .18s var(--ease);
+    }
+    .checkline input[type="checkbox"]:checked { background:var(--ink); }
+    .checkline input[type="checkbox"]:checked::after { transform:translateX(18px); }
+    .checkline input[type="checkbox"]:focus-visible { outline:none; box-shadow:var(--ring-strong); }
+    .checkline label { margin:0; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer; }
+
+    /* --- Buttons ------------------------------------------------- */
+    .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    /* A card's own footer: divided off from the content above it. */
+    .controls.bar { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+    .controls.end { justify-content:flex-end; }
+    .btn {
+      --btn-bg:var(--ink); --btn-fg:#fff; --btn-bd:var(--ink);
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      min-height:40px; padding:10px 16px; border-radius:var(--r); border:1px solid var(--btn-bd);
+      background:var(--btn-bg); color:var(--btn-fg); cursor:pointer; box-shadow:var(--sh-1);
+      font-family:inherit; font-size:13.5px; font-weight:600; letter-spacing:.01em; white-space:nowrap;
+      transition:transform .12s var(--ease), box-shadow .16s var(--ease), background .16s var(--ease), border-color .16s var(--ease);
+    }
+    .btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:var(--sh-2); }
+    .btn:active:not(:disabled) { transform:translateY(0); box-shadow:var(--sh-1); }
+    .btn:focus-visible { outline:none; box-shadow:var(--ring-strong); }
+    .btn.secondary { --btn-bg:var(--surface); --btn-fg:var(--ink); --btn-bd:var(--line-strong); }
+    .btn.secondary:hover:not(:disabled) { --btn-bg:var(--surface-2); --btn-bd:#bcc3ce; }
+    .btn.danger { --btn-bg:var(--accent); --btn-bd:var(--accent); }
+    .btn.danger:focus-visible { box-shadow:0 0 0 3px rgba(220,38,38,.3); }
+    .btn.small { min-height:32px; padding:6px 12px; font-size:12px; border-radius:var(--r-sm); }
+    .btn.grow { flex:1 1 160px; }
+    /* Disabled reads as an empty slot rather than a faded colour, so a greyed
+       primary and a greyed destructive button look the same. */
+    .btn:disabled {
+      --btn-bg:var(--surface-2); --btn-fg:var(--muted); --btn-bd:var(--line);
+      cursor:not-allowed; box-shadow:none;
+    }
+
+    /* --- Segmented control --------------------------------------- */
+    .segmented {
+      display:flex; gap:4px; padding:4px; border:1px solid var(--line);
+      border-radius:14px; background:var(--surface-2);
+    }
+    .segmented button {
+      flex:1; padding:9px 10px; border:none; border-radius:10px; background:transparent;
+      color:var(--ink-2); cursor:pointer; font-family:inherit; font-size:13px; font-weight:600;
+      transition:background .16s var(--ease), color .16s var(--ease), box-shadow .16s var(--ease);
+    }
+    .segmented button:hover:not(.on) { background:var(--surface); color:var(--ink); }
+    .segmented button:focus-visible { outline:none; box-shadow:var(--ring-strong); }
+    .segmented button.on { background:var(--ink); color:#fff; box-shadow:var(--sh-1); }
+
+    /* --- Read-outs ----------------------------------------------- */
+    .stat {
+      display:flex; justify-content:space-between; align-items:baseline; gap:14px;
+      padding:10px 0; border-bottom:1px solid var(--line); font-size:13px;
+    }
+    .stat:last-child { border-bottom:none; padding-bottom:0; }
+    .stat span { color:var(--muted); }
+    .stat b { font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; text-align:right; }
+
+    .alert {
+      display:flex; align-items:flex-start; gap:10px; line-height:1.45;
+      padding:12px 14px; border-radius:var(--r); border:1px solid;
+      font-size:13px; font-weight:500; margin-bottom:14px;
+    }
+    .alert::before {
+      content:''; width:6px; height:6px; margin-top:6px; border-radius:50%;
+      background:currentColor; flex-shrink:0; opacity:.85;
+    }
+    .alert.warn { background:#fffaeb; border-color:#fedf89; color:#93370d; }
+    .alert.err { background:#fef3f2; border-color:#fecdca; color:#b42318; }
+    .alert.ok { background:#ecfdf3; border-color:#a9efc5; color:#067647; }
+
+    .progress {
+      height:20px; background:var(--surface-3); border:1px solid var(--line);
+      border-radius:999px; overflow:hidden;
+    }
+    .progress > div {
+      height:100%; background:linear-gradient(90deg, #1c2027, #3a4150);
+      color:#fff; font-size:11px; font-weight:600; font-variant-numeric:tabular-nums;
+      display:flex; align-items:center; justify-content:center; transition:width .12s linear;
+    }
+
+    /* --- Previews ------------------------------------------------ */
+    .previewWrap {
+      border:1px solid var(--line); border-radius:14px; background:var(--surface);
+      padding:10px; display:flex; align-items:center; justify-content:center; overflow:hidden;
+    }
     .previewWrap svg { width:100%; height:auto; display:block; max-height:70vh; }
-    .stat { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px dashed #e3e5e8; font-size:13px; }
-    .stat:last-child { border-bottom:none; }
-    .stat b { font-weight:600; }
-    .alert { padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:12px; border:1px solid; font-weight:600; }
-    .alert.warn { background:#fff8e6; border-color:#e6c14d; color:#7a5a00; }
-    .alert.err { background:#fdecec; border-color:#e79a9a; color:#8d1c1c; }
-    .alert.ok { background:#eaf7ee; border-color:#8fcf9f; color:#1d6b32; }
-    .canvasWrap { position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff; aspect-ratio:1; }
+    .canvasWrap {
+      position:relative; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+      background:var(--surface-2); aspect-ratio:1;
+    }
     .canvasWrap canvas { width:100%; height:100%; display:block; }
     .canvasWrap.framing canvas { cursor:grab; touch-action:none; }
     .canvasWrap.framing canvas:active { cursor:grabbing; }
-    .caption { font-size:12px; font-weight:600; margin-bottom:6px; }
-    .zoombar { display:flex; align-items:center; gap:8px; margin:8px 0 6px; flex-wrap:wrap; }
+
+    .zoombar { display:flex; align-items:center; gap:6px; margin:10px 0 8px; flex-wrap:wrap; }
     .zoombtn {
-      width:30px; height:30px; flex-shrink:0; padding:0; display:flex; align-items:center; justify-content:center;
-      border:1px solid var(--border); border-radius:8px; background:#fff; color:#111;
+      width:32px; height:32px; flex-shrink:0; padding:0; display:flex; align-items:center; justify-content:center;
+      border:1px solid var(--line-strong); border-radius:var(--r-sm); background:var(--surface); color:var(--ink);
       cursor:pointer; font-family:inherit; font-size:17px; font-weight:600; line-height:1;
+      transition:background .15s var(--ease), border-color .15s var(--ease);
     }
-    .zoombtn:hover:not(:disabled) { background:#f0f0f0; }
-    .zoombtn:disabled { opacity:.45; cursor:not-allowed; }
-    .zoomval { font-size:12px; font-weight:600; min-width:46px; text-align:center; }
-    .btn.small { padding:6px 12px; font-size:12px; border-radius:8px; }
+    .zoombtn:hover:not(:disabled) { background:var(--surface-2); border-color:#bcc3ce; }
+    .zoombtn:focus-visible { outline:none; box-shadow:var(--ring-strong); }
+    .zoombtn:disabled {
+      background:var(--surface-2); border-color:var(--line); color:var(--muted); cursor:not-allowed;
+    }
+    .zoomval {
+      font-size:12px; font-weight:600; min-width:52px; text-align:center;
+      color:var(--ink-2); font-variant-numeric:tabular-nums;
+    }
+
     /* The box keeps the layout steady while the stage itself pops out of the
        flow to cover the window. */
     .stageBox { position:relative; aspect-ratio:16/10; }
     .stage3d {
-      position:absolute; inset:0; border:1px solid var(--border); border-radius:12px; overflow:hidden;
-      background:#eef0f3; touch-action:none; cursor:grab;
+      position:absolute; inset:0; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+      background:var(--surface-3); touch-action:none; cursor:grab;
     }
-    .stage3d.max { position:fixed; inset:12px; z-index:3000; box-shadow:0 24px 60px rgba(0,0,0,.28); }
+    .stage3d.max {
+      position:fixed; inset:14px; z-index:3000; border-radius:var(--r-lg); box-shadow:var(--sh-pop);
+    }
     .stage3d:active { cursor:grabbing; }
     .stage3d canvas { width:100%; height:100%; display:block; }
-    .stageBackdrop { position:fixed; inset:0; background:rgba(17,17,17,.55); z-index:2900; }
-    .expand {
-      position:absolute; top:10px; right:10px; width:34px; height:34px; padding:0; border-radius:50%;
-      display:flex; align-items:center; justify-content:center; cursor:pointer;
-      border:1px solid rgba(0,0,0,.18); background:rgba(255,255,255,.92); color:#111;
-      box-shadow:0 2px 6px rgba(0,0,0,.14); transition:background .15s;
+    .stageBackdrop {
+      position:fixed; inset:0; z-index:2900;
+      background:rgba(11,13,18,.58); backdrop-filter:blur(3px);
     }
-    .expand:hover { background:#fff; }
+    .expand {
+      position:absolute; top:12px; right:12px; width:36px; height:36px; padding:0; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; cursor:pointer;
+      border:1px solid rgba(16,24,40,.1); background:rgba(255,255,255,.86); color:var(--ink);
+      box-shadow:var(--sh-1); backdrop-filter:blur(8px);
+      transition:background .15s var(--ease), transform .15s var(--ease);
+    }
+    .expand:hover { background:#fff; transform:translateY(-1px); }
+    .expand:focus-visible { outline:none; box-shadow:var(--ring-strong); }
     .expand svg { width:18px; height:18px; }
+
     .swatch { display:flex; align-items:center; gap:10px; }
     .swatch input[type="color"] {
-      width:44px; height:34px; padding:2px; border:1px solid #d9dde3; border-radius:8px;
-      background:#fff; cursor:pointer; flex-shrink:0;
+      width:46px; height:36px; padding:3px; border:1px solid var(--line-strong); border-radius:var(--r-sm);
+      background:var(--surface); cursor:pointer; flex-shrink:0;
     }
-    .swatch code { font-size:12px; font-weight:600; text-transform:uppercase; }
-    .segmented { display:flex; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
-    .segmented button {
-      flex:1; padding:9px 10px; border:none; background:#fff; color:#111; cursor:pointer;
-      font-family:inherit; font-size:13px; font-weight:600;
+    .swatch input[type="color"]:focus-visible { outline:none; box-shadow:var(--ring); }
+    .swatch code {
+      font-size:12px; font-weight:600; text-transform:uppercase; color:var(--ink-2);
+      padding:3px 7px; border-radius:6px; background:var(--surface-2); border:1px solid var(--line);
     }
-    .segmented button + button { border-left:1px solid var(--border); }
-    .segmented button.on { background:#111; color:#fff; }
-    .progress { height:22px; background:#e9ecef; border-radius:999px; overflow:hidden; border:1px solid var(--border); }
-    .progress > div { height:100%; background:#111; color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; transition:width .1s linear; }
-    footer { padding:12px 20px 24px; text-align:center; color:#444; font-size:12px; }
-    footer a { color:#111; }
-    .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0 16px; }
+
+    footer {
+      max-width:1400px; margin:0 auto; padding:24px var(--gutter) 40px;
+      text-align:center; color:var(--muted); font-size:12px;
+    }
+    footer a { color:var(--ink); text-decoration:none; border-bottom:1px solid var(--line-strong); }
+
+    @media (max-width:640px) {
+      :root { --gutter:14px; }
+      .card { padding:16px; border-radius:16px; }
+      .appbar { padding:14px var(--gutter); }
+      .brand-mark { width:40px; height:40px; border-radius:12px; }
+      .brand-mark svg { width:24px; height:24px; }
+      header h1 { font-size:17px; }
+      .custom-select-wrapper { width:158px; }
+      .row { gap:14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition:none !important; animation:none !important; }
+    }
   </style>
 
   <script>
@@ -174,6 +427,60 @@
       tabTemplate: "Template PDF",
       tabGenerator: "String Art Generator",
       tabRing: "Template STL",
+      tabMachine: "Winding machine",
+
+      mJobTitle: "What to wind",
+      mFromGenerator: "{0} wraps, from the generator tab.",
+      mNoSequence: "Make a sequence in the generator tab, or load one you saved earlier.",
+      mLoadSequence: "Load a sequence (.txt)",
+      mUseGenerator: "Use the generator's sequence",
+      mLoaded: "{0} wraps, from {1}.",
+      mMachineTitle: "Machine",
+      mWrapHeight: "Wrap height (mm)",
+      mWrapHeightHint: "Where the thread is laid on the nail, measured up from the board.",
+      mEyelet: "Guide tip radius (mm)",
+      mEyeletHint: "The outside of the eyelet the thread runs through. It has to pass between two nails.",
+      mOrbitAuto: "Work the orbit out for me",
+      mOrbit: "Orbit radius (mm)",
+      mOrbitHint: "Eyelet to nail, while it goes round.",
+      mFeedTravel: "Travel feed (mm/min)",
+      mFeedOrbit: "Wrap feed (mm/min)",
+      mPhase: "Angle of nail 0 (°)",
+      mPhaseHint: "Leave at zero unless the ring is mounted turned on the turntable.",
+      mReach: "Machine reach (mm)",
+      mReachHint: "How far the guide gets from the middle of the turntable. The stock machine reaches 300 mm.",
+      mSOrbit: "Orbit radius",
+      mSWraps: "Wraps",
+      mSPath: "Path the guide walks",
+      mSTime: "Estimated time",
+      mSSize: "Job size",
+      mWarnCrowded: "{0} nails on this circle sit {1} mm apart, too close for a {2} mm guide tip to get between them. Use fewer nails, a wider circle, or a finer guide.",
+      mWarnOrbit: "On this ring the orbit has to be between {0} and {1} mm.",
+      mWarnReach: "This ring needs {0} mm of reach and the machine has {1} mm.",
+      mSendTitle: "Send it over",
+      mHost: "Machine address",
+      mHostHint: "printer.local, or the address your router gave it.",
+      mUser: "User",
+      mPass: "Password",
+      mDownloadGcode: "Download .gcode",
+      mSend: "Send to the machine",
+      mRefresh: "Check the machine",
+      mStart: "Start",
+      mPause: "Pause",
+      mResume: "Carry on",
+      mStop: "Stop",
+      mStateIdle: "Waiting",
+      mStateRunning: "Winding",
+      mStatePaused: "Paused",
+      mStateHoming: "Homing",
+      mStateError: "Stopped on an error",
+      mOffline: "Nothing answered at {0}.",
+      mSent: "Sent {0} wraps. Tie the thread to nail {1}, line it up with the guide, then press Start.",
+      mRefused: "The machine would not take the job: {0}",
+      mDenied: "The machine did not accept that user and password.",
+      mWarnPoints: "This sequence was made for {0} nails, so that is the count the job uses.",
+      mProgress: "line {0} of {1}",
+      mInsecure: "This page came over https and the machine speaks http, so the browser will block the connection. Open the app from the machine itself, or over http.",
 
       paramsTitle: "Parameters",
       points: "Number of points",
@@ -218,9 +525,14 @@
       warnNoFit: "The drawing ({0} mm) does not fit the selected page ({1} mm). Increase the page size or reduce the radius.",
       warnDense: "With {0} points the spacing is only {1} mm. The numbers may overlap — consider raising \"Number every N points\".",
 
-      ringTitle: "Nails & ring",
+      ringTitle: "Nails & base",
+      baseShape: "Base",
+      baseRing: "Circular ring",
+      baseSquare: "Square board",
+      baseRound: "Circular board",
+      baseShapeHint: "Ring alone, or a square / circular board with the same nail ring raised on top as relief.",
       nailHeight: "Nail height (mm)",
-      nailHeightHint: "How far each nail stands above the ring.",
+      nailHeightHint: "How far each nail stands above the base.",
       nailDiameter: "Nail diameter (mm)",
       nailDiameterHint: "Thicker nails are sturdier but take up more of the gap.",
       nailShape: "Nail tip",
@@ -230,12 +542,15 @@
       nailShapeHint: "A straight nail is quickest to print. A curl hooks outwards over the thread and a tapered tip ends 30% thicker than its base, both of which stop finished loops riding off the top. The curl overhangs, so print it with supports.",
       ringWidth: "Ring width (mm)",
       ringWidthHint: "Radial width of the band the nails stand on.",
-      ringThickness: "Ring thickness (mm)",
-      ringThicknessHint: "Height of the band itself.",
+      boardMargin: "Margin past nails (mm)",
+      boardMarginHint: "How far the board extends past the nail circle on every side.",
+      ringThickness: "Base thickness (mm)",
+      ringThicknessHint: "Height of the ring band or of the board itself.",
       partColor: "Filament colour",
       downloadStl: "Download STL",
-      ringPreviewHint: "Drag to turn the part and scroll to get closer. The model is in millimetres, ready to slice.",
+      ringPreviewHint: "Drag to turn, Shift-drag to move, scroll to get closer. The model is in millimetres, ready to slice.",
       sOuterDiameter: "Outer diameter",
+      sBoardSize: "Board size",
       sPartHeight: "Total height",
       sNailGap: "Gap between nails",
       sTipDiameter: "Tip diameter",
@@ -244,18 +559,18 @@
       warnNailsTouch: "With {0} points only {1} mm is left between nails, so they would merge. Reduce the nail diameter or the number of points.",
       splitTitle: "Cutting and numbering",
       segments: "Ring segments",
-      segmentsHint: "1 prints the ring whole. More cuts it into that many arcs, held together by a puzzle tab and slot.",
+      segmentsHint: "1 prints the ring whole. More cuts it into that many arcs, held together by a puzzle tab and slot. Solid boards always print in one piece.",
       jointGap: "Joint clearance (mm)",
       jointGapHint: "Play left between tab and slot. 0.25 suits most printers; raise it if the parts refuse to go together.",
-      arrows: "Numbered snap-off tags",
-      arrowsHint: "Puts a pointer at every nail with its number raised on it, held by a stub you snap or cut off once the picture is finished.",
+      arrows: "Numbered arrow ring",
+      arrowsHint: "Adds a slim second ring around the mould with one inward pointer per nail and its number raised on it. Downloaded as its own STL so you can fit it for numbering and take it off again.",
       sParts: "Parts",
       sLargest: "Largest part",
       sJoint: "Joint length",
       downloadZip: "Download ZIP",
       warnJointTight: "With {0} points the gap between nails leaves no room for a joint, so the arcs are cut square and will need gluing. Reduce the points, widen the radius, or print the ring whole.",
       warnTagsTiny: "At {0} points the tag digits are only {1} mm tall, too small to read or to print. Reduce the points or turn the tags off.",
-      warnBedSize: "The largest part measures {0} × {1} cm and will not fit a typical 25 cm print bed — raise the number of ring segments.",
+      warnBedSize: "The largest part measures {0} × {1} cm and will not fit a typical 25 cm print bed — raise the number of ring segments, or print a smaller board.",
 
       genTitle: "Source image",
       selectImage: "Select an image",
@@ -285,7 +600,7 @@
       zoomHint: "Scroll or use the buttons to zoom, and drag the image to reframe it. It turns greyscale when you generate.",
       resultLabel: "String art result",
       preview3dTitle: "3D preview",
-      preview3dHint: "Drag to turn the piece and scroll to get closer. The nails are always black.",
+      preview3dHint: "Drag to turn, Shift-drag to move, scroll to get closer. The nails are always black.",
       maximize: "Maximise the 3D view",
       minimize: "Minimise the 3D view",
       threadColor: "Thread colour",
@@ -325,6 +640,60 @@
       tabTemplate: "PDF do molde",
       tabGenerator: "Gerador de String Art",
       tabRing: "STL do molde",
+      tabMachine: "Máquina de enrolar",
+
+      mJobTitle: "O que enrolar",
+      mFromGenerator: "{0} laçadas, vindas do separador do gerador.",
+      mNoSequence: "Cria uma sequência no separador do gerador, ou carrega uma que tenhas guardado.",
+      mLoadSequence: "Carregar sequência (.txt)",
+      mUseGenerator: "Usar a sequência do gerador",
+      mLoaded: "{0} laçadas, de {1}.",
+      mMachineTitle: "Máquina",
+      mWrapHeight: "Altura da laçada (mm)",
+      mWrapHeightHint: "Onde o fio assenta no prego, medido a partir da placa.",
+      mEyelet: "Raio da ponta do guia (mm)",
+      mEyeletHint: "O exterior do ilhó por onde passa o fio. Tem de caber entre dois pregos.",
+      mOrbitAuto: "Calcular a órbita por mim",
+      mOrbit: "Raio da órbita (mm)",
+      mOrbitHint: "Do ilhó ao prego, enquanto lhe dá a volta.",
+      mFeedTravel: "Velocidade de deslocação (mm/min)",
+      mFeedOrbit: "Velocidade da laçada (mm/min)",
+      mPhase: "Ângulo do prego 0 (°)",
+      mPhaseHint: "Deixa a zero, a não ser que o aro esteja montado rodado no prato.",
+      mReach: "Alcance da máquina (mm)",
+      mReachHint: "Até onde o guia chega a partir do centro do prato. A máquina de série alcança 300 mm.",
+      mSOrbit: "Raio da órbita",
+      mSWraps: "Laçadas",
+      mSPath: "Percurso do guia",
+      mSTime: "Tempo estimado",
+      mSSize: "Tamanho do trabalho",
+      mWarnCrowded: "{0} pregos nesta circunferência ficam a {1} mm uns dos outros, pouco para uma ponta de guia de {2} mm passar entre eles. Usa menos pregos, uma circunferência maior, ou um guia mais fino.",
+      mWarnOrbit: "Neste aro a órbita tem de estar entre {0} e {1} mm.",
+      mWarnReach: "Este aro precisa de {0} mm de alcance e a máquina tem {1} mm.",
+      mSendTitle: "Enviar para a máquina",
+      mHost: "Endereço da máquina",
+      mHostHint: "printer.local, ou o endereço que o router lhe deu.",
+      mUser: "Utilizador",
+      mPass: "Palavra-passe",
+      mDownloadGcode: "Descarregar .gcode",
+      mSend: "Enviar para a máquina",
+      mRefresh: "Ver o estado da máquina",
+      mStart: "Iniciar",
+      mPause: "Pausa",
+      mResume: "Continuar",
+      mStop: "Parar",
+      mStateIdle: "À espera",
+      mStateRunning: "A enrolar",
+      mStatePaused: "Em pausa",
+      mStateHoming: "A procurar as origens",
+      mStateError: "Parada com um erro",
+      mOffline: "Não respondeu nada em {0}.",
+      mSent: "Enviadas {0} laçadas. Ata o fio ao prego {1}, alinha-o com o guia, e carrega em Iniciar.",
+      mRefused: "A máquina não aceitou o trabalho: {0}",
+      mDenied: "A máquina não aceitou esse utilizador e palavra-passe.",
+      mWarnPoints: "Esta sequência foi feita para {0} pregos, por isso é essa a contagem que o trabalho usa.",
+      mProgress: "linha {0} de {1}",
+      mInsecure: "Esta página veio por https e a máquina fala http, por isso o browser bloqueia a ligação. Abre a app a partir da própria máquina, ou por http.",
 
       paramsTitle: "Parâmetros",
       points: "Número de pontos",
@@ -369,9 +738,14 @@
       warnNoFit: "O desenho ({0} mm) não cabe na página escolhida ({1} mm). Aumenta a página ou reduz o raio.",
       warnDense: "Com {0} pontos o espaçamento é de apenas {1} mm. Os números podem sobrepor-se — considera aumentar \"Numerar a cada N pontos\".",
 
-      ringTitle: "Pregos e aro",
+      ringTitle: "Pregos e base",
+      baseShape: "Base",
+      baseRing: "Aro circular",
+      baseSquare: "Placa quadrada",
+      baseRound: "Placa circular",
+      baseShapeHint: "Só o aro, ou uma placa quadrada / circular com o mesmo aro dos pregos em relevo por cima.",
       nailHeight: "Altura do prego (mm)",
-      nailHeightHint: "Quanto cada prego sobressai do aro.",
+      nailHeightHint: "Quanto cada prego sobressai da base.",
       nailDiameter: "Diâmetro do prego (mm)",
       nailDiameterHint: "Pregos mais grossos são mais robustos mas ocupam mais espaço.",
       nailShape: "Ponta do prego",
@@ -381,12 +755,15 @@
       nailShapeHint: "A ponta reta é a mais rápida de imprimir. A curva em camarão dobra para fora sobre o fio e a cónica acaba 30% mais grossa do que a base, impedindo ambas que as voltas já dadas saltem por cima do prego. A curva fica em consola, por isso imprime-a com suportes.",
       ringWidth: "Largura do aro (mm)",
       ringWidthHint: "Largura radial da faixa onde os pregos assentam.",
-      ringThickness: "Espessura do aro (mm)",
-      ringThicknessHint: "Altura da própria faixa.",
+      boardMargin: "Margem além dos pregos (mm)",
+      boardMarginHint: "Quanto a placa ultrapassa o círculo dos pregos em cada lado.",
+      ringThickness: "Espessura da base (mm)",
+      ringThicknessHint: "Altura do aro ou da própria placa.",
       partColor: "Cor do filamento",
       downloadStl: "Descarregar STL",
-      ringPreviewHint: "Arrasta para rodar a peça e usa a roda do rato para aproximar. O modelo está em milímetros, pronto a fatiar.",
+      ringPreviewHint: "Arrasta para rodar, Shift-arrasta para mover, e usa a roda do rato para aproximar. O modelo está em milímetros, pronto a fatiar.",
       sOuterDiameter: "Diâmetro exterior",
+      sBoardSize: "Tamanho da placa",
       sPartHeight: "Altura total",
       sNailGap: "Folga entre pregos",
       sTipDiameter: "Diâmetro da ponta",
@@ -395,18 +772,18 @@
       warnNailsTouch: "Com {0} pontos sobra apenas {1} mm entre pregos, pelo que ficariam colados. Reduz o diâmetro dos pregos ou o número de pontos.",
       splitTitle: "Cortar e numerar",
       segments: "Partes do aro",
-      segmentsHint: "1 imprime o aro inteiro. Mais corta-o nesse número de arcos, unidos por encaixe macho e fêmea em puzzle.",
+      segmentsHint: "1 imprime o aro inteiro. Mais corta-o nesse número de arcos, unidos por encaixe macho e fêmea em puzzle. As placas sólidas imprimem-se sempre de uma só peça.",
       jointGap: "Folga do encaixe (mm)",
       jointGapHint: "Espaço deixado entre macho e fêmea. 0,25 serve na maioria das impressoras; aumenta se as peças não entrarem.",
-      arrows: "Setas numeradas destacáveis",
-      arrowsHint: "Coloca em cada prego uma seta com o número em relevo, presa por um pescoço que arrancas ou cortas quando o quadro estiver pronto.",
+      arrows: "Aro de setas numeradas",
+      arrowsHint: "Acrescenta um aro fino à volta do molde, com uma seta de fora para dentro em cada prego e o número em relevo. Sai num STL à parte para encaixar na numeração e voltar a tirar.",
       sParts: "Peças",
       sLargest: "Maior peça",
       sJoint: "Comprimento do encaixe",
       downloadZip: "Descarregar ZIP",
       warnJointTight: "Com {0} pontos a folga entre pregos não deixa espaço para o encaixe, pelo que os arcos são cortados a direito e terão de ser colados. Reduz os pontos, aumenta o raio ou imprime o aro inteiro.",
       warnTagsTiny: "Com {0} pontos os dígitos das setas ficam com apenas {1} mm, pequenos demais para ler ou imprimir. Reduz os pontos ou desliga as setas.",
-      warnBedSize: "A maior peça mede {0} × {1} cm e não cabe numa base de impressão comum de 25 cm — aumenta o número de partes do aro.",
+      warnBedSize: "A maior peça mede {0} × {1} cm e não cabe numa base de impressão comum de 25 cm — aumenta o número de partes do aro, ou imprime uma placa mais pequena.",
 
       genTitle: "Imagem de origem",
       selectImage: "Escolher imagem",
@@ -436,7 +813,7 @@
       zoomHint: "Usa a roda do rato ou os botões para ampliar e arrasta a imagem para reenquadrar. Fica em tons de cinzento quando geras.",
       resultLabel: "Resultado string art",
       preview3dTitle: "Pré-visualização 3D",
-      preview3dHint: "Arrasta para rodar a peça e usa a roda do rato para aproximar. Os pregos são sempre pretos.",
+      preview3dHint: "Arrasta para rodar, Shift-arrasta para mover, e usa a roda do rato para aproximar. Os pregos são sempre pretos.",
       maximize: "Maximizar a vista 3D",
       minimize: "Minimizar a vista 3D",
       threadColor: "Cor da linha",
@@ -477,6 +854,60 @@
       tabTemplate: "PDF du gabarit",
       tabGenerator: "Générateur de String Art",
       tabRing: "STL du gabarit",
+      tabMachine: "Machine à enrouler",
+
+      mJobTitle: "Ce qu'il faut enrouler",
+      mFromGenerator: "{0} tours, venus de l'onglet générateur.",
+      mNoSequence: "Créez une séquence dans l'onglet générateur, ou chargez-en une que vous avez gardée.",
+      mLoadSequence: "Charger une séquence (.txt)",
+      mUseGenerator: "Utiliser la séquence du générateur",
+      mLoaded: "{0} tours, depuis {1}.",
+      mMachineTitle: "Machine",
+      mWrapHeight: "Hauteur du tour (mm)",
+      mWrapHeightHint: "Là où le fil se pose sur la pointe, mesuré depuis la planche.",
+      mEyelet: "Rayon du bout du guide (mm)",
+      mEyeletHint: "L'extérieur de l'œillet où passe le fil. Il doit passer entre deux pointes.",
+      mOrbitAuto: "Calculer l'orbite pour moi",
+      mOrbit: "Rayon de l'orbite (mm)",
+      mOrbitHint: "De l'œillet à la pointe, pendant qu'il en fait le tour.",
+      mFeedTravel: "Vitesse de déplacement (mm/min)",
+      mFeedOrbit: "Vitesse du tour (mm/min)",
+      mPhase: "Angle de la pointe 0 (°)",
+      mPhaseHint: "Laissez à zéro, sauf si l'anneau est monté tourné sur le plateau.",
+      mReach: "Portée de la machine (mm)",
+      mReachHint: "Jusqu'où le guide s'éloigne du centre du plateau. La machine de série atteint 300 mm.",
+      mSOrbit: "Rayon de l'orbite",
+      mSWraps: "Tours",
+      mSPath: "Chemin parcouru par le guide",
+      mSTime: "Temps estimé",
+      mSSize: "Taille du travail",
+      mWarnCrowded: "{0} pointes sur ce cercle sont à {1} mm l'une de l'autre, trop peu pour qu'un bout de guide de {2} mm passe entre elles. Prenez moins de pointes, un cercle plus grand, ou un guide plus fin.",
+      mWarnOrbit: "Sur cet anneau l'orbite doit être entre {0} et {1} mm.",
+      mWarnReach: "Cet anneau demande {0} mm de portée et la machine en a {1} mm.",
+      mSendTitle: "Envoyer à la machine",
+      mHost: "Adresse de la machine",
+      mHostHint: "printer.local, ou l'adresse que votre box lui a donnée.",
+      mUser: "Utilisateur",
+      mPass: "Mot de passe",
+      mDownloadGcode: "Télécharger le .gcode",
+      mSend: "Envoyer à la machine",
+      mRefresh: "Voir l'état de la machine",
+      mStart: "Démarrer",
+      mPause: "Pause",
+      mResume: "Reprendre",
+      mStop: "Arrêter",
+      mStateIdle: "En attente",
+      mStateRunning: "En train d'enrouler",
+      mStatePaused: "En pause",
+      mStateHoming: "Prise des origines",
+      mStateError: "Arrêtée sur une erreur",
+      mOffline: "Rien n'a répondu à {0}.",
+      mSent: "{0} tours envoyés. Attachez le fil à la pointe {1}, alignez-la avec le guide, puis appuyez sur Démarrer.",
+      mRefused: "La machine n'a pas pris le travail : {0}",
+      mDenied: "La machine n'a pas accepté cet utilisateur et ce mot de passe.",
+      mWarnPoints: "Cette séquence a été faite pour {0} pointes, c'est donc ce compte que le travail utilise.",
+      mProgress: "ligne {0} sur {1}",
+      mInsecure: "Cette page est arrivée en https et la machine parle http, donc le navigateur bloque la connexion. Ouvrez l'application depuis la machine elle-même, ou en http.",
 
       paramsTitle: "Paramètres",
       points: "Nombre de points",
@@ -521,9 +952,14 @@
       warnNoFit: "Le dessin ({0} mm) ne tient pas sur la page choisie ({1} mm). Agrandissez la page ou réduisez le rayon.",
       warnDense: "Avec {0} points l'espacement n'est que de {1} mm. Les numéros risquent de se chevaucher — augmentez « Numéroter tous les N points ».",
 
-      ringTitle: "Clous et anneau",
+      ringTitle: "Clous et base",
+      baseShape: "Base",
+      baseRing: "Anneau circulaire",
+      baseSquare: "Planche carrée",
+      baseRound: "Planche ronde",
+      baseShapeHint: "Anneau seul, ou planche carrée / ronde avec le même anneau de clous en relief par-dessus.",
       nailHeight: "Hauteur du clou (mm)",
-      nailHeightHint: "De combien chaque clou dépasse de l'anneau.",
+      nailHeightHint: "De combien chaque clou dépasse de la base.",
       nailDiameter: "Diamètre du clou (mm)",
       nailDiameterHint: "Des clous plus épais sont plus solides mais laissent moins d'espace.",
       nailShape: "Bout du clou",
@@ -533,12 +969,15 @@
       nailShapeHint: "Le bout droit s'imprime le plus vite. La courbe en crevette se recourbe vers l'extérieur au-dessus du fil et le bout conique finit 30% plus épais que sa base, ce qui empêche les tours déjà passés de sauter par-dessus le clou. La courbe est en porte-à-faux : imprimez-la avec des supports.",
       ringWidth: "Largeur de l'anneau (mm)",
       ringWidthHint: "Largeur radiale de la bande qui porte les clous.",
-      ringThickness: "Épaisseur de l'anneau (mm)",
-      ringThicknessHint: "Hauteur de la bande elle-même.",
+      boardMargin: "Marge au-delà des clous (mm)",
+      boardMarginHint: "De combien la planche dépasse le cercle des clous de chaque côté.",
+      ringThickness: "Épaisseur de la base (mm)",
+      ringThicknessHint: "Hauteur de la bande ou de la planche elle-même.",
       partColor: "Couleur du filament",
       downloadStl: "Télécharger le STL",
-      ringPreviewHint: "Faites glisser pour tourner la pièce et utilisez la molette pour vous rapprocher. Le modèle est en millimètres, prêt à trancher.",
+      ringPreviewHint: "Faites glisser pour tourner, Shift-glisser pour déplacer, molette pour vous rapprocher. Le modèle est en millimètres, prêt à trancher.",
       sOuterDiameter: "Diamètre extérieur",
+      sBoardSize: "Taille de la planche",
       sPartHeight: "Hauteur totale",
       sNailGap: "Espace entre les clous",
       sTipDiameter: "Diamètre du bout",
@@ -547,18 +986,18 @@
       warnNailsTouch: "Avec {0} points il ne reste que {1} mm entre les clous, ils se toucheraient. Réduisez le diamètre des clous ou le nombre de points.",
       splitTitle: "Découpe et numérotation",
       segments: "Parties de l'anneau",
-      segmentsHint: "1 imprime l'anneau d'une seule pièce. Au-delà, il est coupé en autant d'arcs, tenus par un tenon et une mortaise en puzzle.",
+      segmentsHint: "1 imprime l'anneau d'une seule pièce. Au-delà, il est coupé en autant d'arcs, tenus par un tenon et une mortaise en puzzle. Les planches pleines s'impriment toujours d'une seule pièce.",
       jointGap: "Jeu de l'assemblage (mm)",
       jointGapHint: "Jeu laissé entre tenon et mortaise. 0,25 convient à la plupart des imprimantes ; augmentez-le si les pièces refusent d'entrer.",
-      arrows: "Étiquettes numérotées détachables",
-      arrowsHint: "Ajoute à chaque clou une flèche portant son numéro en relief, tenue par une amorce que vous cassez ou coupez une fois le tableau terminé.",
+      arrows: "Anneau de flèches numérotées",
+      arrowsHint: "Ajoute un anneau mince autour du moule, avec une flèche vers l'intérieur à chaque clou et son numéro en relief. Téléchargé en STL séparé pour le poser le temps de numéroter, puis le retirer.",
       sParts: "Pièces",
       sLargest: "Plus grande pièce",
       sJoint: "Longueur de l'assemblage",
       downloadZip: "Télécharger le ZIP",
       warnJointTight: "Avec {0} points, l'espace entre les clous ne laisse pas de place à l'assemblage : les arcs sont coupés droit et devront être collés. Réduisez les points, agrandissez le rayon ou imprimez l'anneau entier.",
       warnTagsTiny: "À {0} points, les chiffres des flèches ne font que {1} mm de haut, trop petits pour être lus ou imprimés. Réduisez les points ou désactivez les flèches.",
-      warnBedSize: "La plus grande pièce mesure {0} × {1} cm et n'entre pas sur un plateau courant de 25 cm — augmentez le nombre de parties.",
+      warnBedSize: "La plus grande pièce mesure {0} × {1} cm et n'entre pas sur un plateau courant de 25 cm — augmentez le nombre de parties, ou imprimez une planche plus petite.",
 
       genTitle: "Image source",
       selectImage: "Choisir une image",
@@ -588,7 +1027,7 @@
       zoomHint: "Utilisez la molette ou les boutons pour zoomer et faites glisser l’image pour la recadrer. Elle passe en niveaux de gris à la génération.",
       resultLabel: "Résultat string art",
       preview3dTitle: "Aperçu 3D",
-      preview3dHint: "Faites glisser pour tourner la pièce et utilisez la molette pour vous rapprocher. Les clous sont toujours noirs.",
+      preview3dHint: "Faites glisser pour tourner, Shift-glisser pour déplacer, molette pour vous rapprocher. Les clous sont toujours noirs.",
       maximize: "Agrandir la vue 3D",
       minimize: "Réduire la vue 3D",
       threadColor: "Couleur du fil",
@@ -628,6 +1067,60 @@
       tabTemplate: "PDF de la plantilla",
       tabGenerator: "Generador de String Art",
       tabRing: "STL de la plantilla",
+      tabMachine: "Máquina de enrollar",
+
+      mJobTitle: "Qué enrollar",
+      mFromGenerator: "{0} vueltas, de la pestaña del generador.",
+      mNoSequence: "Crea una secuencia en la pestaña del generador, o carga una que hayas guardado.",
+      mLoadSequence: "Cargar secuencia (.txt)",
+      mUseGenerator: "Usar la secuencia del generador",
+      mLoaded: "{0} vueltas, de {1}.",
+      mMachineTitle: "Máquina",
+      mWrapHeight: "Altura de la vuelta (mm)",
+      mWrapHeightHint: "Dónde se apoya el hilo en el pin, medido desde el tablero.",
+      mEyelet: "Radio de la punta de la guía (mm)",
+      mEyeletHint: "El exterior del ojal por donde pasa el hilo. Tiene que caber entre dos pines.",
+      mOrbitAuto: "Calcular la órbita por mí",
+      mOrbit: "Radio de la órbita (mm)",
+      mOrbitHint: "Del ojal al pin, mientras le da la vuelta.",
+      mFeedTravel: "Velocidad de desplazamiento (mm/min)",
+      mFeedOrbit: "Velocidad de la vuelta (mm/min)",
+      mPhase: "Ángulo del pin 0 (°)",
+      mPhaseHint: "Déjalo en cero, salvo que el aro esté montado girado en el plato.",
+      mReach: "Alcance de la máquina (mm)",
+      mReachHint: "Hasta dónde llega la guía desde el centro del plato. La máquina de serie alcanza 300 mm.",
+      mSOrbit: "Radio de la órbita",
+      mSWraps: "Vueltas",
+      mSPath: "Recorrido de la guía",
+      mSTime: "Tiempo estimado",
+      mSSize: "Tamaño del trabajo",
+      mWarnCrowded: "{0} pines en esta circunferencia quedan a {1} mm unos de otros, poco para que una punta de guía de {2} mm pase entre ellos. Usa menos pines, una circunferencia mayor, o una guía más fina.",
+      mWarnOrbit: "En este aro la órbita tiene que estar entre {0} y {1} mm.",
+      mWarnReach: "Este aro necesita {0} mm de alcance y la máquina tiene {1} mm.",
+      mSendTitle: "Enviar a la máquina",
+      mHost: "Dirección de la máquina",
+      mHostHint: "printer.local, o la dirección que le haya dado el router.",
+      mUser: "Usuario",
+      mPass: "Contraseña",
+      mDownloadGcode: "Descargar el .gcode",
+      mSend: "Enviar a la máquina",
+      mRefresh: "Ver el estado de la máquina",
+      mStart: "Empezar",
+      mPause: "Pausa",
+      mResume: "Seguir",
+      mStop: "Parar",
+      mStateIdle: "Esperando",
+      mStateRunning: "Enrollando",
+      mStatePaused: "En pausa",
+      mStateHoming: "Buscando los orígenes",
+      mStateError: "Parada por un error",
+      mOffline: "No contestó nada en {0}.",
+      mSent: "Enviadas {0} vueltas. Ata el hilo al pin {1}, alinéalo con la guía y pulsa Empezar.",
+      mRefused: "La máquina no aceptó el trabajo: {0}",
+      mDenied: "La máquina no aceptó ese usuario y contraseña.",
+      mWarnPoints: "Esta secuencia se hizo para {0} pines, así que es esa la cuenta que usa el trabajo.",
+      mProgress: "línea {0} de {1}",
+      mInsecure: "Esta página llegó por https y la máquina habla http, así que el navegador bloquea la conexión. Abre la app desde la propia máquina, o por http.",
 
       paramsTitle: "Parámetros",
       points: "Número de puntos",
@@ -672,9 +1165,14 @@
       warnNoFit: "El dibujo ({0} mm) no cabe en la página elegida ({1} mm). Aumenta la página o reduce el radio.",
       warnDense: "Con {0} puntos la separación es de solo {1} mm. Los números pueden solaparse — aumenta «Numerar cada N puntos».",
 
-      ringTitle: "Clavos y aro",
+      ringTitle: "Clavos y base",
+      baseShape: "Base",
+      baseRing: "Aro circular",
+      baseSquare: "Placa cuadrada",
+      baseRound: "Placa circular",
+      baseShapeHint: "Solo el aro, o una placa cuadrada / circular con el mismo aro de clavos en relieve encima.",
       nailHeight: "Altura del clavo (mm)",
-      nailHeightHint: "Cuánto sobresale cada clavo del aro.",
+      nailHeightHint: "Cuánto sobresale cada clavo de la base.",
       nailDiameter: "Diámetro del clavo (mm)",
       nailDiameterHint: "Los clavos más gruesos son más resistentes pero dejan menos hueco.",
       nailShape: "Punta del clavo",
@@ -684,12 +1182,15 @@
       nailShapeHint: "La punta recta es la más rápida de imprimir. La curva en gamba se dobla hacia fuera por encima del hilo y la cónica acaba un 30% más gruesa que su base, y ambas evitan que las vueltas ya dadas se salgan por arriba. La curva queda en voladizo, así que imprímela con soportes.",
       ringWidth: "Anchura del aro (mm)",
       ringWidthHint: "Anchura radial de la banda sobre la que se apoyan los clavos.",
-      ringThickness: "Espesor del aro (mm)",
-      ringThicknessHint: "Altura de la propia banda.",
+      boardMargin: "Margen más allá de los clavos (mm)",
+      boardMarginHint: "Cuánto se extiende la placa más allá del círculo de clavos a cada lado.",
+      ringThickness: "Espesor de la base (mm)",
+      ringThicknessHint: "Altura del aro o de la propia placa.",
       partColor: "Color del filamento",
       downloadStl: "Descargar STL",
-      ringPreviewHint: "Arrastra para girar la pieza y usa la rueda para acercarte. El modelo está en milímetros, listo para laminar.",
+      ringPreviewHint: "Arrastra para girar, Shift-arrastra para mover, rueda para acercarte. El modelo está en milímetros, listo para laminar.",
       sOuterDiameter: "Diámetro exterior",
+      sBoardSize: "Tamaño de la placa",
       sPartHeight: "Altura total",
       sNailGap: "Hueco entre clavos",
       sTipDiameter: "Diámetro de la punta",
@@ -698,18 +1199,18 @@
       warnNailsTouch: "Con {0} puntos solo quedan {1} mm entre clavos, así que se juntarían. Reduce el diámetro de los clavos o el número de puntos.",
       splitTitle: "Corte y numeración",
       segments: "Partes del aro",
-      segmentsHint: "1 imprime el aro de una pieza. Más lo corta en tantos arcos, sujetos por un encaje macho y hembra tipo puzle.",
+      segmentsHint: "1 imprime el aro de una pieza. Más lo corta en tantos arcos, sujetos por un encaje macho y hembra tipo puzle. Las placas macizas se imprimen siempre de una sola pieza.",
       jointGap: "Holgura del encaje (mm)",
       jointGapHint: "Juego que queda entre macho y hembra. 0,25 vale para casi cualquier impresora; súbelo si las piezas no entran.",
-      arrows: "Etiquetas numeradas desprendibles",
-      arrowsHint: "Pone en cada clavo una flecha con su número en relieve, sujeta por un cuello que arrancas o cortas cuando el cuadro esté acabado.",
+      arrows: "Aro de flechas numeradas",
+      arrowsHint: "Añade un aro fino alrededor del molde, con una flecha de fuera hacia adentro en cada clavo y su número en relieve. Se descarga en un STL aparte para encajarlo al numerar y volver a quitarlo.",
       sParts: "Piezas",
       sLargest: "Pieza mayor",
       sJoint: "Longitud del encaje",
       downloadZip: "Descargar ZIP",
       warnJointTight: "Con {0} puntos el hueco entre clavos no deja sitio para el encaje, así que los arcos se cortan a escuadra y habrá que pegarlos. Reduce los puntos, amplía el radio o imprime el aro entero.",
       warnTagsTiny: "Con {0} puntos los dígitos de las flechas miden solo {1} mm, demasiado pequeños para leerse o imprimirse. Reduce los puntos o desactiva las flechas.",
-      warnBedSize: "La pieza mayor mide {0} × {1} cm y no cabe en una cama de impresión normal de 25 cm: aumenta el número de partes del aro.",
+      warnBedSize: "La pieza mayor mide {0} × {1} cm y no cabe en una cama de impresión normal de 25 cm: aumenta el número de partes del aro, o imprime una placa más pequeña.",
 
       genTitle: "Imagen de origen",
       selectImage: "Elegir imagen",
@@ -739,7 +1240,7 @@
       zoomHint: "Usa la rueda o los botones para ampliar y arrastra la imagen para reencuadrarla. Pasa a escala de grises al generar.",
       resultLabel: "Resultado string art",
       preview3dTitle: "Vista previa 3D",
-      preview3dHint: "Arrastra para girar la pieza y usa la rueda para acercarte. Los clavos son siempre negros.",
+      preview3dHint: "Arrastra para girar, Shift-arrastra para mover, rueda para acercarte. Los clavos son siempre negros.",
       maximize: "Maximizar la vista 3D",
       minimize: "Minimizar la vista 3D",
       threadColor: "Color del hilo",
@@ -779,6 +1280,60 @@
       tabTemplate: "PDF della dima",
       tabGenerator: "Generatore di String Art",
       tabRing: "STL della dima",
+      tabMachine: "Macchina avvolgitrice",
+
+      mJobTitle: "Cosa avvolgere",
+      mFromGenerator: "{0} giri, dalla scheda del generatore.",
+      mNoSequence: "Crea una sequenza nella scheda del generatore, o caricane una che hai salvato.",
+      mLoadSequence: "Carica una sequenza (.txt)",
+      mUseGenerator: "Usa la sequenza del generatore",
+      mLoaded: "{0} giri, da {1}.",
+      mMachineTitle: "Macchina",
+      mWrapHeight: "Altezza del giro (mm)",
+      mWrapHeightHint: "Dove il filo si appoggia sul pin, misurato dalla tavola.",
+      mEyelet: "Raggio della punta della guida (mm)",
+      mEyeletHint: "L'esterno dell'occhiello in cui passa il filo. Deve passare fra due pin.",
+      mOrbitAuto: "Calcola tu l'orbita",
+      mOrbit: "Raggio dell'orbita (mm)",
+      mOrbitHint: "Dall'occhiello al pin, mentre gli gira intorno.",
+      mFeedTravel: "Velocità di spostamento (mm/min)",
+      mFeedOrbit: "Velocità del giro (mm/min)",
+      mPhase: "Angolo del pin 0 (°)",
+      mPhaseHint: "Lascia a zero, a meno che l'anello sia montato ruotato sul piatto.",
+      mReach: "Sbraccio della macchina (mm)",
+      mReachHint: "Quanto la guida si allontana dal centro del piatto. La macchina di serie arriva a 300 mm.",
+      mSOrbit: "Raggio dell'orbita",
+      mSWraps: "Giri",
+      mSPath: "Percorso della guida",
+      mSTime: "Tempo stimato",
+      mSSize: "Dimensione del lavoro",
+      mWarnCrowded: "{0} pin su questo cerchio stanno a {1} mm l'uno dall'altro, troppo poco perché una punta di guida da {2} mm ci passi in mezzo. Usa meno pin, un cerchio più grande, o una guida più sottile.",
+      mWarnOrbit: "Su questo anello l'orbita deve stare fra {0} e {1} mm.",
+      mWarnReach: "Questo anello chiede {0} mm di sbraccio e la macchina ne ha {1} mm.",
+      mSendTitle: "Manda alla macchina",
+      mHost: "Indirizzo della macchina",
+      mHostHint: "printer.local, o l'indirizzo che le ha dato il router.",
+      mUser: "Utente",
+      mPass: "Password",
+      mDownloadGcode: "Scarica il .gcode",
+      mSend: "Manda alla macchina",
+      mRefresh: "Guarda lo stato della macchina",
+      mStart: "Avvia",
+      mPause: "Pausa",
+      mResume: "Riprendi",
+      mStop: "Ferma",
+      mStateIdle: "In attesa",
+      mStateRunning: "Sta avvolgendo",
+      mStatePaused: "In pausa",
+      mStateHoming: "Cerca gli zeri",
+      mStateError: "Ferma per un errore",
+      mOffline: "Non ha risposto niente a {0}.",
+      mSent: "Mandati {0} giri. Lega il filo al pin {1}, allinealo con la guida, poi premi Avvia.",
+      mRefused: "La macchina non ha preso il lavoro: {0}",
+      mDenied: "La macchina non ha accettato quell'utente e password.",
+      mWarnPoints: "Questa sequenza è stata fatta per {0} pin, quindi è quel numero che il lavoro usa.",
+      mProgress: "riga {0} di {1}",
+      mInsecure: "Questa pagina è arrivata in https e la macchina parla http, così il browser blocca il collegamento. Apri l'app dalla macchina stessa, o in http.",
 
       paramsTitle: "Parametri",
       points: "Numero di punti",
@@ -823,9 +1378,14 @@
       warnNoFit: "Il disegno ({0} mm) non entra nella pagina scelta ({1} mm). Aumenta la pagina o riduci il raggio.",
       warnDense: "Con {0} punti la distanza è di soli {1} mm. I numeri possono sovrapporsi — aumenta «Numerare ogni N punti».",
 
-      ringTitle: "Chiodi e anello",
+      ringTitle: "Chiodi e base",
+      baseShape: "Base",
+      baseRing: "Anello circolare",
+      baseSquare: "Tavola quadrata",
+      baseRound: "Tavola rotonda",
+      baseShapeHint: "Solo l'anello, oppure una tavola quadrata / rotonda con lo stesso anello dei chiodi in rilievo sopra.",
       nailHeight: "Altezza del chiodo (mm)",
-      nailHeightHint: "Quanto ogni chiodo sporge dall'anello.",
+      nailHeightHint: "Quanto ogni chiodo sporge dalla base.",
       nailDiameter: "Diametro del chiodo (mm)",
       nailDiameterHint: "Chiodi più spessi sono più robusti ma lasciano meno spazio.",
       nailShape: "Punta del chiodo",
@@ -835,12 +1395,15 @@
       nailShapeHint: "La punta diritta è la più rapida da stampare. La curva a gambero si piega in fuori sopra il filo e quella conica finisce il 30% più spessa della base: entrambe impediscono ai giri già fatti di scivolare oltre il chiodo. La curva è a sbalzo, quindi stampala con i supporti.",
       ringWidth: "Larghezza dell'anello (mm)",
       ringWidthHint: "Larghezza radiale della fascia su cui poggiano i chiodi.",
-      ringThickness: "Spessore dell'anello (mm)",
-      ringThicknessHint: "Altezza della fascia stessa.",
+      boardMargin: "Margine oltre i chiodi (mm)",
+      boardMarginHint: "Di quanto la tavola supera il cerchio dei chiodi su ogni lato.",
+      ringThickness: "Spessore della base (mm)",
+      ringThicknessHint: "Altezza dell'anello o della tavola stessa.",
       partColor: "Colore del filamento",
       downloadStl: "Scarica STL",
-      ringPreviewHint: "Trascina per ruotare il pezzo e usa la rotella per avvicinarti. Il modello è in millimetri, pronto per lo slicing.",
+      ringPreviewHint: "Trascina per ruotare, Shift-trascina per spostare, rotella per avvicinarti. Il modello è in millimetri, pronto per lo slicing.",
       sOuterDiameter: "Diametro esterno",
+      sBoardSize: "Dimensione della tavola",
       sPartHeight: "Altezza totale",
       sNailGap: "Spazio tra i chiodi",
       sTipDiameter: "Diametro della punta",
@@ -849,18 +1412,18 @@
       warnNailsTouch: "Con {0} punti restano solo {1} mm tra i chiodi, che finirebbero attaccati. Riduci il diametro dei chiodi o il numero di punti.",
       splitTitle: "Taglio e numerazione",
       segments: "Parti dell'anello",
-      segmentsHint: "1 stampa l'anello in un pezzo solo. Di più lo taglia in altrettanti archi, tenuti da un incastro maschio e femmina a puzzle.",
+      segmentsHint: "1 stampa l'anello in un pezzo solo. Di più lo taglia in altrettanti archi, tenuti da un incastro maschio e femmina a puzzle. Le tavole piene si stampano sempre in un pezzo solo.",
       jointGap: "Gioco dell'incastro (mm)",
       jointGapHint: "Gioco lasciato tra maschio e femmina. 0,25 va bene su quasi tutte le stampanti; aumentalo se i pezzi non entrano.",
-      arrows: "Targhette numerate a strappo",
-      arrowsHint: "Mette a ogni chiodo una freccia con il suo numero in rilievo, tenuta da un collo che stacchi o tagli a quadro finito.",
+      arrows: "Anello di frecce numerate",
+      arrowsHint: "Aggiunge un anello sottile intorno allo stampo, con una freccia dall'esterno verso l'interno a ogni chiodo e il numero in rilievo. Scaricato come STL a parte per infilarlo in numerazione e toglierlo di nuovo.",
       sParts: "Pezzi",
       sLargest: "Pezzo più grande",
       sJoint: "Lunghezza dell'incastro",
       downloadZip: "Scarica lo ZIP",
       warnJointTight: "Con {0} punti lo spazio tra i chiodi non lascia posto all'incastro, quindi gli archi vengono tagliati di netto e andranno incollati. Riduci i punti, allarga il raggio o stampa l'anello intero.",
       warnTagsTiny: "Con {0} punti le cifre delle frecce sono alte solo {1} mm, troppo piccole da leggere o da stampare. Riduci i punti o disattiva le frecce.",
-      warnBedSize: "Il pezzo più grande misura {0} × {1} cm e non entra su un piano di stampa da 25 cm: aumenta il numero di parti dell'anello.",
+      warnBedSize: "Il pezzo più grande misura {0} × {1} cm e non entra su un piano di stampa da 25 cm: aumenta il numero di parti dell'anello, o stampa una tavola più piccola.",
 
       genTitle: "Immagine sorgente",
       selectImage: "Scegli un'immagine",
@@ -890,7 +1453,7 @@
       zoomHint: "Usa la rotella o i pulsanti per lo zoom e trascina l’immagine per reinquadrarla. Passa in scala di grigi alla generazione.",
       resultLabel: "Risultato string art",
       preview3dTitle: "Anteprima 3D",
-      preview3dHint: "Trascina per ruotare l’opera e usa la rotella per avvicinarti. I chiodi sono sempre neri.",
+      preview3dHint: "Trascina per ruotare, Shift-trascina per spostare, rotella per avvicinarti. I chiodi sono sempre neri.",
       maximize: "Ingrandisci la vista 3D",
       minimize: "Riduci la vista 3D",
       threadColor: "Colore del filo",
@@ -930,6 +1493,60 @@
       tabTemplate: "Schablonen-PDF",
       tabGenerator: "String-Art-Generator",
       tabRing: "Schablonen-STL",
+      tabMachine: "Wickelmaschine",
+
+      mJobTitle: "Was gewickelt wird",
+      mFromGenerator: "{0} Umschlingungen, aus dem Generator-Tab.",
+      mNoSequence: "Erzeuge eine Reihenfolge im Generator-Tab, oder lade eine gespeicherte.",
+      mLoadSequence: "Reihenfolge laden (.txt)",
+      mUseGenerator: "Die Reihenfolge aus dem Generator nehmen",
+      mLoaded: "{0} Umschlingungen, aus {1}.",
+      mMachineTitle: "Maschine",
+      mWrapHeight: "Wickelhöhe (mm)",
+      mWrapHeightHint: "Wo der Faden am Stift liegt, vom Brett aus gemessen.",
+      mEyelet: "Radius der Führungsspitze (mm)",
+      mEyeletHint: "Die Außenseite der Öse, durch die der Faden läuft. Sie muss zwischen zwei Stifte passen.",
+      mOrbitAuto: "Den Umlauf für mich ausrechnen",
+      mOrbit: "Umlaufradius (mm)",
+      mOrbitHint: "Von der Öse zum Stift, während sie ihn umrundet.",
+      mFeedTravel: "Eilgang (mm/min)",
+      mFeedOrbit: "Wickelvorschub (mm/min)",
+      mPhase: "Winkel von Stift 0 (°)",
+      mPhaseHint: "Auf null lassen, außer der Ring sitzt verdreht auf dem Teller.",
+      mReach: "Reichweite der Maschine (mm)",
+      mReachHint: "Wie weit die Führung von der Tellermitte wegkommt. Die Standardmaschine schafft 300 mm.",
+      mSOrbit: "Umlaufradius",
+      mSWraps: "Umschlingungen",
+      mSPath: "Weg der Führung",
+      mSTime: "Geschätzte Dauer",
+      mSSize: "Größe des Auftrags",
+      mWarnCrowded: "{0} Stifte auf diesem Kreis stehen {1} mm auseinander, zu wenig für eine {2} mm starke Führungsspitze dazwischen. Nimm weniger Stifte, einen größeren Kreis oder eine feinere Führung.",
+      mWarnOrbit: "Auf diesem Ring muss der Umlauf zwischen {0} und {1} mm liegen.",
+      mWarnReach: "Dieser Ring braucht {0} mm Reichweite, die Maschine hat {1} mm.",
+      mSendTitle: "An die Maschine schicken",
+      mHost: "Adresse der Maschine",
+      mHostHint: "printer.local, oder die Adresse, die ihr der Router gegeben hat.",
+      mUser: "Benutzer",
+      mPass: "Passwort",
+      mDownloadGcode: ".gcode herunterladen",
+      mSend: "An die Maschine schicken",
+      mRefresh: "Nach der Maschine sehen",
+      mStart: "Starten",
+      mPause: "Pause",
+      mResume: "Weiter",
+      mStop: "Anhalten",
+      mStateIdle: "Wartet",
+      mStateRunning: "Wickelt",
+      mStatePaused: "Pausiert",
+      mStateHoming: "Sucht die Nullpunkte",
+      mStateError: "Wegen eines Fehlers angehalten",
+      mOffline: "Unter {0} hat nichts geantwortet.",
+      mSent: "{0} Umschlingungen geschickt. Binde den Faden an Stift {1}, richte ihn zur Führung aus und drücke Starten.",
+      mRefused: "Die Maschine hat den Auftrag nicht angenommen: {0}",
+      mDenied: "Die Maschine hat diesen Benutzer und dieses Passwort nicht akzeptiert.",
+      mWarnPoints: "Diese Reihenfolge wurde für {0} Stifte gemacht, also rechnet der Auftrag damit.",
+      mProgress: "Zeile {0} von {1}",
+      mInsecure: "Diese Seite kam über https und die Maschine spricht http, deshalb blockiert der Browser die Verbindung. Öffne die App von der Maschine selbst, oder über http.",
 
       paramsTitle: "Parameter",
       points: "Anzahl der Punkte",
@@ -974,9 +1591,14 @@
       warnNoFit: "Die Zeichnung ({0} mm) passt nicht auf die gewählte Seite ({1} mm). Vergrößere die Seite oder verkleinere den Radius.",
       warnDense: "Bei {0} Punkten beträgt der Abstand nur {1} mm. Die Zahlen können sich überlappen — erhöhe „Jeden N-ten Punkt nummerieren“.",
 
-      ringTitle: "Nägel und Ring",
+      ringTitle: "Nägel und Basis",
+      baseShape: "Basis",
+      baseRing: "Runder Ring",
+      baseSquare: "Quadratische Platte",
+      baseRound: "Runde Platte",
+      baseShapeHint: "Nur der Ring, oder eine quadratische / runde Platte mit demselben Nagelring als Relief obenauf.",
       nailHeight: "Nagelhöhe (mm)",
-      nailHeightHint: "Wie weit jeder Nagel über den Ring hinausragt.",
+      nailHeightHint: "Wie weit jeder Nagel über die Basis hinausragt.",
       nailDiameter: "Nageldurchmesser (mm)",
       nailDiameterHint: "Dickere Nägel sind stabiler, lassen aber weniger Platz.",
       nailShape: "Nagelspitze",
@@ -986,12 +1608,15 @@
       nailShapeHint: "Die gerade Spitze druckt am schnellsten. Der Garnelenbogen krümmt sich nach außen über den Faden, und die konische Spitze endet 30% dicker als ihr Fuß; beide verhindern, dass fertige Schlingen oben abrutschen. Der Bogen kragt aus, drucke ihn also mit Stützen.",
       ringWidth: "Ringbreite (mm)",
       ringWidthHint: "Radiale Breite des Bands, auf dem die Nägel stehen.",
-      ringThickness: "Ringdicke (mm)",
-      ringThicknessHint: "Höhe des Bands selbst.",
+      boardMargin: "Rand über die Nägel hinaus (mm)",
+      boardMarginHint: "Wie weit die Platte auf jeder Seite über den Nagelkreis hinausragt.",
+      ringThickness: "Basisdicke (mm)",
+      ringThicknessHint: "Höhe des Ringbands oder der Platte selbst.",
       partColor: "Filamentfarbe",
       downloadStl: "STL herunterladen",
-      ringPreviewHint: "Ziehen dreht das Teil, Scrollen holt es näher. Das Modell ist in Millimetern und direkt slicebar.",
+      ringPreviewHint: "Ziehen dreht, Shift-Ziehen verschiebt, Scrollen holt näher. Das Modell ist in Millimetern und direkt slicebar.",
       sOuterDiameter: "Außendurchmesser",
+      sBoardSize: "Plattenmaß",
       sPartHeight: "Gesamthöhe",
       sNailGap: "Abstand zwischen den Nägeln",
       sTipDiameter: "Spitzendurchmesser",
@@ -1000,18 +1625,18 @@
       warnNailsTouch: "Bei {0} Punkten bleiben nur {1} mm zwischen den Nägeln, sie würden verschmelzen. Verringere den Nageldurchmesser oder die Punktzahl.",
       splitTitle: "Teilen und nummerieren",
       segments: "Ringteile",
-      segmentsHint: "1 druckt den Ring in einem Stück. Mehr teilt ihn in so viele Bögen, gehalten von Zapfen und Nut im Puzzleformat.",
+      segmentsHint: "1 druckt den Ring in einem Stück. Mehr teilt ihn in so viele Bögen, gehalten von Zapfen und Nut im Puzzleformat. Massive Platten werden immer in einem Stück gedruckt.",
       jointGap: "Spiel der Verbindung (mm)",
       jointGapHint: "Spiel zwischen Zapfen und Nut. 0,25 passt für die meisten Drucker; erhöhe es, wenn die Teile nicht zusammengehen.",
-      arrows: "Nummerierte Abreißfähnchen",
-      arrowsHint: "Setzt an jeden Nagel einen Pfeil mit erhabener Nummer, gehalten von einem Stegchen, das du nach dem Fädeln abbrichst oder abschneidest.",
+      arrows: "Nummerierter Pfeilring",
+      arrowsHint: "Fügt einen schmalen Ring um die Form hinzu, mit einem von außen nach innen zeigenden Pfeil pro Nagel und erhabener Nummer. Als eigenes STL, zum Aufstecken beim Nummerieren und wieder Abnehmen.",
       sParts: "Teile",
       sLargest: "Größtes Teil",
       sJoint: "Länge der Verbindung",
       downloadZip: "ZIP herunterladen",
       warnJointTight: "Bei {0} Punkten lässt der Abstand zwischen den Nägeln keinen Platz für die Verbindung, die Bögen werden gerade abgeschnitten und müssen geklebt werden. Verringere die Punktzahl, vergrößere den Radius oder drucke den Ring ganz.",
       warnTagsTiny: "Bei {0} Punkten sind die Ziffern der Fähnchen nur {1} mm hoch, zu klein zum Lesen und Drucken. Verringere die Punktzahl oder schalte die Fähnchen ab.",
-      warnBedSize: "Das größte Teil misst {0} × {1} cm und passt nicht auf ein übliches 25-cm-Druckbett – erhöhe die Zahl der Ringteile.",
+      warnBedSize: "Das größte Teil misst {0} × {1} cm und passt nicht auf ein übliches 25-cm-Druckbett – erhöhe die Zahl der Ringteile, oder drucke eine kleinere Platte.",
 
       genTitle: "Quellbild",
       selectImage: "Bild auswählen",
@@ -1041,7 +1666,7 @@
       zoomHint: "Zoome mit dem Mausrad oder den Schaltflächen und zieh das Bild, um den Ausschnitt zu wählen. Bei der Erzeugung wird es in Graustufen umgewandelt.",
       resultLabel: "String-Art-Ergebnis",
       preview3dTitle: "3D-Vorschau",
-      preview3dHint: "Zieh, um das Werk zu drehen, und nutze das Mausrad, um näher zu kommen. Die Nägel sind immer schwarz.",
+      preview3dHint: "Ziehen dreht, Shift-Ziehen verschiebt, Scrollen holt näher. Die Nägel sind immer schwarz.",
       maximize: "3D-Ansicht maximieren",
       minimize: "3D-Ansicht minimieren",
       threadColor: "Fadenfarbe",
@@ -1076,11 +1701,26 @@
 </head>
 <body>
   <header>
-    <div class="header-content">
-      <h1 id="header-title"></h1>
-      <div class="hint" id="header-hint"></div>
+    <div class="appbar">
+      <div class="brand">
+        <!-- The mark is the product: a circle of points with threads across it,
+             and the three red dots the drilling template numbers. -->
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+            <circle cx="16" cy="16" r="12.6" opacity=".45" />
+            <path d="M6.9 6.9 25.3 19.4M3.7 16 24 25.1M16 3.6 8.1 26M28.3 16 9.6 25.4M25.1 6.9 8.6 21.8" opacity=".85" />
+            <circle cx="16" cy="3.4" r="1.7" fill="#dc2626" stroke="none" />
+            <circle cx="28.6" cy="16" r="1.7" fill="#dc2626" stroke="none" />
+            <circle cx="8.4" cy="25.7" r="1.7" fill="#dc2626" stroke="none" />
+          </svg>
+        </div>
+        <div class="header-content">
+          <h1 id="header-title"></h1>
+          <div class="hint" id="header-hint"></div>
+        </div>
+      </div>
+      <div id="language-selector"></div>
     </div>
-    <div id="language-selector"></div>
   </header>
 
   <main id="app"></main>
@@ -1343,9 +1983,10 @@
     // Printable nail ring
     //
     // The part that replaces a drilled board: a flat band centred on the point
-    // circle carrying one cylindrical nail per point. A ring too wide for the
-    // print bed can be cut into arcs that clip together with puzzle joints, and
-    // every point can carry a snap-off tag stamped with its number.
+    // circle carrying the nails, optionally with a square or circular board
+    // filling its middle. A ring too wide for the print bed can be cut into arcs
+    // that clip together with puzzle joints. Numbered pointers live on a second
+    // ring around the outside, downloaded as a part of its own.
     //
     // Everything is emitted as a plain triangle soup in millimetres, so the STL
     // writer and the 3D preview read the same numbers and never drift apart.
@@ -1353,6 +1994,7 @@
     (function (root) {
       var D = {
         nailH: 12, nailD: 3, ringW: 10, ringH: 4,
+        baseShape: 'ring', // ring | square | round
         segments: 1, clearance: 0.25,
         nailShape: 'straight',
         nailSides: 12,     // faces around a nail
@@ -1389,15 +2031,24 @@
         var nailD = Math.max(0.4, num(o.nailD, D.nailD));
         var nailH = Math.max(1, num(o.nailH, D.nailH));
         var shape = o.nailShape === 'curl' || o.nailShape === 'cone' ? o.nailShape : 'straight';
+        var base = o.baseShape === 'square' || o.baseShape === 'round' ? o.baseShape : 'ring';
+        // A solid board has nothing to clip together, so it always prints whole.
         // Never more arcs than points, or an arc would come out with no nail on
         // it and no band to speak of.
-        var segments = Math.round(clamp(num(o.segments, D.segments), 1, Math.min(24, points)));
+        var segments = base === 'ring'
+          ? Math.round(clamp(num(o.segments, D.segments), 1, Math.min(24, points)))
+          : 1;
         var clearance = clamp(num(o.clearance, D.clearance), 0.05, 1);
         var arrows = !!o.arrows;
 
         // The band straddles the point circle, so the thread still runs at
-        // exactly the radius the drilling template is built for.
+        // exactly the radius the drilling template is built for. A square or
+        // round board is the full plate under that circle; the nail ring sits
+        // on top of it as a raised relief, same annulus as the ring-only base.
         var ri = Math.max(0.5, R - ringW / 2), ro = R + ringW / 2;
+        var half = ro;
+        var relief = base === 'ring' ? 0 : Math.min(3, Math.max(1.8, ringH * 0.5));
+        var bandTop = ringH + relief;
         var spacing = 2 * Math.PI * R / points;
 
         // A finished loop escapes over the tip, so both shaped nails make the
@@ -1450,6 +2101,7 @@
 
         return {
           points: points, R: R, ri: ri, ro: ro,
+          baseShape: base, halfW: half, halfH: half,
           ringW: ringW, ringH: ringH, nailD: nailD, nailH: nailH,
           segments: segments, clearance: clearance, arrows: arrows,
           nailShape: shape, tipD: tipD, curl: curl,
@@ -1457,7 +2109,8 @@
           steps: Math.min(1440, Math.max(180, Math.round(2 * Math.PI * R / D.facet))),
           spacing: spacing,
           gap: spacing - wide,
-          height: ringH + nailH,
+          relief: relief, bandTop: bandTop,
+          height: bandTop + nailH,
           jointLen: jointLen, headHalf: headHalf, neckHalf: neckHalf,
           jointFits: jointFits,
           // How much band each arc gives up at a cut, measured along the ring.
@@ -1609,7 +2262,8 @@
       // into the band so a slicer reads nail and band as a single body.
       function nail(s, P, cx, cy, w) {
         var r = P.nailD / 2, tip = P.tipD / 2;
-        var z0 = P.ringH - Math.min(0.8, P.ringH / 2), z1 = P.ringH + P.nailH;
+        var top = P.bandTop;
+        var z0 = top - Math.min(0.8, P.ringH / 2), z1 = top + P.nailH;
         // Outwards and along the ring: the curl bends in the plane the first
         // one spans, and every cross-section is drawn on both.
         var u = [cx / P.R, cy / P.R, 0], v = [-u[1], u[0], 0], up = [0, 0, 1];
@@ -1617,13 +2271,13 @@
         if (P.nailShape !== 'curl') {
           tube(s, [
             { p: [cx, cy, z0], r: r, e1: u, e2: v },
-            { p: [cx, cy, P.ringH], r: r, e1: u, e2: v },
+            { p: [cx, cy, top], r: r, e1: u, e2: v },
             { p: [cx, cy, z1], r: tip, e1: u, e2: v }
           ], w);
           return;
         }
 
-        var C = P.curl, bendZ = P.ringH + C.rise, sections = [];
+        var C = P.curl, bendZ = top + C.rise, sections = [];
         sections.push({ p: [cx, cy, z0], r: r, e1: u, e2: v });
         sections.push({ p: [cx, cy, bendZ], r: r, e1: u, e2: v });
         // Turning about a centre one radius outwards, so the arc leaves the
@@ -1713,26 +2367,35 @@
         s.sweep(inner, 0, P.ringH, false);
       }
 
-      // A pointer aimed at its nail, stamped with the point number and joined to
-      // the band by a stub thin enough to snap or cut off afterwards.
-      function tag(s, P, angle, label) {
+      // A pointer aimed at its nail, stamped with the point number. dir is +1
+      // when the tag grows outwards from attachR (the old snap-off tags) and -1
+      // when it grows inwards from an outer label ring toward the nail.
+      function tag(s, P, angle, label, attachR, dir) {
         var T = P.tag;
         var c = Math.cos(angle), si = Math.sin(angle);
         function at(u, w) { return [c * u - si * w, si * u + c * w]; }
+        dir = dir < 0 ? -1 : 1;
+        var rootR = attachR;
 
         var root = Math.min(D.tagRoot, T.w * 0.5) / 2;
-        var head = P.ro + T.headLen, tip = P.ro + T.len;
+        var head = rootR + dir * T.headLen, tip = rootR + dir * T.len;
         var z1 = T.plate;
+        // The stub reaches a little past the wall it hangs off, so the two
+        // solids cross instead of sharing a face.
+        var stub = rootR - dir * D.weld;
 
-        s.plate([at(P.ro - D.weld, -root), at(head, -T.w / 2), at(head, T.w / 2), at(P.ro - D.weld, root)], 0, z1);
-        s.plate([at(head - 0.4, -T.shaft / 2), at(tip, -T.shaft / 2), at(tip, T.shaft / 2), at(head - 0.4, T.shaft / 2)], 0, z1);
+        s.plate([at(stub, -root), at(head, -T.w / 2), at(head, T.w / 2), at(stub, root)], 0, z1);
+        s.plate([at(head - dir * 0.4, -T.shaft / 2), at(tip, -T.shaft / 2),
+                 at(tip, T.shaft / 2), at(head - dir * 0.4, T.shaft / 2)], 0, z1);
 
         var text = String(label);
         var wide = text.length * T.digitW + (text.length - 1) * T.digitW * 0.3;
-        var u0 = head + 0.6 + (T.text - wide) / 2;
+        // First digit sits nearer the ring the tag hangs off; later ones walk
+        // toward the tip, so the pointer still reads from the base outwards.
+        var u0 = head + dir * (0.6 + (T.text - wide) / 2);
         for (var d = 0; d < text.length; d++) {
           var segs = DIGITS[text.charCodeAt(d) - 48];
-          var bu = u0 + d * T.digitW * 1.3;
+          var bu = u0 + dir * d * T.digitW * 1.3;
           for (var q = 0; q < segs.length; q++) {
             var r = segRect(segs.charAt(q), T.digitW, T.digitH, T.stroke);
             s.plate([
@@ -1795,6 +2458,8 @@
         var s = soup(), step = 2 * Math.PI / P.points, i;
         var nailWheel = wheel(P.sides);
 
+        // Ring-only: just the nail band. Square / round: the full board first,
+        // then the same circular nail ring raised on top as relief.
         if (split) {
           // Cuts fall halfway between two nails, and each arc carries a tab at
           // its leading end and the matching slot at the other.
@@ -1807,6 +2472,13 @@
             tab(s, P, high, half);
             slot(s, P, low, half);
           }
+        } else if (P.baseShape === 'square') {
+          var hw = P.halfW, hh = P.halfH;
+          s.plate([[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]], 0, P.ringH);
+          s.sweep(loop(wheel(P.steps), P.ri, P.ro), P.ringH, P.bandTop, true);
+        } else if (P.baseShape === 'round') {
+          s.sweep(loop(wheel(P.steps), 0, P.ro), 0, P.ringH, true);
+          s.sweep(loop(wheel(P.steps), P.ri, P.ro), P.ringH, P.bandTop, true);
         } else {
           s.sweep(loop(wheel(P.steps), P.ri, P.ro), 0, P.ringH, true);
         }
@@ -1814,24 +2486,91 @@
         for (i = n0; i < n1; i++) {
           var a = i * step;
           nail(s, P, P.R * Math.cos(a), P.R * Math.sin(a), nailWheel);
-          if (P.arrows) tag(s, P, a, i);
         }
 
         var v = s.done();
         var place = frame(v, split ? ((n0 + n1) / 2 - 0.5) * step : 0);
-        return { v: v, place: place, box: place.box, volume: volumeOf(v) };
+        return { v: v, place: place, box: place.box, volume: volumeOf(v), role: 'body' };
+      }
+
+      // Numbered pointer hung off the outer rim of the label ring. Every arrow
+      // uses the same radial length (sized for the widest label); only the
+      // digits change. The tip sinks into the band so the two solids fuse when
+      // printed; the rest hangs outside and points inward.
+      function edgeArrow(s, P, angle, label, ari, aro) {
+        var T = P.tag;
+        var c = Math.cos(angle), si = Math.sin(angle);
+        function at(u, w) { return [c * u - si * w, si * u + c * w]; }
+        var z1 = T.plate;
+        var half = T.w / 2;
+        var text = String(label);
+        var wide = text.length * T.digitW + (text.length - 1) * T.digitW * 0.3;
+        // Fixed envelope so "0" and "287" occupy the same outline.
+        var headLen = T.headLen;
+        var pad = headLen + T.text + 1.2;
+        // Pull the whole arrow a few millimetres into the band so the tip and
+        // the start of the shaft are solidly overlapped with it.
+        var embed = Math.min(2.6, Math.max(1.6, (aro - ari) * 0.55));
+        var tip = Math.max(ari + 0.25, aro - embed);
+        var head = tip + headLen;
+        var end = tip + pad;
+
+        // Triangular tip, pointing in toward the nails.
+        s.plate([
+          at(head, -half), at(head, half), at(tip, 0)
+        ], 0, z1);
+        // Same-length shaft; starts inside the band, digits sit outside.
+        s.plate([
+          at(Math.min(head, aro) - D.weld, -T.shaft / 2), at(end, -T.shaft / 2),
+          at(end, T.shaft / 2), at(Math.min(head, aro) - D.weld, T.shaft / 2)
+        ], 0, z1);
+
+        var u0 = head + 0.5 + (T.text - wide) / 2;
+        for (var d = 0; d < text.length; d++) {
+          var segs = DIGITS[text.charCodeAt(d) - 48];
+          var bu = u0 + d * T.digitW * 1.3;
+          for (var q = 0; q < segs.length; q++) {
+            var r = segRect(segs.charAt(q), T.digitW, T.digitH, T.stroke);
+            s.plate([
+              at(bu + r[0], r[1] - T.digitH / 2), at(bu + r[2], r[1] - T.digitH / 2),
+              at(bu + r[2], r[3] - T.digitH / 2), at(bu + r[0], r[3] - T.digitH / 2)
+            ], z1 - 0.3, z1 + D.tagEmboss);
+          }
+        }
+      }
+
+      // A second ring that sits outside the nail ring, carrying one inward
+      // pointer per nail. It is a part of its own so it can be printed, fitted
+      // around the mould for numbering, and taken off again.
+      function buildArrowRing(P) {
+        var s = soup(), step = 2 * Math.PI / P.points, i;
+        var gap = Math.max(1.0, P.clearance * 2);
+        // Always around the nail circle — same path as the ring-only base, even
+        // when the middle is filled with a square or round board.
+        var outer = P.ro;
+        // Slim band — only enough to hold the stubs, not a copy of the nail ring.
+        var band = Math.max(3.2, Math.min(5.5, P.tag.w * 0.32));
+        var ari = outer + gap;
+        var aro = ari + band;
+        s.sweep(loop(wheel(P.steps), ari, aro), 0, Math.max(P.tag.plate, Math.min(P.ringH, 2.4)), true);
+        for (i = 0; i < P.points; i++) edgeArrow(s, P, i * step, i, ari, aro);
+        var v = s.done();
+        var place = frame(v, 0);
+        return { v: v, place: place, box: place.box, volume: volumeOf(v), role: 'arrows' };
       }
 
       // Parts come back in ring coordinates, so the preview can just show them
-      // all at once; `placed` is what goes into a file.
+      // all at once; `placed` is what goes into a file. The label ring, when
+      // asked for, is always last and always whole.
       function toParts(P) {
         var out = [], k;
-        if (P.segments < 2) return [build(P, 0, P.points, false)];
-        for (k = 0; k < P.segments; k++) {
+        if (P.segments < 2) out.push(build(P, 0, P.points, false));
+        else for (k = 0; k < P.segments; k++) {
           out.push(build(P,
             Math.round(k * P.points / P.segments),
             Math.round((k + 1) * P.points / P.segments), true));
         }
+        if (P.arrows) out.push(buildArrowRing(P));
         return out;
       }
 
@@ -1854,7 +2593,7 @@
 
         // Anything but a leading "solid", which would make readers parse the
         // file as ASCII.
-        var label = 'String art nail ring (mm)';
+        var label = 'String art nail template (mm)';
         for (var c = 0; c < label.length; c++) dv.setUint8(c, label.charCodeAt(c));
         dv.setUint32(80, n, true);
 
@@ -1949,6 +2688,122 @@
         toZip: toZip
       };
     })(typeof window !== 'undefined' ? window : this);
+  </script>
+
+  <script>
+    // ---------------------------------------------------------------
+    // Jobs for the winding machine
+    //
+    // The machine is told the ring it is working on and then given one line per
+    // nail; it works out the path itself, which is why a job is thirty
+    // kilobytes rather than several megabytes and why the same file runs on a
+    // machine of any size. The rules about what the guide can reach are the
+    // same ones the firmware enforces, and they are written out in
+    // machine/PROTOCOL.md.
+    // ---------------------------------------------------------------
+    (function (root) {
+      var D = {
+        height: 6,        // where the thread is laid on the shank, mm above the board
+        nailD: 3,         // matches the printed ring
+        eyeletR: 1.1,     // the tip of the guide
+        feedTravel: 4200, // mm/min at the eyelet
+        feedOrbit: 1200,
+        phase: 0,         // where nail 0 sits, degrees
+        rail: 300,        // how far out the stock machine reaches, mm
+        park: 20          // how high it lifts when the job is done, mm
+      };
+
+      function spacingOf(radius, points) {
+        return points > 0 ? 2 * Math.PI * radius / points : 0;
+      }
+
+      // Too tight and the guide grinds along the nail it is going round; too
+      // wide and, on the far side of the lap, it reaches the next one along.
+      function limits(o) {
+        var spacing = spacingOf(o.radius, o.points);
+        return {
+          spacing: spacing,
+          low: o.nailD / 2 + o.eyeletR,
+          high: spacing - o.nailD / 2 - o.eyeletR
+        };
+      }
+
+      function orbitFor(o) {
+        var l = limits(o);
+        if (l.high < l.low) return 0;
+        // Hugging the nail keeps the loop tight, but not so close that the
+        // machine's own slop drags the guide along it.
+        var want = l.low + 0.4;
+        return want > l.high ? (l.low + l.high) / 2 : want;
+      }
+
+      // What is wrong with the job, or an empty list. Anything here stops the
+      // machine before it can drive into something.
+      function faults(o, orbit) {
+        var l = limits(o), out = [];
+        if (!(o.points >= 3) || !(o.radius > 1)) out.push('ring');
+        else if (l.high < l.low) out.push('crowded');
+        else if (orbit < l.low || orbit > l.high) out.push('orbit');
+        if (o.radius + orbit + o.eyeletR > o.rail) out.push('rail');
+        return out;
+      }
+
+      // Travel is the chord between two nails; the lap is a full circle round
+      // each of them. Acceleration is not counted, so a real job runs a little
+      // slower than this.
+      function estimate(o, seq, orbit) {
+        var travel = 0, i;
+        for (i = 1; i < seq.length; i++) {
+          var da = Math.abs(seq[i] - seq[i - 1]) * 2 * Math.PI / o.points;
+          travel += 2 * o.radius * Math.abs(Math.sin(da / 2));
+        }
+        var laps = seq.length * 2 * Math.PI * orbit;
+        return {
+          travelMm: travel,
+          orbitMm: laps,
+          seconds: travel / o.feedTravel * 60 + laps / o.feedOrbit * 60
+        };
+      }
+
+      function plan(opts) {
+        var o = Object.assign({}, D, opts);
+        o.orbit = opts && opts.orbit > 0 ? opts.orbit : orbitFor(o);
+        var l = limits(o);
+        o.spacing = l.spacing;
+        o.minOrbit = l.low;
+        o.maxOrbit = l.high;
+        o.faults = faults(o, o.orbit);
+        return o;
+      }
+
+      function toGcode(opts, seq) {
+        var o = plan(opts);
+        var out = [];
+        out.push('; string art winding job');
+        out.push('; ' + o.points + ' nails on a ' + o.radius.toFixed(1) + ' mm circle, ' +
+                 seq.length + ' wraps');
+        out.push('; tie the thread to nail ' + seq[0] + ' and line it up with the guide before starting');
+        out.push('M115');
+        out.push('G28');
+        out.push('M701 R' + o.radius.toFixed(2) + ' N' + o.points + ' H' + o.height.toFixed(2) +
+                 ' D' + o.nailD.toFixed(2) + ' O' + o.orbit.toFixed(2) + ' P' + o.phase.toFixed(2));
+        out.push('M702 F' + Math.round(o.feedTravel) + ' S' + Math.round(o.feedOrbit));
+        out.push('G92 A0');
+        out.push('M17');
+        // Up to working height before the first run, so the guide is not
+        // dragged across the board on its way out.
+        out.push('G0 Z' + o.height.toFixed(2));
+        for (var i = 0; i < seq.length; i++) out.push('M700 P' + seq[i]);
+        out.push('M400');
+        out.push('G0 Z' + o.park.toFixed(2));
+        out.push('M18');
+        return out.join('\n') + '\n';
+      }
+
+      root.MachineEngine = {
+        D: D, plan: plan, orbitFor: orbitFor, estimate: estimate, toGcode: toGcode
+      };
+    })(window);
   </script>
 
   <script id="string-art-worker" type="javascript/worker">
@@ -2159,6 +3014,58 @@
       );
     }
 
+    var CHEVRON = 'M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z';
+
+    // The same dropdown the app bar uses for languages, for any list of
+    // choices: `options` is [value, label] pairs and the value comes back as it
+    // went in, so callers keep their own strings.
+    function Select(p) {
+      var stOpen = React.useState(false); var open = stOpen[0], setOpen = stOpen[1];
+      var ref = React.useRef(null);
+
+      React.useEffect(function () {
+        var close = function (e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        var esc = function (e) { if (e.key === 'Escape') setOpen(false); };
+        document.addEventListener('mousedown', close);
+        document.addEventListener('scroll', close, true);
+        document.addEventListener('keydown', esc);
+        return function () {
+          document.removeEventListener('mousedown', close);
+          document.removeEventListener('scroll', close, true);
+          document.removeEventListener('keydown', esc);
+        };
+      }, []);
+
+      var chosen = p.options.filter(function (o) { return o[0] === p.value; })[0];
+
+      return h('div', { ref: ref, className: 'select-wrapper' + (open ? ' open' : '') },
+        h('button', {
+          type: 'button', className: 'select-button',
+          'aria-haspopup': 'listbox', 'aria-expanded': open ? 'true' : 'false',
+          onClick: function (e) { e.stopPropagation(); setOpen(!open); }
+        },
+          h('span', { className: 'select-label' }, chosen ? chosen[1] : ''),
+          h('svg', {
+            xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 20 20',
+            fill: 'currentColor', className: 'select-arrow', 'aria-hidden': 'true'
+          }, h('path', { fillRule: 'evenodd', clipRule: 'evenodd', d: CHEVRON }))
+        ),
+        open ? h('div', { className: 'select-menu open', role: 'listbox' },
+          p.options.map(function (o) {
+            return h('button', {
+              key: String(o[0]), type: 'button', role: 'option',
+              'aria-selected': o[0] === p.value ? 'true' : 'false',
+              className: 'select-option' + (o[0] === p.value ? ' selected' : ''),
+              onMouseDown: function (e) {
+                e.preventDefault(); e.stopPropagation();
+                setOpen(false); p.onChange(o[0]);
+              }
+            }, o[1]);
+          })
+        ) : null
+      );
+    }
+
     // -------------------------------------------------------------
     // Template tab
     // -------------------------------------------------------------
@@ -2210,21 +3117,25 @@
             h('h2', null, t('layoutTitle')),
             h('div', { className: 'grid2' },
               h(Field, { label: t('pageSize') },
-                h('select', { value: o.pageSize, onChange: function (e) { set('pageSize', e.target.value); } },
-                  isoPages.map(function (p) {
-                    return h('option', { key: p, value: p },
-                      p === 'auto' ? t('pageAuto') : p === 'custom' ? t('pageCustom') : p);
-                  }))),
+                h(Select, {
+                  value: o.pageSize,
+                  options: isoPages.map(function (p) {
+                    return [p, p === 'auto' ? t('pageAuto') : p === 'custom' ? t('pageCustom') : p];
+                  }),
+                  onChange: function (v) { set('pageSize', v); }
+                })),
               o.pageSize !== 'custom' ? h(Field, { label: t('orientation') },
-                h('select', { value: o.orientation, onChange: function (e) { set('orientation', e.target.value); } },
-                  h('option', { value: 'portrait' }, t('portrait')),
-                  h('option', { value: 'landscape' }, t('landscape')))) : null,
+                h(Select, {
+                  value: o.orientation,
+                  options: [['portrait', t('portrait')], ['landscape', t('landscape')]],
+                  onChange: function (v) { set('orientation', v); }
+                })) : null,
               o.pageSize === 'custom' ? h(Field, { label: t('customWidth') },
                 h(NumberInput, { value: o.customW, min: 20, max: 3000, onChange: function (v) { set('customW', v); } })) : null,
               o.pageSize === 'custom' ? h(Field, { label: t('customHeight') },
                 h(NumberInput, { value: o.customH, min: 20, max: 3000, onChange: function (v) { set('customH', v); } })) : null
             ),
-            h('div', { className: 'controls' },
+            h('div', { className: 'controls bar end' },
               h('button', { className: 'btn secondary', onClick: fitToPage }, t('fitToPage')))
           ),
 
@@ -2232,15 +3143,20 @@
             h('h2', null, t('optionsTitle')),
             h('div', { className: 'grid2' },
               h(Field, { label: t('startAt') },
-                h('select', { value: o.startAt, onChange: function (e) { set('startAt', e.target.value); } },
-                  h('option', { value: 'top' }, t('startTop')),
-                  h('option', { value: 'right' }, t('startRight')),
-                  h('option', { value: 'bottom' }, t('startBottom')),
-                  h('option', { value: 'left' }, t('startLeft')))),
+                h(Select, {
+                  value: o.startAt,
+                  options: [
+                    ['top', t('startTop')], ['right', t('startRight')],
+                    ['bottom', t('startBottom')], ['left', t('startLeft')]
+                  ],
+                  onChange: function (v) { set('startAt', v); }
+                })),
               h(Field, { label: t('direction') },
-                h('select', { value: o.clockwise ? 'cw' : 'ccw', onChange: function (e) { set('clockwise', e.target.value === 'cw'); } },
-                  h('option', { value: 'cw' }, t('clockwise')),
-                  h('option', { value: 'ccw' }, t('counterClockwise')))),
+                h(Select, {
+                  value: o.clockwise ? 'cw' : 'ccw',
+                  options: [['cw', t('clockwise')], ['ccw', t('counterClockwise')]],
+                  onChange: function (v) { set('clockwise', v === 'cw'); }
+                })),
               h(Field, { label: t('labelEvery'), hint: t('labelEveryHint') },
                 h(NumberInput, { value: o.labelEvery, min: 1, max: 50, onChange: function (v) { set('labelEvery', v); } }))
             ),
@@ -2267,9 +3183,9 @@
             layout.labelsOverlap ? h('div', { className: 'alert warn' },
               t('warnDense', layout.points, n2(layout.spacing))) : null,
             h('div', { className: 'previewWrap', dangerouslySetInnerHTML: { __html: svg } }),
-            h('div', { className: 'controls', style: { marginTop: '14px' } },
-              h('button', { className: 'btn', onClick: savePdf }, t('downloadPdf')),
-              h('button', { className: 'btn secondary', onClick: saveSvg }, t('downloadSvg')))
+            h('div', { className: 'controls bar end' },
+              h('button', { className: 'btn secondary', onClick: saveSvg }, t('downloadSvg')),
+              h('button', { className: 'btn', onClick: savePdf }, t('downloadPdf')))
           )
         )
       );
@@ -2284,7 +3200,7 @@
       var t = props.t;
       var st = React.useState({
         nailH: RE.DEFAULTS.nailH, nailD: RE.DEFAULTS.nailD,
-        nailShape: RE.DEFAULTS.nailShape,
+        nailShape: RE.DEFAULTS.nailShape, baseShape: RE.DEFAULTS.baseShape,
         ringW: RE.DEFAULTS.ringW, ringH: RE.DEFAULTS.ringH,
         segments: RE.DEFAULTS.segments, clearance: RE.DEFAULTS.clearance, arrows: false
       });
@@ -2292,6 +3208,7 @@
       function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
 
       var stColor = React.useState('#6b7280'); var color = stColor[0], setColor = stColor[1];
+      var isRing = o.baseShape === 'ring';
 
       var part = React.useMemo(function () {
         return RE.computePart(Object.assign({}, o, { points: props.points, radiusCm: props.radiusCm }));
@@ -2308,13 +3225,23 @@
       // darker on screen.
       function paint() {
         var mats = matsRef.current, base = new THREE.Color(color), n = mats.length;
-        for (var i = 0; i < n; i++) {
+        var bodies = 0, i;
+        for (i = 0; i < n; i++) if (!parts[i] || parts[i].role !== 'arrows') bodies++;
+        var at = 0;
+        for (i = 0; i < n; i++) {
           mats[i].color.copy(base);
-          var shade = i % 2 ? 0.45 : 1;
+          if (parts[i] && parts[i].role === 'arrows') {
+            // The label ring is told apart by a warmer shade, so it reads as a
+            // piece of its own even when the mould under it is one colour.
+            mats[i].color.offsetHSL(0.02, 0.15, 0.08);
+            continue;
+          }
+          var shade = at % 2 ? 0.45 : 1;
           // An odd count would otherwise put the same shade on both sides of the
           // seam where the ring closes.
-          if (n % 2 && i === n - 1) shade = 0.68;
+          if (bodies % 2 && at === bodies - 1) shade = 0.68;
           if (shade !== 1) mats[i].color.multiplyScalar(shade);
+          at++;
         }
       }
 
@@ -2337,7 +3264,7 @@
           // point circle of radius 1, with the top of the band at height zero.
           m.rotation.x = -Math.PI / 2;
           m.scale.setScalar(1 / part.R);
-          m.position.y = -part.ringH / part.R;
+          m.position.y = -part.bandTop / part.R;
           s.scene.add(m);
           made.push(m); mats.push(mat);
         });
@@ -2353,27 +3280,38 @@
       function pad(n) { return (n < 10 ? '0' : '') + n; }
 
       function save() {
-        var base = 'string-art-nail-ring-' + part.points + 'pts-r' + n1(part.R / 10) + 'cm';
-        if (parts.length < 2) {
-          download(new Blob([RE.toStl(RE.placed(parts[0]))], { type: 'model/stl' }), base + '.stl');
+        var kind = part.baseShape === 'ring' ? 'ring' : (part.baseShape === 'square' ? 'square' : 'round');
+        var base = 'string-art-nail-' + kind + '-' + part.points + 'pts-r' + n1(part.R / 10) + 'cm';
+        var body = parts.filter(function (p) { return p.role !== 'arrows'; });
+        var labels = parts.filter(function (p) { return p.role === 'arrows'; });
+        if (body.length === 1 && !labels.length) {
+          download(new Blob([RE.toStl(RE.placed(body[0]))], { type: 'model/stl' }), base + '.stl');
           return;
         }
-        download(RE.toZip(parts.map(function (p, i) {
+        var files = body.map(function (p, i) {
           return {
-            name: base + '-PART_' + pad(i + 1) + '_OF_' + pad(parts.length) + '.stl',
+            name: body.length === 1
+              ? base + '.stl'
+              : base + '-PART_' + pad(i + 1) + '_OF_' + pad(body.length) + '.stl',
             data: RE.toStl(RE.placed(p))
           };
-        })), base + '-' + parts.length + 'parts.zip');
+        });
+        labels.forEach(function (p) {
+          files.push({ name: base + '-ARROWS.stl', data: RE.toStl(RE.placed(p)) });
+        });
+        download(RE.toZip(files), base + (labels.length || body.length > 1 ? '-' + files.length + 'parts.zip' : '.zip'));
       }
 
       var outer = part.ro * 2;
-      var split = parts.length > 1;
+      var bodyParts = parts.filter(function (p) { return p.role !== 'arrows'; });
+      var split = bodyParts.length > 1;
       var volume = 0, biggest = parts[0];
       parts.forEach(function (p) {
         volume += p.volume;
         if (Math.max(p.box[0], p.box[1]) > Math.max(biggest.box[0], biggest.box[1])) biggest = p;
       });
       var footprint = Math.max(biggest.box[0], biggest.box[1]);
+      var needZip = parts.length > 1;
 
       return h('div', { className: 'row' },
         h('div', { className: 'col', style: { flex: '1 1 380px' } },
@@ -2387,6 +3325,20 @@
 
           h('div', { className: 'card' },
             h('h2', null, t('ringTitle')),
+            h(Field, { label: t('baseShape'), hint: t('baseShapeHint') },
+              h('div', { className: 'segmented' },
+                h('button', {
+                  type: 'button', className: o.baseShape === 'ring' ? 'on' : '',
+                  onClick: function () { set('baseShape', 'ring'); }
+                }, t('baseRing')),
+                h('button', {
+                  type: 'button', className: o.baseShape === 'square' ? 'on' : '',
+                  onClick: function () { set('baseShape', 'square'); }
+                }, t('baseSquare')),
+                h('button', {
+                  type: 'button', className: o.baseShape === 'round' ? 'on' : '',
+                  onClick: function () { set('baseShape', 'round'); }
+                }, t('baseRound')))),
             h('div', { className: 'grid2' },
               h(Field, { label: t('nailHeight'), hint: t('nailHeightHint') },
                 h(NumberInput, { value: o.nailH, min: 2, max: 60, step: 0.5, onChange: function (v) { set('nailH', v); } })),
@@ -2415,12 +3367,12 @@
 
           h('div', { className: 'card' },
             h('h2', null, t('splitTitle')),
-            h('div', { className: 'grid2' },
+            isRing ? h('div', { className: 'grid2' },
               h(Field, { label: t('segments'), hint: t('segmentsHint') },
                 h(NumberInput, { value: o.segments, min: 1, max: 24, onChange: function (v) { set('segments', v); } })),
               split ? h(Field, { label: t('jointGap'), hint: t('jointGapHint') },
                 h(NumberInput, { value: o.clearance, min: 0.05, max: 1, step: 0.05, onChange: function (v) { set('clearance', v); } })) : null
-            ),
+            ) : null,
             h(Check, {
               id: 'ring-arrows', checked: o.arrows, label: t('arrows'),
               onChange: function (v) { set('arrows', v); }
@@ -2430,7 +3382,12 @@
 
           h('div', { className: 'card' },
             h('h2', null, t('summaryTitle')),
-            h('div', { className: 'stat' }, h('span', null, t('sOuterDiameter')), h('b', null, n1(outer / 10) + ' cm')),
+            isRing
+              ? h('div', { className: 'stat' }, h('span', null, t('sOuterDiameter')), h('b', null, n1(outer / 10) + ' cm'))
+              : h('div', { className: 'stat' }, h('span', null, t(part.baseShape === 'square' ? 'sBoardSize' : 'sOuterDiameter')),
+                  h('b', null, part.baseShape === 'square'
+                    ? (n1(part.halfW * 2 / 10) + ' × ' + n1(part.halfH * 2 / 10) + ' cm')
+                    : (n1(outer / 10) + ' cm'))),
             h('div', { className: 'stat' }, h('span', null, t('sPartHeight')), h('b', null, n1(part.height) + ' mm')),
             h('div', { className: 'stat' }, h('span', null, t('sSpacing')), h('b', null, n2(part.spacing) + ' mm')),
             h('div', { className: 'stat' }, h('span', null, t('sNailGap')), h('b', null, n2(part.gap) + ' mm')),
@@ -2457,16 +3414,17 @@
               t('warnTagsTiny', part.points, n2(part.tag.digitH))) : null,
             footprint > 250 ? h('div', { className: 'alert warn' },
               t('warnBedSize', n1(biggest.box[0] / 10), n1(biggest.box[1] / 10))) : null,
-            stage.failed ? h('div', { className: 'alert err' }, t('error3D')) : h('div', { className: 'row' },
-              h('div', { className: 'col', style: { flex: '2 1 420px' } },
-                h(Stage3D, { stage: stage, t: t }),
-                h('div', { className: 'hint', style: { marginTop: '8px' } }, t('ringPreviewHint'))
-              ),
-              h('div', { className: 'col', style: { flex: '1 1 210px' } },
-                h(Field, { label: t('partColor') }, h(Swatch, { value: color, onChange: setColor })))
+            stage.failed ? h('div', { className: 'alert err' }, t('error3D')) : h(React.Fragment, null,
+              h(Stage3D, { stage: stage, t: t }),
+              h('div', { className: 'row', style: { marginTop: '14px', alignItems: 'flex-start' } },
+                h('div', { className: 'col', style: { flex: '2 1 300px' } },
+                  h('div', { className: 'hint' }, t('ringPreviewHint'))),
+                h('div', { className: 'col', style: { flex: '1 1 190px' } },
+                  h(Field, { label: t('partColor') }, h(Swatch, { value: color, onChange: setColor })))
+              )
             ),
-            h('div', { className: 'controls', style: { marginTop: '14px' } },
-              h('button', { className: 'btn', onClick: save }, split ? t('downloadZip') : t('downloadStl')))
+            h('div', { className: 'controls bar end' },
+              h('button', { className: 'btn', onClick: save }, needZip ? t('downloadZip') : t('downloadStl')))
           )
         )
       );
@@ -2609,7 +3567,10 @@
       // later renders must not push it back to where it started.
       if (!camRef.current) camRef.current = {
         azimuth: o.azimuth, polar: o.polar, distance: o.distance,
-        min: o.min, max: o.max
+        min: o.min, max: o.max,
+        // Where the camera looks. Orbit turns around this point; pan slides it
+        // across the screen so the piece can be moved without changing the angle.
+        target: { x: 0, y: 0, z: 0 }
       };
 
       React.useEffect(function () {
@@ -2641,13 +3602,13 @@
 
         function render() {
           st.frame = 0;
-          var c = camRef.current, s = Math.sin(c.polar);
+          var c = camRef.current, s = Math.sin(c.polar), t = c.target;
           camera.position.set(
-            c.distance * s * Math.sin(c.azimuth),
-            c.distance * Math.cos(c.polar),
-            c.distance * s * Math.cos(c.azimuth)
+            t.x + c.distance * s * Math.sin(c.azimuth),
+            t.y + c.distance * Math.cos(c.polar),
+            t.z + c.distance * s * Math.cos(c.azimuth)
           );
-          camera.lookAt(0, 0, 0);
+          camera.lookAt(t.x, t.y, t.z);
           renderer.render(scene, camera);
         }
         // Nothing moves on its own, so only draw when something actually changed.
@@ -2714,16 +3675,39 @@
       var s = p.stage, t = p.t, maxed = s.maxed;
 
       function onPointerDown(e) {
+        // Right and middle drag, or Shift with the primary button, slide the
+        // look-at point; a plain drag still orbits. Context menu on the right
+        // button would steal the gesture, so it is blocked while over the stage.
         e.currentTarget.setPointerCapture(e.pointerId);
-        s.drag.current = { x: e.clientX, y: e.clientY };
+        s.drag.current = {
+          x: e.clientX, y: e.clientY,
+          pan: e.shiftKey || e.button === 1 || e.button === 2
+        };
       }
       function onPointerMove(e) {
         var drag = s.drag.current;
         if (!drag) return;
-        var c = s.cam.current;
-        c.azimuth -= (e.clientX - drag.x) * 0.008;
-        c.polar = clamp(c.polar - (e.clientY - drag.y) * 0.006, 0.06, 1.5);
+        var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
         drag.x = e.clientX; drag.y = e.clientY;
+        var c = s.cam.current;
+        if (drag.pan) {
+          // Move in the camera's screen plane, scaled so a drag across the view
+          // roughly crosses the piece at the current distance.
+          var polar = c.polar, az = c.azimuth;
+          var sx = Math.sin(polar), cx = Math.cos(polar);
+          var sy = Math.sin(az), cy = Math.cos(az);
+          // Camera forward is from eye toward the target; right and up follow.
+          var rx = cy, rz = -sy;
+          var ux = -cx * sy, uy = sx, uz = -cx * cy;
+          var k = c.distance * 0.0022;
+          // Grab feel: the piece follows the pointer.
+          c.target.x += (rx * dx - ux * dy) * k;
+          c.target.y += (-uy * dy) * k;
+          c.target.z += (rz * dx - uz * dy) * k;
+        } else {
+          c.azimuth -= dx * 0.008;
+          c.polar = clamp(c.polar - dy * 0.006, 0.06, 1.5);
+        }
         s.request();
       }
       function onPointerUp(e) {
@@ -2739,7 +3723,8 @@
           h('div', {
             className: 'stage3d' + (maxed ? ' max' : ''), ref: s.hostRef,
             onPointerDown: onPointerDown, onPointerMove: onPointerMove,
-            onPointerUp: onPointerUp, onPointerCancel: onPointerUp
+            onPointerUp: onPointerUp, onPointerCancel: onPointerUp,
+            onContextMenu: function (e) { e.preventDefault(); }
           },
             h('button', {
               type: 'button', className: 'expand',
@@ -2782,10 +3767,72 @@
     // from just above the board up to the nail heads.
     var D3 = { radius: 1, margin: 1.09, thickness: 0.07, nailH: 0.085, nailR: 0.0065 };
 
+    // Tips as the printable ring builds them, so choosing a nail here shows what
+    // the STL tab would give you: a flared one ends 30% wider than its base, and
+    // a curl climbs most of the way up before turning outwards over the thread.
+    var N3 = { sides: 8, coneTip: 1.3, curlTip: 0.72, curlRise: 0.62, curlBend: 100, curlSteps: 8, sink: 0.01 };
+
     function drop3d(mesh) {
       if (!mesh) return;
       if (mesh.parent) mesh.parent.remove(mesh);
       if (mesh.geometry) mesh.geometry.dispose();
+    }
+
+    // One nail, foot at y = 0 and local +X facing away from the centre, which is
+    // the way a curl bends. All three shapes are the same tube with a different
+    // path: rings of points threaded along it, closed by a cap at the tip. The
+    // foot has no cap because it starts under the surface of the board.
+    function nailGeometry3d(shape) {
+      var r = D3.nailR, hh = D3.nailH, N = N3.sides, i, j;
+      var tip = r * (shape === 'cone' ? N3.coneTip : shape === 'curl' ? N3.curlTip : 1);
+      // x, y: where the ring sits, in the plane the curl bends in.
+      // ux, uy: the radial axis of the ring, tilting to stay across the path.
+      var rings = [{ x: 0, y: -N3.sink, r: r, ux: 1, uy: 0 }];
+
+      if (shape === 'curl') {
+        var rad = hh * (1 - N3.curlRise), rise = hh - rad;
+        var bend = N3.curlBend * Math.PI / 180;
+        rings.push({ x: 0, y: rise, r: r, ux: 1, uy: 0 });
+        // Turning about a centre one radius outwards, so the arc leaves the
+        // shaft vertically and ends up hanging over it.
+        for (i = 1; i <= N3.curlSteps; i++) {
+          var f = bend * i / N3.curlSteps, co = Math.cos(f), si = Math.sin(f);
+          rings.push({
+            x: rad * (1 - co), y: rise + rad * si,
+            r: r + (tip - r) * i / N3.curlSteps,
+            ux: co, uy: -si
+          });
+        }
+      } else {
+        rings.push({ x: 0, y: hh, r: tip, ux: 1, uy: 0 });
+      }
+
+      var pos = [];
+      for (i = 0; i < rings.length; i++) {
+        var s = rings[i];
+        for (j = 0; j < N; j++) {
+          var a = 2 * Math.PI * j / N, c = Math.cos(a) * s.r;
+          pos.push(s.x + s.ux * c, s.y + s.uy * c, Math.sin(a) * s.r);
+        }
+      }
+      var last = rings[rings.length - 1];
+      var capAt = pos.length / 3;
+      pos.push(last.x, last.y, 0);
+
+      var idx = [];
+      for (i = 0; i < rings.length - 1; i++) {
+        for (j = 0; j < N; j++) {
+          var j2 = (j + 1) % N, lo = i * N, hi = lo + N;
+          idx.push(lo + j, hi + j2, lo + j2, lo + j, hi + j, hi + j2);
+        }
+      }
+      for (j = 0; j < N; j++) idx.push(capAt, (rings.length - 1) * N + (j + 1) % N, (rings.length - 1) * N + j);
+
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      geo.setIndex(idx);
+      geo.computeVertexNormals();
+      return geo;
     }
 
     function Preview3D(p) {
@@ -2793,6 +3840,7 @@
       var stThread = React.useState('#1c1c1c'); var thread = stThread[0], setThread = stThread[1];
       var stBoard = React.useState('#c8a06a'); var board = stBoard[0], setBoard = stBoard[1];
       var stShape = React.useState('rect'); var shape = stShape[0], setShape = stShape[1];
+      var stNail = React.useState('straight'); var nailShape = stNail[0], setNailShape = stNail[1];
 
       var stage = useStage3D({ azimuth: -0.35, polar: 0.78, distance: 3.2, min: 1.5, max: 9 });
       var matRef = React.useRef(null), meshRef = React.useRef({});
@@ -2835,19 +3883,21 @@
         var m = meshRef.current, pins = p.pins, R = D3.radius, i;
 
         drop3d(m.nails);
-        var nails = new THREE.InstancedMesh(
-          new THREE.CylinderGeometry(D3.nailR * 1.7, D3.nailR, D3.nailH, 8), mats().nail, pins);
-        var mx = new THREE.Matrix4();
+        var nails = new THREE.InstancedMesh(nailGeometry3d(nailShape), mats().nail, pins);
+        var mx = new THREE.Matrix4(), at = new THREE.Vector3(), turn = new THREE.Quaternion();
+        var up = new THREE.Vector3(0, 1, 0), one = new THREE.Vector3(1, 1, 1);
         for (i = 0; i < pins; i++) {
           var a = 2 * Math.PI * i / pins;
-          mx.makeTranslation(R * Math.cos(a), D3.nailH / 2, R * Math.sin(a));
-          nails.setMatrixAt(i, mx);
+          at.set(R * Math.cos(a), 0, R * Math.sin(a));
+          // Turned so the nail's own outward axis points away from the centre.
+          turn.setFromAxisAngle(up, -a);
+          nails.setMatrixAt(i, mx.compose(at, turn, one));
         }
         nails.instanceMatrix.needsUpdate = true;
         m.nails = nails;
         st.scene.add(nails);
         stage.request();
-      }, [p.pins]);
+      }, [p.pins, nailShape]);
 
       React.useEffect(function () {
         var st = stage.ref.current;
@@ -2908,6 +3958,16 @@
                   type: 'button', className: shape === 'round' ? 'on' : '',
                   onClick: function () { setShape('round'); }
                 }, t('boardRound')))),
+            h(Field, { label: t('nailShape') },
+              h(Select, {
+                value: nailShape,
+                options: [
+                  ['straight', t('nailStraight')],
+                  ['curl', t('nailCurl')],
+                  ['cone', t('nailCone')]
+                ],
+                onChange: setNailShape
+              })),
             h(Field, { label: t('boardColor') }, h(Swatch, { value: board, onChange: setBoard })),
             h(Field, { label: t('threadColor') }, h(Swatch, { value: thread, onChange: setThread }))
           )
@@ -2941,6 +4001,12 @@
       var dragRef = React.useRef(null);
 
       var pins = o.sync ? props.points : o.pins;
+
+      // The machine tab reads the sequence from the app rather than from here,
+      // because this panel is thrown away as soon as another tab is opened.
+      function publish(list, np) {
+        if (props.onSequence) props.onSequence(list ? { pins: list, points: np } : null);
+      }
 
       React.useEffect(function () {
         return function () { if (workerRef.current) workerRef.current.terminate(); };
@@ -2988,7 +4054,7 @@
       function onFile(f) {
         var image = new Image();
         image.onload = function () {
-          setSeq(null);
+          setSeq(null); publish(null);
           setFileName(f.name);
           setView({ zoom: 1, panX: 0, panY: 0 });
           setImgEl(image);
@@ -3067,7 +4133,7 @@
         drawRef.current = { pin: 0, coords: coords };
 
         resetOutput();
-        setSeq(null); setRunning(true); setPct(0); setMsg(t('preparing'));
+        setSeq(null); publish(null); setRunning(true); setPct(0); setMsg(t('preparing'));
 
         var w = makeWorker();
         workerRef.current = w;
@@ -3089,6 +4155,7 @@
             setMsg(t('linesDrawn', d.drawn, Math.round(d.drawn / d.total * 100)));
           } else if (d.type === 'done') {
             setSeq(d.sequence); setRunning(false); setPct(100); setMsg(t('done'));
+            publish(d.sequence, np);
             w.terminate(); workerRef.current = null;
           } else if (d.type === 'error') {
             setRunning(false); setMsg('');
@@ -3204,8 +4271,8 @@
               h(NumberInput, { value: o.lineWeight, min: 1, max: 100, onChange: function (v) { set('lineWeight', v); } })),
             h(Field, { label: t('minDistance'), hint: t('minDistanceHint') },
               h(NumberInput, { value: o.minDistance, min: 1, max: 200, onChange: function (v) { set('minDistance', v); } })),
-            h('div', { className: 'controls' },
-              h('button', { className: 'btn', onClick: start, disabled: !imgEl || running }, t('generate')),
+            h('div', { className: 'controls bar' },
+              h('button', { className: 'btn grow', onClick: start, disabled: !imgEl || running }, t('generate')),
               h('button', { className: 'btn danger', onClick: stop, disabled: !running }, t('stop')))
           ),
           seq ? h('div', { className: 'card' },
@@ -3258,7 +4325,7 @@
             h('h2', null, t('sequenceTitle')),
             h('div', { className: 'hint', style: { marginBottom: '8px' } }, t('sequenceHint')),
             h('textarea', { rows: 6, readOnly: true, value: seq.join(',') }),
-            h('div', { className: 'controls', style: { marginTop: '12px' } },
+            h('div', { className: 'controls bar end' },
               h('button', { className: 'btn secondary', onClick: copySeq }, copied ? t('copied') : t('copySeq')),
               h('button', { className: 'btn secondary', onClick: saveTxt }, t('downloadSeq')),
               h('button', { className: 'btn secondary', onClick: savePng }, t('downloadPng')),
@@ -3271,26 +4338,381 @@
     }
 
     // -------------------------------------------------------------
+    // Winding machine tab
+    // -------------------------------------------------------------
+    function MachinePanel(props) {
+      var t = props.t;
+      var ME = window.MachineEngine;
+
+      var st = React.useState({
+        height: ME.D.height, eyeletR: ME.D.eyeletR, nailD: ME.D.nailD,
+        orbitAuto: true, orbit: 3, phase: 0,
+        feedTravel: ME.D.feedTravel, feedOrbit: ME.D.feedOrbit, reach: ME.D.rail,
+        host: 'printer.local', user: 'admin', pass: 'admin'
+      });
+      var o = st[0], setO = st[1];
+      function set(k, v) { var patch = {}; patch[k] = v; setO(Object.assign({}, o, patch)); }
+
+      // A sequence loaded from a file wins over the one in the generator tab,
+      // until it is put away again.
+      var stFile = React.useState(null); var loaded = stFile[0], setLoaded = stFile[1];
+      var stStatus = React.useState(null); var status = stStatus[0], setStatus = stStatus[1];
+      var stNote = React.useState(null); var note = stNote[0], setNote = stNote[1];
+      var stBusy = React.useState(false); var busy = stBusy[0], setBusy = stBusy[1];
+
+      var source = loaded || props.sequence;
+      var seq = source ? source.pins : null;
+      var points = source ? source.points : props.points;
+      var radius = props.radiusCm * 10;
+
+      var job = React.useMemo(function () {
+        return ME.plan({
+          points: points, radius: radius,
+          nailD: num(o.nailD, 3), eyeletR: num(o.eyeletR, 1.1),
+          height: num(o.height, 6), phase: num(o.phase, 0),
+          orbit: o.orbitAuto ? 0 : num(o.orbit, 3),
+          feedTravel: num(o.feedTravel, 4200), feedOrbit: num(o.feedOrbit, 1200),
+          rail: num(o.reach, 300)
+        });
+      }, [points, radius, o]);
+
+      var sums = React.useMemo(function () {
+        if (!seq || !seq.length) return null;
+        return ME.estimate(job, seq, job.orbit);
+      }, [job, seq]);
+
+      var gcode = React.useMemo(function () {
+        if (!seq || !seq.length || job.faults.length) return '';
+        return ME.toGcode(job, seq);
+      }, [job, seq]);
+
+      function num(v, dflt) { var n = parseFloat(v); return isFinite(n) ? n : dflt; }
+
+      function onFile(f) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var pins = String(reader.result).split(/[^0-9]+/)
+            .filter(function (s) { return s.length; })
+            .map(function (s) { return parseInt(s, 10); });
+          if (!pins.length) return;
+          var most = 0;
+          for (var i = 0; i < pins.length; i++) if (pins[i] > most) most = pins[i];
+          // A saved sequence carries no pin count of its own, so it is taken
+          // from the highest number in it, or from the field if that is bigger.
+          setLoaded({ pins: pins, points: Math.max(most + 1, props.points), name: f.name });
+        };
+        reader.readAsText(f);
+      }
+
+      // Everything the machine is asked goes through here, so the password and
+      // the excuses are in one place.
+      function call(path, options) {
+        var base = String(o.host || '').trim().replace(/\/+$/, '');
+        if (!/^https?:\/\//.test(base)) base = 'http://' + base;
+        var opts = options || {};
+        opts.headers = Object.assign({
+          Authorization: 'Basic ' + btoa(o.user + ':' + o.pass)
+        }, opts.headers || {});
+        return fetch(base + path, opts).then(function (r) {
+          if (r.status === 401) throw new Error(t('mDenied'));
+          return r.text().then(function (body) {
+            return { ok: r.ok, status: r.status, body: body };
+          });
+        }, function () {
+          throw new Error(t('mOffline', base));
+        });
+      }
+
+      function refresh() {
+        setBusy(true);
+        call('/api/status').then(function (r) {
+          var data = null;
+          try { data = JSON.parse(r.body); } catch (e) { data = null; }
+          if (!data) throw new Error(t('mOffline', o.host));
+          setStatus(data);
+          // Clears an old complaint, but not what the machine was just told to
+          // do: the instructions after a send are still worth reading.
+          setNote(function (prev) { return prev && prev.kind === 'ok' ? prev : null; });
+        }).catch(function (e) {
+          setStatus(null);
+          setNote({ kind: 'err', text: e.message });
+        }).then(function () { setBusy(false); });
+      }
+
+      function send() {
+        if (!gcode) return;
+        setBusy(true);
+        call('/api/job?name=string-art.gcode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: gcode
+        }).then(function (r) {
+          if (!r.ok) throw new Error(t('mRefused', r.body));
+          setNote({ kind: 'ok', text: t('mSent', seq.length, seq[0]) });
+          refresh();
+        }).catch(function (e) {
+          setNote({ kind: 'err', text: e.message });
+          setBusy(false);
+        });
+      }
+
+      function command(path, body) {
+        setBusy(true);
+        call(path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: body || '' })
+          .then(function (r) {
+            if (!r.ok) throw new Error(t('mRefused', r.body));
+            refresh();
+          }).catch(function (e) {
+            setNote({ kind: 'err', text: e.message });
+            setBusy(false);
+          });
+      }
+
+      // Once the machine has answered once, keep asking, so the progress bar
+      // means something while it winds.
+      React.useEffect(function () {
+        if (!status) return;
+        var id = setInterval(refresh, 2000);
+        return function () { clearInterval(id); };
+      }, [status !== null, o.host, o.user, o.pass]);
+
+      function save() {
+        download(new Blob([gcode], { type: 'text/plain' }),
+          'string-art-' + points + 'x' + n1(radius / 10) + 'cm.gcode');
+      }
+
+      var crowded = job.faults.indexOf('crowded') >= 0;
+      var badOrbit = job.faults.indexOf('orbit') >= 0;
+      var tooFar = job.faults.indexOf('rail') >= 0;
+      var insecure = location.protocol === 'https:';
+      function stateLabel(s) {
+        if (s === 'running') return t('mStateRunning');
+        if (s === 'paused') return t('mStatePaused');
+        if (s === 'homing') return t('mStateHoming');
+        if (s === 'error') return t('mStateError');
+        return t('mStateIdle');
+      }
+      var pct = status && status.lines ? Math.round(status.line / status.lines * 100) : 0;
+
+      return h('div', { className: 'row' },
+        h('div', { className: 'col', style: { flex: '1 1 380px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('paramsTitle')),
+            h(Field, { label: t('points'), hint: t('pointsHint') },
+              h(NumberInput, { value: props.points, min: 3, max: 2000, onChange: props.setPoints })),
+            h(Field, { label: t('radiusCm'), hint: t('radiusHint') },
+              h(NumberInput, { value: props.radiusCm, min: 1, max: 200, step: 0.1, onChange: props.setRadiusCm })),
+            seq && points !== props.points
+              ? h('div', { className: 'alert warn' }, t('mWarnPoints', points)) : null
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('mJobTitle')),
+            h('div', { className: 'hint', style: { marginBottom: '10px' } },
+              !seq ? t('mNoSequence')
+                : loaded ? t('mLoaded', seq.length, loaded.name)
+                  : t('mFromGenerator', seq.length)),
+            h('div', { className: 'controls' },
+              h('label', { className: 'btn secondary' }, t('mLoadSequence'),
+                h('input', {
+                  type: 'file', accept: '.txt,text/plain', style: { display: 'none' },
+                  onChange: function (e) { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ''; }
+                })),
+              loaded && props.sequence ? h('button', {
+                className: 'btn secondary', onClick: function () { setLoaded(null); }
+              }, t('mUseGenerator')) : null)
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('mMachineTitle')),
+            h('div', { className: 'grid2' },
+              h(Field, { label: t('mWrapHeight'), hint: t('mWrapHeightHint') },
+                h(NumberInput, { value: o.height, min: 1, max: 40, step: 0.5, onChange: function (v) { set('height', v); } })),
+              h(Field, { label: t('nailDiameter'), hint: t('nailDiameterHint') },
+                h(NumberInput, { value: o.nailD, min: 0.8, max: 12, step: 0.1, onChange: function (v) { set('nailD', v); } })),
+              h(Field, { label: t('mEyelet'), hint: t('mEyeletHint') },
+                h(NumberInput, { value: o.eyeletR, min: 0.3, max: 6, step: 0.1, onChange: function (v) { set('eyeletR', v); } })),
+              h(Field, { label: t('mReach'), hint: t('mReachHint') },
+                h(NumberInput, { value: o.reach, min: 50, max: 1000, step: 5, onChange: function (v) { set('reach', v); } }))
+            ),
+            h(Check, {
+              id: 'machine-orbit-auto', checked: o.orbitAuto, label: t('mOrbitAuto'),
+              onChange: function (v) { setO(Object.assign({}, o, { orbitAuto: v, orbit: n2(job.orbit) })); }
+            }),
+            h('div', { className: 'grid2' },
+              o.orbitAuto ? null : h(Field, { label: t('mOrbit'), hint: t('mOrbitHint') },
+                h(NumberInput, { value: o.orbit, min: 0.5, max: 20, step: 0.1, onChange: function (v) { set('orbit', v); } })),
+              h(Field, { label: t('mPhase'), hint: t('mPhaseHint') },
+                h(NumberInput, { value: o.phase, min: -360, max: 360, step: 0.5, onChange: function (v) { set('phase', v); } })),
+              h(Field, { label: t('mFeedTravel') },
+                h(NumberInput, { value: o.feedTravel, min: 60, max: 20000, step: 60, onChange: function (v) { set('feedTravel', v); } })),
+              h(Field, { label: t('mFeedOrbit') },
+                h(NumberInput, { value: o.feedOrbit, min: 60, max: 20000, step: 60, onChange: function (v) { set('feedOrbit', v); } }))
+            )
+          ),
+
+          h('div', { className: 'card' },
+            h('h2', null, t('summaryTitle')),
+            h('div', { className: 'stat' }, h('span', null, t('points')), h('b', null, String(points))),
+            h('div', { className: 'stat' }, h('span', null, t('sSpacing')), h('b', null, n2(job.spacing) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('mSOrbit')),
+              h('b', null, crowded ? '—' : n2(job.orbit) + ' mm')),
+            h('div', { className: 'stat' }, h('span', null, t('mSWraps')), h('b', null, seq ? String(seq.length) : '—')),
+            sums ? h('div', { className: 'stat' }, h('span', null, t('mSPath')),
+              h('b', null, n1((sums.travelMm + sums.orbitMm) / 1000) + ' m')) : null,
+            sums ? h('div', { className: 'stat' }, h('span', null, t('mSTime')),
+              h('b', null, hoursMinutes(sums.seconds))) : null,
+            gcode ? h('div', { className: 'stat' }, h('span', null, t('mSSize')),
+              h('b', null, n1(gcode.length / 1024) + ' kB')) : null
+          )
+        ),
+
+        h('div', { className: 'col', style: { flex: '2 1 520px' } },
+          h('div', { className: 'card' },
+            h('h2', null, t('mSendTitle')),
+            crowded ? h('div', { className: 'alert err' },
+              t('mWarnCrowded', points, n2(job.spacing), n2(num(o.eyeletR, 1.1) * 2))) : null,
+            badOrbit ? h('div', { className: 'alert err' },
+              t('mWarnOrbit', n2(job.minOrbit), n2(job.maxOrbit))) : null,
+            tooFar ? h('div', { className: 'alert err' },
+              t('mWarnReach', n1(radius + job.orbit + num(o.eyeletR, 1.1)), n1(num(o.reach, 300)))) : null,
+            insecure ? h('div', { className: 'alert warn' }, t('mInsecure')) : null,
+            note ? h('div', { className: 'alert ' + (note.kind === 'ok' ? 'ok' : 'err') }, note.text) : null,
+
+            h('div', { className: 'grid2' },
+              h(Field, { label: t('mHost'), hint: t('mHostHint') },
+                h('input', {
+                  type: 'text', value: o.host,
+                  onChange: function (e) { set('host', e.target.value); }
+                })),
+              h(Field, { label: t('mUser') },
+                h('input', {
+                  type: 'text', value: o.user, autoComplete: 'username',
+                  onChange: function (e) { set('user', e.target.value); }
+                })),
+              h(Field, { label: t('mPass') },
+                h('input', {
+                  type: 'password', value: o.pass, autoComplete: 'current-password',
+                  onChange: function (e) { set('pass', e.target.value); }
+                }))
+            ),
+
+            h('div', { className: 'controls bar' },
+              h('button', { className: 'btn', onClick: send, disabled: !gcode || busy }, t('mSend')),
+              h('button', { className: 'btn secondary', onClick: save, disabled: !gcode }, t('mDownloadGcode')),
+              h('button', { className: 'btn secondary', onClick: refresh, disabled: busy }, t('mRefresh'))),
+
+            status ? h('div', { style: { marginTop: '16px' } },
+              h('div', { className: 'stat' },
+                h('span', null, status.name),
+                h('b', null, stateLabel(status.state))),
+              status.lines ? h('div', { style: { marginTop: '8px' } },
+                h('div', { className: 'progress' }, h('div', { style: { width: pct + '%' } }, pct > 8 ? pct + '%' : '')),
+                h('div', { className: 'hint', style: { marginTop: '6px' } },
+                  t('mProgress', status.line, status.lines))) : null,
+              status.error ? h('div', { className: 'alert err', style: { marginTop: '10px' } }, status.error) : null,
+              h('div', { className: 'controls', style: { marginTop: '12px' } },
+                h('button', {
+                  className: 'btn', disabled: busy || status.state === 'running',
+                  onClick: function () { command('/api/job/start'); }
+                }, t('mStart')),
+                status.state === 'paused'
+                  ? h('button', {
+                    className: 'btn secondary', disabled: busy,
+                    onClick: function () { command('/api/job/pause', '{"on":false}'); }
+                  }, t('mResume'))
+                  : h('button', {
+                    className: 'btn secondary', disabled: busy || status.state !== 'running',
+                    onClick: function () { command('/api/job/pause', '{"on":true}'); }
+                  }, t('mPause')),
+                h('button', {
+                  className: 'btn secondary', disabled: busy,
+                  onClick: function () { command('/api/job/stop'); }
+                }, t('mStop')))
+            ) : null
+          )
+        )
+      );
+    }
+
+    function hoursMinutes(seconds) {
+      var m = Math.round(seconds / 60);
+      var hh = Math.floor(m / 60);
+      return hh ? hh + ' h ' + (m % 60) + ' min' : m + ' min';
+    }
+
+    // Line glyphs for the tab rail, all drawn in the same 24-unit box so they
+    // sit at one weight and one size next to their labels.
+    var TAB_GLYPHS = {
+      generator: [
+        ['rect', { x: 3.4, y: 5.4, width: 17.2, height: 13.2, rx: 2.2 }],
+        ['circle', { cx: 9, cy: 10.4, r: 1.7 }],
+        ['path', { d: 'M4.2 17.7l4.6-4.5 3.2 3.1 3.4-3.3 4.6 4.5' }]
+      ],
+      template: [
+        ['rect', { x: 3.4, y: 3.4, width: 17.2, height: 17.2, rx: 2.2, opacity: 0.45 }],
+        ['circle', { cx: 12, cy: 12, r: 6.4 }],
+        ['circle', { cx: 12, cy: 5.6, r: 1.1, fill: 'currentColor', stroke: 'none' }]
+      ],
+      ring: [
+        ['circle', { cx: 12, cy: 12, r: 8.6 }],
+        ['circle', { cx: 12, cy: 12, r: 4.2, opacity: 0.5 }],
+        ['circle', { cx: 12, cy: 3.4, r: 1.1, fill: 'currentColor', stroke: 'none' }]
+      ],
+      machine: [
+        ['circle', { cx: 12, cy: 12, r: 3.2 }],
+        ['path', { d: 'M12 2.2v3M12 18.8v3M4.4 4.4l2.1 2.1M17.5 17.5l2.1 2.1M2.2 12h3M18.8 12h3M4.4 19.6l2.1-2.1M17.5 6.5l2.1-2.1' }]
+      ]
+    };
+
+    function tabGlyph(name) {
+      var kids = TAB_GLYPHS[name].map(function (spec, i) {
+        return h(spec[0], Object.assign({ key: i }, spec[1]));
+      });
+      return h('svg', {
+        className: 'tab-ico', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+        strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true'
+      }, kids);
+    }
+
+    // -------------------------------------------------------------
     function App() {
       var t = useLang();
       var stTab = React.useState('generator'); var tab = stTab[0], setTab = stTab[1];
       var stPts = React.useState(288); var points = stPts[0], setPoints = stPts[1];
       var stR = React.useState(28); var radiusCm = stR[0], setRadiusCm = stR[1];
+      // The sequence is kept up here because the generator tab is thrown away
+      // when another one is opened, and the machine tab needs what it made.
+      var stSeq = React.useState(null); var sequence = stSeq[0], setSequence = stSeq[1];
 
       var nPoints = Math.max(3, Math.min(2000, parseInt(points, 10) || 3));
       var nRadius = Math.max(1, Math.min(200, parseFloat(radiusCm) || 1));
 
+      var tabs = [
+        ['generator', 'tabGenerator'], ['template', 'tabTemplate'],
+        ['ring', 'tabRing'], ['machine', 'tabMachine']
+      ];
+
       return h(React.Fragment, null,
-        h('div', { className: 'tabs' },
-          h('button', { className: 'tab' + (tab === 'generator' ? ' active' : ''), onClick: function () { setTab('generator'); } }, t('tabGenerator')),
-          h('button', { className: 'tab' + (tab === 'template' ? ' active' : ''), onClick: function () { setTab('template'); } }, t('tabTemplate')),
-          h('button', { className: 'tab' + (tab === 'ring' ? ' active' : ''), onClick: function () { setTab('ring'); } }, t('tabRing'))
+        h('div', { className: 'tabbar' },
+          h('nav', { className: 'tabs' },
+            tabs.map(function (p) {
+              return h('button', {
+                key: p[0], type: 'button',
+                className: 'tab' + (tab === p[0] ? ' active' : ''),
+                'aria-current': tab === p[0] ? 'page' : null,
+                onClick: function () { setTab(p[0]); }
+              }, tabGlyph(p[0]), h('span', null, t(p[1])));
+            })
+          )
         ),
         tab === 'template'
           ? h(TemplatePanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm })
           : tab === 'ring'
             ? h(RingPanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm })
-            : h(GeneratorPanel, { t: t, points: nPoints, radiusCm: nRadius }),
+            : tab === 'machine'
+              ? h(MachinePanel, { t: t, points: nPoints, setPoints: setPoints, radiusCm: nRadius, setRadiusCm: setRadiusCm, sequence: sequence })
+              : h(GeneratorPanel, { t: t, points: nPoints, radiusCm: nRadius, onSequence: setSequence }),
         h('footer', null, t('footerText'))
       );
     }
@@ -3345,10 +4767,7 @@
               h('img', { src: sel.flag, alt: sel.code.toUpperCase(), className: 'flag-icon' }),
               h('span', null, sel.name)),
             h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 20 20', fill: 'currentColor', className: 'custom-select-arrow' },
-              h('path', {
-                fillRule: 'evenodd', clipRule: 'evenodd',
-                d: 'M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z'
-              }))
+              h('path', { fillRule: 'evenodd', clipRule: 'evenodd', d: CHEVRON }))
           ),
           isOpen ? h('div', { className: 'custom-select-menu open' },
             languages.map(function (l) {
